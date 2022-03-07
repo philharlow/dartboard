@@ -1,10 +1,11 @@
 import styled from '@emotion/styled';
-import Game301 from '../gameTypes/Game301';
-import { DartThrow, useGameStore } from '../store/GameStore';
+import Game301 from '../../gameTypes/Game301';
+import { DartThrow, useGameStore } from '../../store/GameStore';
 
 const ScoresTable = styled.table`
 	align-self: center;
 	border: 1px solid white;
+    border-collapse: collapse;
 `;
 const ScoreRow = styled.tr`
 	&.current {
@@ -34,6 +35,7 @@ const ThrowList = styled.div`
 	display: flex;
 	flex-direction: column;
     font-weight: normal;
+    border-collapse: collapse;
 `;
 const ThrowCell = styled.div`
 	height: 12px;
@@ -41,7 +43,7 @@ const ThrowCell = styled.div`
 	border: 1px solid white;
 `;
 
-function Scores() {
+function Scores301() {
 	const dartThrows = useGameStore(store => store.dartThrows);
 	const players = useGameStore(store => store.players);
 	const currentPlayerIndex = useGameStore(store => store.currentPlayerIndex);
@@ -83,9 +85,9 @@ function Scores() {
 		const throwCells: JSX.Element[] = [];
 		for (let i=0; i<game301.throwsPerRound; i++)
 			throwCells.push(getThrowCell(i, darts[i]));
-		return <ScoreCell key={i} className={bust ? "bust" : ""}>
+		return <ScoreCell key={i}>
 			<ThrowDetails>
-				<ThrowList>
+				<ThrowList className={bust ? "bust" : ""}>
 					{throwCells}
 				</ThrowList>
 				{shownScore}
@@ -116,4 +118,4 @@ function Scores() {
 	);
 }
 
-export default Scores;
+export default Scores301;

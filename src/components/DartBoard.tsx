@@ -56,9 +56,9 @@ function DartBoard() {
 
 	const parseDartCode = (code: string) => {
 		const ring = getRing(code[0]);
-		if (ring === Ring.Miss)
-			return { score: 0, ring }
-		const score = parseInt(code.substring(1));
+		const score = parseInt(code.substring(1)) || 0;
+		if (ring === Ring.Miss || score === 0)
+			return { score: 0, ring: Ring.Miss }
 		if (score === 25)
 			return { ring: ring === Ring.InnerSingle ? Ring.OuterBullseye : Ring.InnerBullseye, score: 25 };
 		return { ring, score };

@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
-import GameType from '../gameTypes/GameType';
-import { gameList, useGameStore } from '../store/GameStore';
+import { gameList } from '../gameTypes/GamesList';
+import { useGameStore } from '../store/GameStore';
 
 const StartScreenDiv = styled.div`
     height: 100%;
@@ -47,10 +47,8 @@ const Players = styled.div`
 
 
 function GameSelectionScreen() {
-	const startGame = useGameStore(store =>store.startGame);
-	const selectGame = (currentGame: GameType) => {
-		startGame(currentGame);
-	}
+	const selectGame = useGameStore(store =>store.selectGame);
+
 	return (
 		<StartScreenDiv>
 			<Slider>

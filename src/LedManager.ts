@@ -2,7 +2,7 @@ import { cloneDeep } from "lodash";
 import { useLedStore } from "./store/LedStore";
 import { Hint, Led, Ring } from "./types/LedTypes";
 
-const wipeOrder = [20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5];
+export const scoreOrder = [20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5];
 const growOrder = [Ring.InnerBullseye, Ring.OuterBullseye, Ring.InnerSingle, Ring.Triple, Ring.OuterSingle, Ring.Double];
 
 export const countOns = (arr: Led[]) => arr.reduce((a, v) => (v.on ? a + 1 : a), 0);
@@ -46,51 +46,6 @@ class LedManager {
 		});
 		this.pendingFlashes = [];
 		this.hints = [];
-	};
-	
-	doWipe = () => {
-		this.cancelPendingFlashes();
-		const scoreTime = 50;
-		for (let i=0; i<21; i++) {
-			setTimeout(() => this.setScoreOn(wipeOrder[i%20], true), scoreTime * i);
-			setTimeout(() => this.setScoreOn(wipeOrder[i%20], false), scoreTime * (i + 1));
-		}
-	};
-	
-	doSolidWipe = () => {
-		this.cancelPendingFlashes();
-		const scoreTime = 50;
-		for (let i=0; i<=20; i++) {
-			setTimeout(() => this.setScoreOn(wipeOrder[i%20], true), scoreTime * i);
-			setTimeout(() => this.setScoreOn(wipeOrder[i%20], false), 20 * scoreTime + scoreTime * i);
-		}
-	};
-	
-	doSolidGrow = () => {
-		this.cancelPendingFlashes();
-		const ringTime = 150;
-		growOrder.forEach((ring, i) =>  {
-			setTimeout(() => this.setRingOn(ring, true), ringTime * i);
-			setTimeout(() => this.setRingOn(ring, false), growOrder.length * ringTime + ringTime * i);
-		});
-	};
-	
-	doGrow = () => {
-		this.cancelPendingFlashes();
-		const ringTime = 150;
-		growOrder.forEach((ring, i) =>  {
-			setTimeout(() => this.setRingOn(ring, true), ringTime * i);
-			setTimeout(() => this.setRingOn(ring, false), ringTime * (i + 1));
-		});
-	};
-	
-	doShrink = () => {
-		this.cancelPendingFlashes();
-		const ringTime = 150;
-		[...growOrder].reverse().forEach((ring, i) =>  {
-			setTimeout(() => this.setRingOn(ring, true), ringTime * i);
-			setTimeout(() => this.setRingOn(ring, false), ringTime * (i + 1));
-		});
 	};
 	
 	flashLed = (score: number, ring: Ring, duration = 100, flashes = 3, dispatch: boolean = true) => {
@@ -170,6 +125,69 @@ class LedManager {
 		const clone = cloneDeep(this.leds);
 		useLedStore.getState().setLeds(clone);
 	}
+
+
+	// Animations
+	
+	animQuadSpin = () => {
+		this.cancelPendingFlashes();
+		const flashTime = 50;
+		const loops = 4;
+		const blades = 4;
+		const spacing = 20 / blades;
+		for (let i=0; i<=loops * spacing; i++) {
+			for (let blade=0; blade<blades; blade++) {
+				setTimeout(() => this.setScoreOn(scoreOrder[(i + blade * spacing)%20], true), flashTime * i);
+				setTimeout(() => this.setScoreOn(scoreOrder[(i + blade * spacing)%20], false), flashTime * (i + 1));
+			}
+		}
+	};
+	
+	animWipe = () => {
+		this.cancelPendingFlashes();
+		const scoreTime = 50;
+		for (let i=0; i<=20; i++) {
+			setTimeout(() => this.setScoreOn(scoreOrder[i%20], true), scoreTime * i);
+			setTimeout(() => this.setScoreOn(scoreOrder[i%20], false), scoreTime * (i + 1));
+		}
+	};
+	
+	animSolidWipe = () => {
+		this.cancelPendingFlashes();
+		const scoreTime = 50;
+		for (let i=0; i<=20; i++) {
+			setTimeout(() => this.setScoreOn(scoreOrder[i%20], true), scoreTime * i);
+			setTimeout(() => this.setScoreOn(scoreOrder[i%20], false), 20 * scoreTime + scoreTime * i);
+		}
+	};
+	
+	animSolidGrow = () => {
+		this.cancelPendingFlashes();
+		const ringTime = 150;
+		growOrder.forEach((ring, i) =>  {
+			setTimeout(() => this.setRingOn(ring, true), ringTime * i);
+			setTimeout(() => this.setRingOn(ring, false), growOrder.length * ringTime + ringTime * i);
+		});
+	};
+	
+	animGrow = () => {
+		this.cancelPendingFlashes();
+		const ringTime = 150;
+		growOrder.forEach((ring, i) =>  {
+			setTimeout(() => this.setRingOn(ring, true), ringTime * i);
+			setTimeout(() => this.setRingOn(ring, false), ringTime * (i + 1));
+		});
+	};
+	
+	animShrink = () => {
+		this.cancelPendingFlashes();
+		const ringTime = 150;
+		[...growOrder].reverse().forEach((ring, i) =>  {
+			setTimeout(() => this.setRingOn(ring, true), ringTime * i);
+			setTimeout(() => this.setRingOn(ring, false), ringTime * (i + 1));
+		});
+	};
+	
 	
 }
 

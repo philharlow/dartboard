@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
-import { useGameStore } from '../store/GameStore';
-import { Ring } from '../types/LedTypes';
+import { useGameStore } from '../../store/GameStore';
+import { Ring } from '../../types/LedTypes';
 
 const TurnTable = styled.div`
     position: absolute;
@@ -30,7 +30,7 @@ const BoldCell = styled(ScoreCell)`
 `;
 
 
-function TurnDisplay() {
+function TurnDisplay301() {
 	const dartThrows = useGameStore(store => store.dartThrows);
 	const players = useGameStore(store => store.players);
 	const currentPlayerIndex = useGameStore(store => store.currentPlayerIndex);
@@ -42,11 +42,11 @@ function TurnDisplay() {
 	const turnDarts = darts.slice(round * 3);
 	const turnTotal = turnDarts.reduce((acc, dart) => acc + dart.totalScore, 0);
 	const bust = turnDarts.some(dart => dart.bust);
-	const className =  bust ? "bust": "";
+	const className = bust ? "bust": "";
 
 	const throws: JSX.Element[] = [];
 	for (let i=1; i<=3; i++)
-		throws.push(<BoldCell key={i} className={className + (i === turnDarts.length ? "flash" : "")}>Throw {i}</BoldCell>);
+		throws.push(<BoldCell key={i} className={className + (i === turnDarts.length ? " flash" : "")}>Throw {i}</BoldCell>);
 	const scores: JSX.Element[] = [];
 	for (let i=0; i<3; i++)
 		if (turnDarts[i]) {
@@ -74,4 +74,4 @@ function TurnDisplay() {
 	);
 }
 
-export default TurnDisplay;
+export default TurnDisplay301;

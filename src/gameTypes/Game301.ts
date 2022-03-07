@@ -6,16 +6,14 @@ import { Player } from "../store/PlayerStore";
 import { Hint, Ring } from "../types/LedTypes";
 import GameType from "./GameType";
 
-
-const STATING_SCORE = "Starting Score";
-
 class Game301 extends GameType {
 	throwsPerRound = 3;
 	startingScore = 0;
 	settingsOptions = [
 		{
-			name: STATING_SCORE,
-			options: [ "301", "501", "601" ]
+			name: "Starting Score",
+			propName: "startingScore",
+			options: [ 301, 501, 601, 701, 101 ]
 		},
 	];
 
@@ -28,24 +26,30 @@ class Game301 extends GameType {
 		});
 	}
 
-	setOptions = () => {
-		const { selectedSettings, } = useGameStore.getState();
-
-		console.log("got settings", selectedSettings)
-
-		this.startingScore = parseInt(selectedSettings?.find(o => o.name === STATING_SCORE)?.option ?? "");
+	setOptions() {
+		super.setOptions();
 		this.name = "" + this.startingScore;
 	}
 
-	getScore = (player: Player) => {
+	getScore(player: Player) {
 		const { dartThrows, } = useGameStore.getState();
 
 		const darts = dartThrows.filter(t => t.player === player.name);
-		const score = darts.reduce((score, dart) => score - dart.totalScore, this.startingScore);
+		let score = this.startingScore;
+		//const score = darts.reduce((score, dart) => score - dart.totalScore, this.startingScore);
+		const roundDarts = darts.reduce<DartThrow[][]>((rounds, dart) => { rounds[dart.round] = [ ...rounds[dart.round] || [], dart ]; return rounds; }, []);
+		roundDarts.forEach(round => {
+			const bust = round.some(dart => dart.bust);
+			if (!bust) {
+				const roundScore = round.reduce((acc, dart) => acc + dart.totalScore, 0);
+				score -= roundScore;
+			}
+		})
+
 		return score;
 	}
 	
-	addDartThrow = (player: string, score: number, ring: Ring) => {
+	addDartThrow(player: string, score: number, ring: Ring) {
 		const { dartThrows, setDartThrows, waitingForThrow, currentRound, players, currentPlayerIndex, finishGame, winningPlayerIndex } = useGameStore.getState();
 		const currentPlayer = players[currentPlayerIndex];
 		console.log("addDartThrow", score, ring, player);
@@ -79,49 +83,45 @@ class Game301 extends GameType {
 
 		const scoreMessage = ring === Ring.Miss ? " miss" : this.getSpokenScore(score, ring);
 		speak(scoreMessage, true);
-		
-		// Winner!
-		if (playerScore === 0) {
-			speak("Well done!. " + currentPlayer.name + " wins!");
-			finishGame(currentPlayerIndex);
-			ledManager.doSolidWipe();
-			return;
-		}
 
 		// Bust!
 		if (playerScore < 0) {
+			newThrow.bust = true;
+			newThrow.totalScore = 0;
 			// Mark all darts this round as busts
-			playerDarts.filter((d => d.round === currentRound)).forEach(dart => this.bustDart(dart));
-			setDartThrows(clonedDarts);
+			//playerDarts.filter((d => d.round === currentRound)).forEach(dart => this.bustDart(dart));
 			speak("Bust!!", true);
 			this.roundEnded();
+		// Winner!
+		} else if (playerScore === 0) {
+			speak("Well done!. " + currentPlayer.name + " wins!");
+			finishGame(currentPlayerIndex);
+			ledManager.animSolidWipe();
 		// Thrown 3 darts
 		} else if (playerDarts.filter((d => d.round === currentRound)).length === this.throwsPerRound)
 			this.roundEnded();
 
 
 		setDartThrows(clonedDarts);
-		this.update();
+		this.updateHints();
 	};
 
-	bustDart = (dart: DartThrow) => {
-		dart.bust = true;
-		dart.totalScore = 0;
+	waitingForThrowSet() {
+		super.waitingForThrowSet();
+		ledManager.animWipe();
 	}
 
-	update = async () => {
+	async updateHints() {
 		const {
 			players,
 			currentPlayerIndex,
 		} = useGameStore.getState();
-		const currentPlayer = players[currentPlayerIndex];
 
+		const currentPlayer = players[currentPlayerIndex];
 		const score = this.getScore(currentPlayer);
 
-		//console.log("updating", dartThrows)
-		// All three darts
+		const hints: Hint[] = [];
 		if (score <= 60) {
-			const hints: Hint[] = [];
 			if (score === 25)
 				hints.push({score: 25, ring: Ring.OuterBullseye });
 			if (score === 50)
@@ -138,11 +138,11 @@ class Game301 extends GameType {
 					hints.push({score: i, ring: Ring.Triple });
 			}
 			//console.log("hints", score, hints)
-			ledManager.setHints(hints);
 		}
+		ledManager.setHints(hints);
 	}
 
-	getSpokenScore = (score: number, ring: Ring) => {
+	getSpokenScore(score: number, ring: Ring) {
 		if (ring === Ring.Miss) return "miss";
 		if (ring === Ring.Triple) return "triple " + score;
 		const scoreStr = score === 25 ? "bullseye" : ""+score;
@@ -150,7 +150,7 @@ class Game301 extends GameType {
 		return scoreStr;
 	}
 	
-	geMultiplier = (ring: Ring) => {
+	geMultiplier(ring: Ring) {
 		if (ring === Ring.Triple) return 3;
 		if (ring === Ring.Double || ring === Ring.InnerBullseye) return 2;
 		return 1;

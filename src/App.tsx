@@ -3,7 +3,7 @@ import React from 'react';
 import './App.css';
 import AudioDrawer from './components/AudioDrawer';
 import DartboardDrawer from './components/DartboardDrawer';
-import GameBoard from './components/GameBoard';
+import GameBoard from './components/gameBoards/GameBoard';
 import GameSelectionScreen from './components/GameSelectionScreen';
 import PlayerSelectionScreen from './components/PlayerSelectionScreen';
 import SerialDrawer from './components/SerialDrawer';

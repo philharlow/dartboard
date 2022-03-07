@@ -10,9 +10,6 @@ const defaultPlayers: Player[] = [
 		name: "Phil",
 	},
 	{
-		name: "Bellina",
-	},
-	{
 		name: "Mike",
 	},
 	{
@@ -20,6 +17,9 @@ const defaultPlayers: Player[] = [
 	},
 	{
 		name: "Knodel",
+	},
+	{
+		name: "Bellina",
 	},
 ];
 

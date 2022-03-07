@@ -15,6 +15,12 @@ const ColoredSlider = styled(Slider)`
 const ColoredSelect = styled(Select)`
 	width: 100%;
 	color: #fff;
+	fieldset {
+		border-color: #fff;
+	}
+	svg {
+      fill: #fff;
+    }
 `;
 
 function AudioDrawer() {

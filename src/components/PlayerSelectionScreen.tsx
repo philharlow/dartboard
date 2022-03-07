@@ -47,12 +47,12 @@ const GameTitle = styled.div`
 const GamePlayers = styled.div`
 	font-size: 16px;
 `;
-const StartButton = styled(Button)`
+const NextButton = styled(Button)`
 	position: absolute;
-	left: 80%;
+	right: 30px;
 	bottom: 50px;
 	font-size: 26px;
-	transform: translate(-50%);
+	padding: 15px 25px;
 	background: #6a6a;
 	border-radius: 10px;
 `;
@@ -63,7 +63,7 @@ const PlayerNumber = styled.div`
 
 function PlayerSelectionScreen() {
 	const currentGame = useGameStore(store =>store.currentGame);
-	const startGame = useGameStore(store =>store.startGame);
+	const selectGame = useGameStore(store =>store.selectGame);
 	const setPlayers = useGameStore(store =>store.setPlayers);
 	const players = usePlayerStore(store =>store.players);
 	const [ selectedPlayers, setSelectedPlayers ] = useState<Player[]>([]);
@@ -101,14 +101,14 @@ function PlayerSelectionScreen() {
 					</PlayerButton>
 				))}
 			</Slider>
-			<BackButton onClick={() => startGame(undefined)} />
-			<StartButton
+			<BackButton onClick={() => selectGame(undefined)} />
+			<NextButton
 				disabled={!validNumPlayers}
 				variant="contained"
 				onClick={() => validNumPlayers && setPlayers(selectedPlayers)}
 				>
 				Start
-			</StartButton>
+			</NextButton>
 		</RootDiv>
 	);
 }

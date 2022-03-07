@@ -1,16 +1,7 @@
 import create from 'zustand'
-import Game301 from '../gameTypes/Game301';
 import GameType, { SelectedSetting } from '../gameTypes/GameType';
 import { Ring } from '../types/LedTypes';
 import { Player } from './PlayerStore';
-
-export interface PlayerScores {
-	name: string;
-	minPlayers: number;
-	maxPlayers: number;
-	pronounciation: string;
-	update: () => void;
-}
 
 export interface GameDefinition {
 	name: string;
@@ -18,14 +9,6 @@ export interface GameDefinition {
 	maxPlayers: number;
 	pronounciation?: string;
 }
-
-export const gameList: GameType[] = [
-	new Game301(),
-	new GameType({name: "Cricket", minPlayers: 1, maxPlayers: 8}),
-	new GameType({name: "Cutthroat Cricket", minPlayers: 1, maxPlayers: 8}),
-	new GameType({name: "Baseball", minPlayers: 1, maxPlayers: 8}),
-	new GameType({name: "Golf", minPlayers: 1, maxPlayers: 8}),
-];
 
 export interface DartThrow {
 	player: string;
@@ -35,6 +18,7 @@ export interface DartThrow {
 	ring: Ring;
 	round: number;
 	bust: boolean;
+	extra?: number;
 }
 
 export type GameStore = {
@@ -51,9 +35,10 @@ export type GameStore = {
 	setCurrentRound: (round: number) => void;
 	setWaitingForThrow: (waitingForThrow: boolean) => void;
 	setPlayers: (players: Player[]) => void;
-	startGame: (gameType?: GameType) => void;
+	selectGame: (gameType?: GameType) => void;
 	setCurrentPlayerIndex: (currentPlayerIndex: number) => void;
 	finishGame: (winningPlayerIndex: number) => void;
+	setWinningPlayerIndex: (winningPlayerIndex?: number) => void;
 	setSerialConnected: (connected: boolean) => void;
 	setSelectedSettings: (selectedSettings?: SelectedSetting[]) => void;
 };
@@ -66,7 +51,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
 	currentPlayerIndex: 0,
 	serialConnected: false,
 	setWaitingForThrow: (waitingForThrow: boolean) => {
+		const { currentGame } = get();
 		set({ waitingForThrow });
+		currentGame?.waitingForThrowSet();
 	},
 	setDartThrows: (dartThrows: DartThrow[]) => {
 		set({ dartThrows });
@@ -79,21 +66,27 @@ export const useGameStore = create<GameStore>((set, get) => ({
 		set({ players });
 		currentGame?.playersSet();
 	},
-	startGame: (game?: GameType) => {
+	selectGame: (game?: GameType) => {
+		const { currentGame } = get();
+		currentGame?.cleanup();
 		set({ currentGame: game,
 			players: [],
 			dartThrows: [],
 			currentPlayerIndex: 0,
-			winningPlayerIndex: 0,
+			currentRound: 0,
+			winningPlayerIndex: undefined,
 			selectedSettings: undefined,
 		});
-		game?.chosen();
+		game?.gameSelected();
 	},
 	setCurrentPlayerIndex: (currentPlayerIndex: number) => {
 		set({ currentPlayerIndex });
 	},
 	finishGame: (winningPlayerIndex: number) => {
 		set({ winningPlayerIndex, waitingForThrow: false });
+	},
+	setWinningPlayerIndex: (winningPlayerIndex?: number) => {
+		set({ winningPlayerIndex });
 	},
 	setSerialConnected: (serialConnected: boolean) => {
 		set({ serialConnected });

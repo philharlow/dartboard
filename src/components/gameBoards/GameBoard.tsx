@@ -1,11 +1,13 @@
 import styled from '@emotion/styled';
 import { Button } from '@mui/material';
-import { useGameStore } from '../store/GameStore';
-import { Ring } from '../types/LedTypes';
-import BackButton from './BackButton';
-import Scores from './Scores';
-import TurnDisplay from './TurnDisplay';
-import WinnerDisplay from './WinnerDisplay';
+import { useGameStore } from '../../store/GameStore';
+import { Ring } from '../../types/LedTypes';
+import BackButton from '../BackButton';
+import Scores301 from './Scores301';
+import TurnDisplay301 from './TurnDisplay301';
+import WinnerDisplay from '../WinnerDisplay';
+import GameType from '../../gameTypes/GameType';
+import Game301 from '../../gameTypes/Game301';
 
 const GameTypeDisplay = styled.div`
   position: absolute;
@@ -41,9 +43,18 @@ const UndoButton = styled(Button)`
 	border-radius: 10px;
 `;
 
+const getScoreBoard = (game?: GameType) => {
+	if (game instanceof Game301) return Scores301;
+	return Scores301;
+}
+const getTurnBoard = (game?: GameType) => {
+	if (game instanceof Game301) return TurnDisplay301;
+	return TurnDisplay301;
+}
+
 function GameBoard() {
   const currentGame = useGameStore(store => store.currentGame);
-  const startGame = useGameStore(store => store.startGame);
+  const selectGame = useGameStore(store => store.selectGame);
   const dartThrows = useGameStore(store => store.dartThrows);
   const players = useGameStore(store => store.players);
   const waitingForThrow = useGameStore(store => store.waitingForThrow);
@@ -54,12 +65,14 @@ function GameBoard() {
     currentGame?.addDartThrow(players[currentPlayerIndex].name, 0, Ring.Miss);
   }
 
+  const ScoreBoard = getScoreBoard(currentGame);
+  const TurnBoard = getTurnBoard(currentGame);
   return (
     <>
-		<Scores />
-		<TurnDisplay />
+		<ScoreBoard />
+		<TurnBoard />
 		<GameTypeDisplay>{ currentGame?.name }</GameTypeDisplay>
-		<BackButton onClick={() => startGame(undefined)} />
+		<BackButton onClick={() => selectGame(undefined)} />
 		<NextPlayerButton
 			disabled={waitingForThrow}
 			variant="contained"

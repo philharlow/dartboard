@@ -9,6 +9,10 @@ import BackButton from './BackButton';
 const RootDiv = styled.div`
     height: 100%;
 	width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-left: 20px;
 `;
 const GameTitle = styled.div`
 	font-size: 26px;
@@ -18,23 +22,39 @@ const GameTitle = styled.div`
 	transform: translate(-50%);
 	position: absolute;
 `;
-const StartButton = styled(Button)`
+const NextButton = styled(Button)`
 	position: absolute;
-	left: 80%;
+	right: 30px;
 	bottom: 50px;
 	font-size: 26px;
-	transform: translate(-50%);
+	padding: 15px 25px;
 	background: #6a6a;
 	border-radius: 10px;
 `;
 const SettingRow = styled.div`
 	font-size: 26px;
+    display: flex;
+    flex-direction: row;
+	gap: 20px;
+`;
+const ColoredSelect = styled(Select)`
+	min-width: 200px;
+	color: #fff;
+	fieldset {
+		border-color: #fff;
+		&:active {
+			border-color: #fff;
+		}
+	}
+	svg {
+      fill: #fff;
+    }
 `;
 
 
 function SettingsSelectionScreen() {
 	const currentGame = useGameStore(store => store.currentGame);
-	const startGame = useGameStore(store => store.startGame);
+	const selectGame = useGameStore(store => store.selectGame);
 	const setSelectedSettings = useGameStore(store => store.setSelectedSettings);
 
 	const [ selections, setSelections ] = useState<SelectedSetting[]>(currentGame!.settingsOptions.map(o => ({ name: o.name, option: o.options[0] })));
@@ -54,21 +74,23 @@ function SettingsSelectionScreen() {
 			Settings
 			{selections.map(selection => <SettingRow key={selection.name}>
 					{selection.name}
-					<Select
+					<ColoredSelect
 						value={selection.option}
-						onChange={(ev) => setSelection(selection.name, ev.target.value || "uhoh")}
+						onChange={(ev) => setSelection(selection.name, (ev.target as any).value)}
 					>
-						{currentGame!.settingsOptions.find(o => o.name === selection.name)?.options.map(option => <MenuItem key={option} value={option}>{option}</MenuItem>)}
-					</Select>
+						{currentGame!.settingsOptions.find(o => o.name === selection.name)?.options.map(option => 
+							<MenuItem key={option} value={option}>{option}</MenuItem>
+						)}
+					</ColoredSelect>
 				</SettingRow>
 				)}
-			<BackButton onClick={() => startGame(undefined)} />
-			<StartButton
+			<BackButton onClick={() => selectGame(undefined)} />
+			<NextButton
 				variant="contained"
 				onClick={() => setSelectedSettings(selections)}
 			>
 				Next
-			</StartButton>
+			</NextButton>
 		</RootDiv>
 	);
 }

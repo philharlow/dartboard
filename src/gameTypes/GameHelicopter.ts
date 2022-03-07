@@ -1,42 +1,86 @@
-import { cloneDeep } from "lodash";
-import ledManager from "../LedManager";
+import { cloneDeep, fill } from "lodash";
+import ledManager, { scoreOrder } from "../LedManager";
 import { speak } from "../store/AudioStore";
 import { DartThrow, useGameStore } from "../store/GameStore";
 import { Player } from "../store/PlayerStore";
-import { Hint, Ring } from "../types/LedTypes";
-import GameType from "./GameType";
+import { Ring } from "../types/LedTypes";
+import GameType, { FinalPlace } from "./GameType";
 
+
+enum Difficulty {
+	Easy = "Easy",
+	Medium = "Medium",
+	Hard = "Hard",
+}
 
 class GameHelicopter extends GameType {
-	startingScore: number;
 	throwsPerRound = 3;
+	numBlades = 4;
+	difficulty = Difficulty.Easy;
+	tickInterval?: NodeJS.Timer;
+	
+	settingsOptions = [
+		{
+			name: "Difficulty",
+			propName: "difficulty",
+			options: [ Difficulty.Easy, Difficulty.Medium, Difficulty.Hard ]
+		},
+	];
 
-	constructor(
-		startingScore: number)
-	{
+	constructor() {
 		super({
 			name: "Helicopter",
 			minPlayers: 1,
 			maxPlayers: 8,
-			pronounciation: ("" + startingScore).replaceAll("0", "o"),
 		});
-		this.startingScore = startingScore;
 	}
 
-	getScore = (player: Player) => {
-		const {
-			dartThrows,
-		} = useGameStore.getState();
+	gameSelected() {
+		ledManager.animQuadSpin();
+	}
+
+	setOptions() {
+		super.setOptions();
+		this.name = this.gameDef.name + " - " + this.difficulty;
+	}
+
+	getSpeed() {
+		if (this.difficulty === Difficulty.Hard) return 10;
+		if (this.difficulty === Difficulty.Medium) return 6;
+		return 1;
+	}
+
+	getScore(player: Player): number {
+		const { dartThrows, } = useGameStore.getState();
 
 		const darts = dartThrows.filter(t => t.player === player.name);
-		const score = darts.reduce((score, dart) => score - dart.totalScore, this.startingScore);
+		const score = darts.reduce((acc, dart) => acc + dart.totalScore, 0);
+
 		return score;
 	}
-	
-	addDartThrow = (player: string, score: number, ring: Ring) => {
+
+	waitingForThrowSet() {
+		super.waitingForThrowSet();
+		const { waitingForThrow } = useGameStore.getState(); 
+
+		if (this.tickInterval) {
+			clearInterval(this.tickInterval);
+			this.tickInterval = undefined;
+		}
+
+		if (waitingForThrow) {
+			const speed = this.getSpeed();
+			this.tickInterval = setInterval(this.tick, 1000 / speed);
+			setTimeout(this.draw, 0);
+			this.updateScores();
+		}
+	}
+
+	paused = 0;
+	addDartThrow(player: string, score: number, ring: Ring) {
 		const { dartThrows, setDartThrows, waitingForThrow, currentRound, players, currentPlayerIndex, finishGame, winningPlayerIndex } = useGameStore.getState();
 		const currentPlayer = players[currentPlayerIndex];
-		console.log("addDartThrow", score, ring, player);
+		//console.log("addDartThrow", score, ring, player);
 		
 		ledManager.flashLed(score, ring);
 		if (!players.length || winningPlayerIndex !== undefined) {
@@ -46,103 +90,119 @@ class GameHelicopter extends GameType {
 			speak("remove darts and hit next player", true);
 			return;
 		}
+		//this.paused = 2;
+
+		const scoreIndex = scoreOrder.indexOf(score);
+		const hitIndex = this.blades.indexOf(scoreIndex);
+		const hit = hitIndex > -1;
+		if (hit)
+			this.blades[hitIndex] = undefined;
+		
+		const hitScore = hit ? 1 : 0;
 
 		const clonedDarts = cloneDeep(dartThrows);
-		const multiplier = this.geMultiplier(ring);
-		const totalScore = score * multiplier;
 		const newThrow: DartThrow = {
 			player,
 			score,
-			ring,
-			multiplier,
-			totalScore,
+			ring: hit ? ring : Ring.Miss,
+			multiplier: hitScore,
+			totalScore: hitScore,
 			round: currentRound,
 			bust: false,
+			extra: hit ? hitIndex : undefined,
 		}
 		clonedDarts.push(newThrow);
-		const playerDarts = clonedDarts.filter(t => t.player === currentPlayer.name);
 		
-		const playerScore = this.getScore(currentPlayer) - totalScore;
+		const playerDarts = clonedDarts.filter(t => t.player === currentPlayer.name);
+		const playerScore = this.getScore(currentPlayer) + hitScore;
 		console.log("playerscore will be", playerScore);
 
-		const scoreMessage = ring === Ring.Miss ? " miss" : this.getSpokenScore(score, ring);
+		const scoreMessage = hit ? "hit!" : "miss";
 		speak(scoreMessage, true);
-		
-		// Winner!
-		if (playerScore === 0) {
+
+		if (playerScore === this.numBlades) {
 			speak("Well done!. " + currentPlayer.name + " wins!");
 			finishGame(currentPlayerIndex);
-			ledManager.doSolidWipe();
-			return;
-		}
-
-		// Bust!
-		if (playerScore < 0) {
-			// Mark all darts this round as busts
-			playerDarts.filter((d => d.round === currentRound)).forEach(dart => this.bustDart(dart));
-			setDartThrows(clonedDarts);
-			speak("Bust!!", true);
-			this.roundEnded();
+			ledManager.animSolidWipe();
 		// Thrown 3 darts
 		} else if (playerDarts.filter((d => d.round === currentRound)).length === this.throwsPerRound)
 			this.roundEnded();
 
-
 		setDartThrows(clonedDarts);
-		this.update();
-	};
-
-	bustDart = (dart: DartThrow) => {
-		dart.bust = true;
-		dart.totalScore = 0;
+		this.draw();
 	}
 
-	update = async () => {
-		const {
-			players,
-			currentPlayerIndex,
-		} = useGameStore.getState();
+	updateScores() {
+		const { dartThrows, players, currentPlayerIndex } = useGameStore.getState();
 		const currentPlayer = players[currentPlayerIndex];
+		
+		const bladesExist = fill(Array(this.numBlades), true);
+		const playerDarts = dartThrows.filter(t => t.player === currentPlayer.name);
+		playerDarts.forEach(dart => {
+			if (dart.extra !== undefined)
+				bladesExist[dart.extra] = false;
+		})
 
-		const score = this.getScore(currentPlayer);
+		const offset = Math.floor(Math.random() * 20);
+		const spacing = Math.floor(20 / this.numBlades);
+		this.blades = bladesExist.map((exists, i) => exists ? (offset + i * spacing) % 20 : undefined);
+		// console.log("updateScores() blades", currentPlayer, this.blades, playerDarts)
+	}
 
-		//console.log("updating", dartThrows)
-		// All three darts
-		if (score <= 60) {
-			const hints: Hint[] = [];
-			if (score === 25)
-				hints.push({score: 25, ring: Ring.OuterBullseye });
-			if (score === 50)
-				hints.push({score: 25, ring: Ring.InnerBullseye });
+	blades: (number | undefined)[] = [];
 
-			for (let i=1; i<=20; i++) {
-				if (i === score) {
-					hints.push({score: i, ring: Ring.InnerSingle });
-					hints.push({score: i, ring: Ring.OuterSingle });
-				}
-				if (i * 2 === score)
-					hints.push({score: i, ring: Ring.Double });
-				if (i * 3 === score)
-					hints.push({score: i, ring: Ring.Triple });
+	tick = () => {
+		console.log("tick");
+		if (this.paused) return this.paused--;
+		
+		this.blades.forEach((blade, i) => {
+			if (blade === undefined) return;
+			this.blades[i] = (blade + 1) % 20;
+		});
+
+		this.draw();
+
+		ledManager.dispatchUpdate();
+	}
+
+	draw = () => {
+		ledManager.setAllOn(false, false); // Clear board
+		
+		this.blades.forEach((blade, i) => {
+			if (blade === undefined) return;
+			const score = scoreOrder[blade%20];
+			ledManager.setScoreOn(score, true, false);
+		});
+
+		ledManager.dispatchUpdate();
+	}
+
+	playersSet() {
+		super.playersSet();
+	}
+
+	getFinalScores(): FinalPlace[] {
+		const { players, } = useGameStore.getState();
+		const places: FinalPlace[] = players.map((player, i) => ({player, place: i, score: this.getScore(player) || 0})).sort((a, b) => b.score - a.score);
+		let lastScore = places[0].score;
+		let currentPlace = 1;
+		places.forEach(playerScore => {
+			if (playerScore.score > lastScore) {
+				lastScore = playerScore.score;
+				currentPlace++;
 			}
-			//console.log("hints", score, hints)
-			ledManager.setHints(hints);
-		}
+			playerScore.place = currentPlace;
+		});
+		return places;
 	}
 
-	getSpokenScore = (score: number, ring: Ring) => {
-		if (ring === Ring.Miss) return "miss";
-		if (ring === Ring.Triple) return "triple " + score;
-		const scoreStr = score === 25 ? "bullseye" : ""+score;
-		if (ring === Ring.Double || ring === Ring.InnerBullseye) return "double " + scoreStr;
-		return scoreStr;
+	cleanup(): void {
+		super.cleanup();
+
+		if (this.tickInterval)
+			clearInterval(this.tickInterval);
 	}
-	
-	geMultiplier = (ring: Ring) => {
-		if (ring === Ring.Triple) return 3;
-		if (ring === Ring.Double || ring === Ring.InnerBullseye) return 2;
-		return 1;
-	}
+
 }
 
 export default GameHelicopter;

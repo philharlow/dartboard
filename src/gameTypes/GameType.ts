@@ -4,14 +4,20 @@ import { GameDefinition, useGameStore } from "../store/GameStore";
 import { Player } from "../store/PlayerStore";
 import { Ring } from "../types/LedTypes";
 
+export interface FinalPlace {
+	player: Player;
+	score: number;
+	place: number;
+}
 
 export interface SettingOptions {
 	name: string;
-	options: string[];
+	propName: string;
+	options: any[];
 }
 export interface SelectedSetting {
 	name: string;
-	option: string;
+	option: any;
 }
 
 class GameType {
@@ -26,16 +32,23 @@ class GameType {
 		this.name = this.gameDef.name;
 	}
 
-	chosen = () => {
-		console.log("chosen() not implemented yet!")
-		ledManager.doGrow();
+	gameSelected() {
+		console.log("gameSelected() not implemented yet!")
+		ledManager.animGrow();
 	}
 
-	setOptions = () => {
-		console.log("setOptions() not implemented yet!")
+	setOptions() {
+		const { selectedSettings, } = useGameStore.getState();
+
+		selectedSettings?.forEach(setting => {
+			const options = this.settingsOptions.find(op => op.name === setting.name);
+			// Apply settings via propName
+			if (options)
+				(this as any)[options.propName] = setting.option;
+		})
 	}
 
-	playersSet = () => {
+	playersSet() {
 		const {
 			players,
 			currentPlayerIndex,
@@ -44,38 +57,43 @@ class GameType {
 		const currentPlayer = players[currentPlayerIndex];
 		speak(players.length + " player" + (players.length > 1 ? "s" : ""));
 		speak(currentPlayer.name + " is up first");
-		ledManager.doWipe();
 		setWaitingForThrow(true);
 	}
 
-	getScore = (player: Player) => {
+	waitingForThrowSet() {
+		
+	}
+
+	getScore(player: Player) {
 		return 0;
 	}
 
-	update = () => {
-		console.log("update() not implemented yet!")
+	updateHints() {
 	}
 
-	addDartThrow = (player: string, score: number, ring: Ring) => {
+	addDartThrow(player: string, score: number, ring: Ring) {
 		console.log("addDartThrow() not implemented yet!")
 	}
 
-	getSpokenScore = (score: number, ring: Ring) => {
+	getSpokenScore(score: number, ring: Ring) {
 		console.log("getSpokenScore() not implemented yet!")
 	}
 	
-	geMultiplier = (ring: Ring): number => {
+	geMultiplier(ring: Ring): number {
 		console.log("geMultiplier() not implemented yet!")
 		return 0;
 	}
 	
-	undoLastDart = () => {
-		const { dartThrows, setDartThrows, setWaitingForThrow } = useGameStore.getState();
+	undoLastDart() {
+		const { dartThrows, setDartThrows, setWaitingForThrow, setWinningPlayerIndex } = useGameStore.getState();
 		setDartThrows(dartThrows.slice(0, -1));
 		setWaitingForThrow(true);
+		setWinningPlayerIndex(undefined);
+		speak("Undone", true);
+		this.updateHints();
 	}
 
-	nextPlayer = () => {
+	nextPlayer() {
 		const { players, setWaitingForThrow, currentPlayerIndex, setCurrentPlayerIndex, currentRound, setCurrentRound } = useGameStore.getState();
 		const nextPlayerIndex = (currentPlayerIndex + 1) % players.length;
 		const nextPlayer = players[nextPlayerIndex];
@@ -84,19 +102,39 @@ class GameType {
 		if (nextPlayerIndex === 0)
 			setCurrentRound(currentRound + 1);
 		
-		setWaitingForThrow(true);
 		setCurrentPlayerIndex(nextPlayerIndex);
+		setWaitingForThrow(true);
 		speak("alright, " + nextPlayer.name + "'s turn!");
-		this.update();
+		this.updateHints();
 	}
 
-	roundEnded = () => {
+	roundEnded() {
 		const { players, setWaitingForThrow, currentPlayerIndex } = useGameStore.getState();
 		const nextPlayerIndex = (currentPlayerIndex + 1) % players.length;
 		const nextPlayer = players[nextPlayerIndex];
 		speak("Grab darts. " + nextPlayer.name + " is up next");
 		setWaitingForThrow(false);
-		ledManager.doSolidWipe();
+		ledManager.setHints([]);
+		ledManager.animSolidWipe();
+	}
+
+	getFinalScores() : FinalPlace[] {
+		const { players, } = useGameStore.getState();
+		const places: FinalPlace[] = players.map((player, i) => ({player, place: i, score: this.getScore(player) || 0})).sort((a, b) => a.score - b.score);
+		let lastScore = places[0].score;
+		let currentPlace = 1;
+		places.forEach(playerScore => {
+			if (playerScore.score > lastScore) {
+				lastScore = playerScore.score;
+				currentPlace++;
+			}
+			playerScore.place = currentPlace;
+		});
+		return places;
+	}
+
+	cleanup() {
+		ledManager.animShrink();
 	}
 
 }

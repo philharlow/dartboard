@@ -2,7 +2,6 @@ import styled from '@emotion/styled';
 import { Button } from '@mui/material';
 import { useState } from 'react';
 import { useGameStore } from '../store/GameStore';
-import { Player } from '../store/PlayerStore';
 
 const BlurBackground = styled.div`
 	position: absolute;
@@ -61,35 +60,20 @@ const CloseButton = styled.div`
 	z-index: 1000;
 `;
 
-
-interface PlayerScore {
-	player: Player;
-	score: number;
-	place: number;
+const getPrettyPlace = (place: number) => {
+	if (place === 1) return "1st";// "🥇";
+	if (place === 2) return "2nd";// "🥈";
+	if (place === 3) return "3rd";// "🥉";
+	return place + "th";
 }
 
 function WinnerDisplay() {
 	const [ hidden, setHidden ] = useState(false);
+	const selectGame = useGameStore(store => store.selectGame);
 	const currentGame = useGameStore(store => store.currentGame);
 	const players = useGameStore(store => store.players);
 	const winningPlayerIndex = useGameStore(store => store.winningPlayerIndex);
-	const places: PlayerScore[] = players.map((player, i) => ({player, place: i, score: currentGame?.getScore(player) || 0})).sort((a, b) => a.score - b.score);
-	let lastScore = places[0].score;
-	let currentPlace = 1;
-	places.forEach(playerScore => {
-		playerScore.place = currentPlace;
-		if (playerScore.score > lastScore) {
-			lastScore = playerScore.score;
-			currentPlace++;
-		}
-	});
-
-	const getPrettyPlace = (place: number) => {
-		if (place === 1) return "1st";
-		if (place === 2) return "2nd";
-		if (place === 3) return "3rd";
-		return place + "th";
-	}
+	const finalScores = currentGame!.getFinalScores();
 	
 	if (hidden)
 		return null;
@@ -107,24 +91,24 @@ function WinnerDisplay() {
 				<FinalScoresTable>
 					<tbody>
 						<tr>
-							{places.map((place, i) => <th key={i}>{getPrettyPlace(place.place)}</th>)}
+							{finalScores.map((place, i) => <th key={i}>{getPrettyPlace(place.place)}</th>)}
 						</tr>
 						<tr>
-							{places.map((place, i) => <th key={i}>{place.player.name}</th>)}
+							{finalScores.map((place, i) => <th key={i}>{place.player.name}</th>)}
 						</tr>
 						<tr>
-							{places.map((place, i) => <th key={i}>{place.score}</th>)}
+							{finalScores.map((place, i) => <th key={i}>{place.score}</th>)}
 						</tr>
 					</tbody>
 				</FinalScoresTable>
 				<ButtonRow>
-					<Button variant='contained'>
+					<Button variant='contained' onClick={() => currentGame?.undoLastDart()}>
 						Undo
 					</Button>
-					<Button variant='contained'>
+					<Button variant='contained' onClick={() => selectGame(undefined)}>
 						Change Game
 					</Button>
-					<Button variant='contained'>
+					<Button variant='contained' onClick={() => selectGame(currentGame)}>
 						Replay Game
 					</Button>
 				</ButtonRow>
