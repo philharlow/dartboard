@@ -1,4 +1,4 @@
-import styled from '@emotion/styled';
+import styled from '@emotion/styled/macro';
 import { gameList } from '../gameTypes/GamesList';
 import { useGameStore } from '../store/GameStore';
 

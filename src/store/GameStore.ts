@@ -29,7 +29,6 @@ export type GameStore = {
 	waitingForThrow: boolean;
 	currentPlayerIndex: number;
 	winningPlayerIndex?: number;
-	serialConnected: boolean;
 	selectedSettings?: SelectedSetting[];
 	setDartThrows: (dartThrows: DartThrow[]) => void;
 	setCurrentRound: (round: number) => void;
@@ -39,7 +38,6 @@ export type GameStore = {
 	setCurrentPlayerIndex: (currentPlayerIndex: number) => void;
 	finishGame: (winningPlayerIndex: number) => void;
 	setWinningPlayerIndex: (winningPlayerIndex?: number) => void;
-	setSerialConnected: (connected: boolean) => void;
 	setSelectedSettings: (selectedSettings?: SelectedSetting[]) => void;
 };
 
@@ -49,7 +47,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
 	currentRound: 0,
 	waitingForThrow: false,
 	currentPlayerIndex: 0,
-	serialConnected: false,
 	setWaitingForThrow: (waitingForThrow: boolean) => {
 		const { currentGame } = get();
 		set({ waitingForThrow });
@@ -87,9 +84,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
 	},
 	setWinningPlayerIndex: (winningPlayerIndex?: number) => {
 		set({ winningPlayerIndex });
-	},
-	setSerialConnected: (serialConnected: boolean) => {
-		set({ serialConnected });
 	},
 	setSelectedSettings: (selectedSettings?: SelectedSetting[]) => {
 		set({ selectedSettings });

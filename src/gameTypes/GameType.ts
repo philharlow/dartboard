@@ -20,10 +20,38 @@ export interface SelectedSetting {
 	option: any;
 }
 
+const getRing = (char: string) => {
+	if (char === "m") return Ring.Miss;
+	if (char === "t") return Ring.Triple;
+	if (char === "d") return Ring.Double;
+	if (char === "o") return Ring.OuterSingle;
+	return Ring.InnerSingle;
+}
+
+export const parseDartCode = (code: string) => {
+	const ring = getRing(code[0]);
+	const score = parseInt(code.substring(1)) || 0;
+	if (ring === Ring.Miss || score === 0)
+		return { score: 0, ring: Ring.Miss }
+	if (score === 25)
+		return { ring: ring === Ring.InnerSingle ? Ring.OuterBullseye : Ring.InnerBullseye, score: 25 };
+	return { ring, score };
+}
+
+export const addDartThrow = (score: number, ring: Ring) => {
+	const { currentGame } = useGameStore.getState();
+	if (currentGame) {
+		currentGame?.addDartThrow(score, ring);
+	} else {
+		ledManager.flashLed(score, ring);
+	}
+}
+
 class GameType {
 	name: string;
 	gameDef: GameDefinition;
 	settingsOptions: SettingOptions[] = [];
+	throwsPerRound = 3;
 
 	constructor(
 		gameDef: GameDefinition)
@@ -71,7 +99,7 @@ class GameType {
 	updateHints() {
 	}
 
-	addDartThrow(player: string, score: number, ring: Ring) {
+	addDartThrow(score: number, ring: Ring) {
 		console.log("addDartThrow() not implemented yet!")
 	}
 
@@ -79,8 +107,8 @@ class GameType {
 		console.log("getSpokenScore() not implemented yet!")
 	}
 	
-	geMultiplier(ring: Ring): number {
-		console.log("geMultiplier() not implemented yet!")
+	getMultiplier(ring: Ring): number {
+		console.log("getMultiplier() not implemented yet!")
 		return 0;
 	}
 	

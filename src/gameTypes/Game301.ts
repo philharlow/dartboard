@@ -7,7 +7,6 @@ import { Hint, Ring } from "../types/LedTypes";
 import GameType from "./GameType";
 
 class Game301 extends GameType {
-	throwsPerRound = 3;
 	startingScore = 0;
 	settingsOptions = [
 		{
@@ -49,10 +48,10 @@ class Game301 extends GameType {
 		return score;
 	}
 	
-	addDartThrow(player: string, score: number, ring: Ring) {
+	addDartThrow(score: number, ring: Ring) {
 		const { dartThrows, setDartThrows, waitingForThrow, currentRound, players, currentPlayerIndex, finishGame, winningPlayerIndex } = useGameStore.getState();
 		const currentPlayer = players[currentPlayerIndex];
-		console.log("addDartThrow", score, ring, player);
+		console.log("addDartThrow", score, ring, currentPlayer);
 		
 		ledManager.flashLed(score, ring);
 		if (!players.length || winningPlayerIndex !== undefined) {
@@ -64,10 +63,10 @@ class Game301 extends GameType {
 		}
 
 		const clonedDarts = cloneDeep(dartThrows);
-		const multiplier = this.geMultiplier(ring);
+		const multiplier = this.getMultiplier(ring);
 		const totalScore = score * multiplier;
 		const newThrow: DartThrow = {
-			player,
+			player: currentPlayer.name,
 			score,
 			ring,
 			multiplier,
@@ -150,7 +149,7 @@ class Game301 extends GameType {
 		return scoreStr;
 	}
 	
-	geMultiplier(ring: Ring) {
+	getMultiplier(ring: Ring) {
 		if (ring === Ring.Triple) return 3;
 		if (ring === Ring.Double || ring === Ring.InnerBullseye) return 2;
 		return 1;

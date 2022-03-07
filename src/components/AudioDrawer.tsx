@@ -1,4 +1,4 @@
-import styled from '@emotion/styled';
+import styled from '@emotion/styled/macro';
 import Drawer, { DrawerPosition } from './Drawer';
 import { speak, useAudioStore } from '../store/AudioStore';
 import { MenuItem, Select, Slider } from '@mui/material';
@@ -48,7 +48,7 @@ function AudioDrawer() {
 	}
 
 	return (
-		<Drawer position={DrawerPosition.Bottom} tabStyle={{left:"95%"}} drawerStyle={{width: 200, right: 0, paddingBottom: 50}} tabLabel="Audio">
+		<Drawer position={DrawerPosition.Top} tabStyle={{right:"2%"}} drawerStyle={{width: 200, right: 0, paddingBottom: 50}} tabLabel="Audio">
 			<Title>
 				Volume
 			</Title>

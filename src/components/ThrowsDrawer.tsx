@@ -1,4 +1,4 @@
-import styled from '@emotion/styled';
+import styled from '@emotion/styled/macro';
 import Drawer, { DrawerPosition } from './Drawer';
 import { useGameStore } from '../store/GameStore';
 
@@ -14,7 +14,7 @@ function ThrowsDrawer() {
 	const dartThrows = useGameStore(store =>store.dartThrows);
 
 	return (
-		<Drawer position={DrawerPosition.Right} tabStyle={{top: 50}} drawerStyle={{top: 0, width: 200, maxHeight: 200, overflowY: "scroll"}} tabLabel="Throws">
+		<Drawer position={DrawerPosition.Top} tabStyle={{right: "22%"}} drawerStyle={{right: 0, width: 200, maxHeight: 200, overflowY: "auto"}} tabLabel="Throws">
 			<Title>
 				Throws
 			</Title>

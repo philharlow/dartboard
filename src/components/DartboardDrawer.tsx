@@ -4,7 +4,7 @@ import DartBoard from './DartBoard';
 
 function DartboardDrawer() {
 	return (
-		<Drawer position={DrawerPosition.Bottom} tabStyle={{left: "75%"}} drawerStyle={{left: "25%"}} tabLabel="Board">
+		<Drawer position={DrawerPosition.Top} tabStyle={{right: "32%"}} drawerStyle={{left: "25%"}} tabLabel="Board">
 			<DartBoard />
 		</Drawer>
 	);

@@ -1,5 +1,5 @@
-import { PropsWithChildren, useState } from 'react';
-import styled from '@emotion/styled';
+import { PropsWithChildren, useEffect, useState } from 'react';
+import styled from '@emotion/styled/macro';
 
 const DrawerRoot = styled.div`
 	position: fixed;
@@ -27,7 +27,7 @@ const DrawerRoot = styled.div`
 const DrawerDiv = styled(DrawerRoot)`
 	z-index: 10;
 	&.right {
-		transform: translateX(100%);
+		transform: translateX(110%);
 		&.open {
 			transform: translateX(0%);
 		}
@@ -39,45 +39,45 @@ const DrawerDiv = styled(DrawerRoot)`
 		}
 	}
 	&.bottom {
-		transform: translateY(100%);
+		transform: translateY(110%);
 		&.open {
 			transform: translateY(0%);
 		}
 	}
 	&.top {
-		transform: translateY(0%);
+		transform: translateY(-110%);
 		&.open {
-			transform: translateY(100%);
+			transform: translateY(0%);
 		}
 	}
 `;
 const DrawerTab = styled(DrawerRoot)`
 	&.right {
     	margin-right: -10px;
-		transform: translate(0%, -50%);
+		transform: translateX(0%);
 		&.open {
-			transform: translate(100%, -50%);
+			transform: translateX(100%);
 		}
 	}
 	&.left {
     	margin-left: -10px;
-		transform: translate(100% -50%);
+		transform: translateX(100%);
 		&.open {
-			transform: translate(0% -50%);
+			transform: translateX(0%);
 		}
 	}
 	&.bottom {
     	margin-bottom: -10px;
-		transform: translate(-50%, 0%);
+		transform: translateY(0%);
 		&.open {
-			transform: translate(-50%, 100%);
+			transform: translateY(100%);
 		}
 	}
 	&.top {
     	margin-top: -10px;
-		transform: translate(-50%, 100%);
+		transform: translateY(0%);
 		&.open {
-			transform: translate(-50%, 0%);
+			transform: translateY(-100%);
 		}
 	}
 `;
@@ -111,6 +111,12 @@ interface DrawerProps {
 
 function Drawer(props: PropsWithChildren<DrawerProps>) {
 	const [ open, setOpen ] = useState(false);
+	const [ drawerRendered, setDrawerRendered ] = useState(false);
+
+	useEffect(() => {
+		if (open) setDrawerRendered(true);
+		else setTimeout(() => setDrawerRendered(false), 1000);
+	}, [open]);
 
 	const classes: string[] = [props.position];
 	if (open)
@@ -123,7 +129,7 @@ function Drawer(props: PropsWithChildren<DrawerProps>) {
 			</DrawerTab>
 			<DrawerDiv className={classes.join(" ")} style={{ ...props.drawerStyle }}>
 				<CloseButton onClick={() => setOpen(false)}>x</CloseButton>
-				{props.children}
+				{drawerRendered && props.children}
 			</DrawerDiv>
 		</>
 	);

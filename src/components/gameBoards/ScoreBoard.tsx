@@ -1,11 +1,13 @@
-import styled from '@emotion/styled';
+import styled from '@emotion/styled/macro';
+import { useEffect, useState } from 'react';
 import Game301 from '../../gameTypes/Game301';
 import { DartThrow, useGameStore } from '../../store/GameStore';
 
 const ScoresTable = styled.table`
-	align-self: center;
 	border: 1px solid white;
     border-collapse: collapse;
+	flex-grow: 0;
+    margin: 10px;
 `;
 const ScoreRow = styled.tr`
 	&.current {
@@ -43,13 +45,23 @@ const ThrowCell = styled.div`
 	border: 1px solid white;
 `;
 
-function Scores301() {
+function ScoreBoard() {
 	const dartThrows = useGameStore(store => store.dartThrows);
 	const players = useGameStore(store => store.players);
 	const currentPlayerIndex = useGameStore(store => store.currentPlayerIndex);
 	const currentRound = useGameStore(store => store.currentRound);
 	const currentGame = useGameStore(store => store.currentGame);
 	const game301 = currentGame as Game301;
+
+	const [ currentDiv, setCurrentDiv ] = useState<HTMLDivElement | null>(null);
+
+	useEffect(() => {
+		currentDiv?.scrollIntoView({
+			behavior: 'smooth',
+            block: 'center',
+            inline: 'center',
+        });
+	}, [currentDiv]);
 
 	const scores: Record<string, number> = {};
 	const dartsPerRound: Record<string, DartThrow[][]> = {};
@@ -78,15 +90,17 @@ function Scores301() {
 			</ThrowCell>
 	}
 
-	const getTurnCell = (darts: DartThrow[], i: number) => {
+	const getTurnCell = (darts: DartThrow[], i: number, currentCell: boolean) => {
 		const bust = darts.some(dart => dart.bust);
 		const roundPoints = darts.reduce((acc, dart) => acc + dart.totalScore, 0);
 		const shownScore = bust ? "Bust" : (darts.length ? roundPoints : "");
 		const throwCells: JSX.Element[] = [];
 		for (let i=0; i<game301.throwsPerRound; i++)
 			throwCells.push(getThrowCell(i, darts[i]));
+		
+		const ref = currentCell ? { ref: setCurrentDiv } : { }
 		return <ScoreCell key={i}>
-			<ThrowDetails>
+			<ThrowDetails { ...ref }>
 				<ThrowList className={bust ? "bust" : ""}>
 					{throwCells}
 				</ThrowList>
@@ -110,7 +124,7 @@ function Scores301() {
 					return <ScoreRow key={player.name} className={i === currentPlayerIndex ? "current" : ""}>
 							<ScoreCell>{player.name}</ScoreCell>
 							<ScoreCell>{score}</ScoreCell>
-							{dartsByRound.map((darts, i) => getTurnCell(darts, i))}
+							{dartsByRound.map((darts, d) => getTurnCell(darts, d, i === currentPlayerIndex && d === currentRound))}
 						</ScoreRow>
 				})}
 			</tbody>
@@ -118,4 +132,4 @@ function Scores301() {
 	);
 }
 
-export default Scores301;
+export default ScoreBoard;

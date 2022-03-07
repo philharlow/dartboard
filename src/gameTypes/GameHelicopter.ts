@@ -77,7 +77,7 @@ class GameHelicopter extends GameType {
 	}
 
 	paused = 0;
-	addDartThrow(player: string, score: number, ring: Ring) {
+	addDartThrow(score: number, ring: Ring) {
 		const { dartThrows, setDartThrows, waitingForThrow, currentRound, players, currentPlayerIndex, finishGame, winningPlayerIndex } = useGameStore.getState();
 		const currentPlayer = players[currentPlayerIndex];
 		//console.log("addDartThrow", score, ring, player);
@@ -102,7 +102,7 @@ class GameHelicopter extends GameType {
 
 		const clonedDarts = cloneDeep(dartThrows);
 		const newThrow: DartThrow = {
-			player,
+			player: currentPlayer.name,
 			score,
 			ring: hit ? ring : Ring.Miss,
 			multiplier: hitScore,

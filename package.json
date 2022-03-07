@@ -17,14 +17,18 @@
     "@types/react": "^17.0.39",
     "@types/react-dom": "^17.0.11",
     "@types/w3c-web-serial": "^1.0.2",
+    "cors": "^2.8.5",
     "d3": "^7.3.0",
     "d3-selection": "^3.0.0",
     "d3-shape": "^3.1.0",
+    "express": "^4.17.3",
     "lodash": "^4.17.21",
     "lodash.clonedeep": "^4.5.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "5.0.0",
+    "socket.io": "^4.4.1",
+    "socket.io-client": "^4.4.1",
     "typescript": "^4.6.2",
     "web-vitals": "^2.1.4",
     "zustand": "^3.7.1"
@@ -33,7 +37,10 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "start-server": "node server.js",
+    "start-servermon": "nodemon",
+    "build-server": "tsc"
   },
   "eslintConfig": {
     "extends": [
@@ -55,6 +62,7 @@
   },
   "devDependencies": {
     "@types/d3-selection": "^3.0.2",
-    "@types/d3-shape": "^3.0.2"
+    "@types/d3-shape": "^3.0.2",
+    "nodemon": "^2.0.15"
   }
 }

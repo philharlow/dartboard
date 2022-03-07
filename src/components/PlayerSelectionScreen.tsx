@@ -1,4 +1,4 @@
-import styled from '@emotion/styled';
+import styled from '@emotion/styled/macro';
 import { Button } from '@mui/material';
 import { useState } from 'react';
 import { useGameStore } from '../store/GameStore';
@@ -18,12 +18,12 @@ const Slider = styled.div`
     align-items: center;
     text-align: center;
     overflow-x: auto;
-	gap: 5px;
+	gap: 15px;
 	padding: 0 50px;
 `;
 const PlayerButton = styled.div`
-	width: 200px;
-	height: 200px;
+	width: 100px;
+	height: 100px;
 	background: #cccccc77;
 	flex-shrink: 0;
     display: flex;

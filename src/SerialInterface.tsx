@@ -1,4 +1,4 @@
-import { useGameStore } from "./store/GameStore";
+import { useConnectionStore } from "./store/ConnectionStore";
 
 let reader: ReadableStreamDefaultReader<string> | undefined;
 let outputStream: WritableStream<string> | undefined;
@@ -11,7 +11,7 @@ export const connectSerial = async () => {
   console.log("port !== undefined", port !== undefined);
   if (port !== undefined) {
 
-    const { setSerialConnected } = useGameStore.getState();
+    const { setSerialConnected } = useConnectionStore.getState();
     setSerialConnected(true);
     console.log("port 2");
     await port.open({ baudRate: 9600 });

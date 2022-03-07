@@ -1,4 +1,4 @@
-import styled from '@emotion/styled';
+import styled from '@emotion/styled/macro';
 import React from 'react';
 import './App.css';
 import AudioDrawer from './components/AudioDrawer';
@@ -6,8 +6,8 @@ import DartboardDrawer from './components/DartboardDrawer';
 import GameBoard from './components/gameBoards/GameBoard';
 import GameSelectionScreen from './components/GameSelectionScreen';
 import PlayerSelectionScreen from './components/PlayerSelectionScreen';
-import SerialDrawer from './components/SerialDrawer';
 import SettingsSelectionScreen from './components/SettingsSelectionScreen';
+import SocketDrawer from './components/SocketDrawer';
 import ThrowsDrawer from './components/ThrowsDrawer';
 import { useGameStore } from './store/GameStore';
 
@@ -33,7 +33,7 @@ function App() {
   return <AppDiv>
       {content}
     
-			<SerialDrawer />
+			<SocketDrawer />
 			<AudioDrawer />
 			<DartboardDrawer />
 			<ThrowsDrawer />

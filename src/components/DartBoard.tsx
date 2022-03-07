@@ -1,10 +1,9 @@
 import { ReactComponent as DartboardSVG } from '../dartboard.svg';
-import styled from '@emotion/styled';
-import { useGameStore } from '../store/GameStore';
+import styled from '@emotion/styled/macro';
 import { useEffect, useState } from 'react';
 import { Led, Ring } from '../types/LedTypes';
-import ledManager from '../LedManager';
 import { useLedStore } from '../store/LedStore';
+import { addDartThrow, parseDartCode } from '../gameTypes/GameType';
 
 const DartboardDiv = styled.div`
 	display: flex;
@@ -31,9 +30,6 @@ const getSVGElement = (id: string): SVGElement | undefined => {
 
 
 function DartBoard() {
-	const players = useGameStore(store => store.players);
-	const currentPlayerIndex = useGameStore(store => store.currentPlayerIndex);
-	const currentGame = useGameStore(store => store.currentGame);
 	const leds = useLedStore(store => store.leds);
 	const [ lastLeds, setLastLeds ] = useState<Led[]>(leds);
 
@@ -46,36 +42,12 @@ function DartBoard() {
 		}
 	};
 
-	const getRing = (char: string) => {
-		if (char === "m") return Ring.Miss;
-		if (char === "t") return Ring.Triple;
-		if (char === "d") return Ring.Double;
-		if (char === "o") return Ring.OuterSingle;
-		return Ring.InnerSingle;
-	}
-
-	const parseDartCode = (code: string) => {
-		const ring = getRing(code[0]);
-		const score = parseInt(code.substring(1)) || 0;
-		if (ring === Ring.Miss || score === 0)
-			return { score: 0, ring: Ring.Miss }
-		if (score === 25)
-			return { ring: ring === Ring.InnerSingle ? Ring.OuterBullseye : Ring.InnerBullseye, score: 25 };
-		return { ring, score };
-	}
-
 	const handleClick = (e: React.MouseEvent) => {
 		if (e.target instanceof SVGElement ) {
 			const id = e.target.id;
 			// console.log("clicked", id)
 			const { ring, score } = parseDartCode(id);
-				
-			if (currentGame) {
-				const player = players[currentPlayerIndex]?.name || "Unknown";
-				currentGame?.addDartThrow(player, score, ring);
-			} else {
-				ledManager.flashLed(score, ring);
-			}
+			addDartThrow(score, ring);
 		}
 	};
 

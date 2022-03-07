@@ -1,7 +1,7 @@
-import styled from '@emotion/styled';
+import styled from '@emotion/styled/macro';
 import { connectSerial } from '../SerialInterface';
 import AudioDrawer from './AudioDrawer';
-import SerialDrawer from './SerialDrawer';
+import SocketDrawer from './SocketDrawer';
 
 const StartScreenDiv = styled.div`
     height: 100%;
@@ -39,7 +39,7 @@ function GameSelectionScreen() {
 				</Title>
 			</StartButton>
 			<AudioDrawer />
-			<SerialDrawer />
+			<SocketDrawer />
 		</StartScreenDiv>
 	);
 }

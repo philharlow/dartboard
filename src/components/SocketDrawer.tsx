@@ -1,8 +1,8 @@
 import styled from '@emotion/styled/macro';
 import Drawer, { DrawerPosition } from './Drawer';
 import { Button, Switch } from '@mui/material';
-import { connectSerial, writeToSerial } from '../SerialInterface';
 import { useConnectionStore } from '../store/ConnectionStore';
+import { connectSocket, writeToSocket } from '../SocketInterface';
 
 
 const Title = styled.div`
@@ -18,34 +18,34 @@ const ColoredSwitch = styled(Switch)`
 	}
 `;
 
-function SerialDrawer() {
-	const serialConnected = useConnectionStore(store =>store.serialConnected);
+function SocketDrawer() {
+	const socketConnected = useConnectionStore(store =>store.socketConnected);
 
 	return (
-		<Drawer position={DrawerPosition.Top} tabStyle={{left: "85%"}} drawerStyle={{right: 0, width: 200, textAlign: "center", paddingBottom: 50}} tabLabel="Serial">
+		<Drawer position={DrawerPosition.Top} tabStyle={{right: "12%"}} drawerStyle={{right: 0, width: 200, textAlign: "center", paddingBottom: 50}} tabLabel="Socket">
 			<Title>
-				Serial Connection
+				Socket Connection
 			</Title>
 			<ColoredSwitch
 				disabled
-				checked={serialConnected}
-				aria-label="Serial Connection"
+				checked={socketConnected}
+				aria-label="Socket Connection"
 				/>
 			<br />
 			<br />
-			<Button variant='contained' onClick={() => connectSerial()}>
+			<Button variant='contained' onClick={() => connectSocket()}>
 				Connect
 			</Button>
 			<br />
 			<br />
-			<Button disabled={!serialConnected} variant='contained' onClick={() => writeToSerial(["yay!"])}>
+			<Button disabled={!socketConnected} variant='contained' onClick={() => writeToSocket("leds", ["yay!"])}>
 				Send something
 			</Button>
 		</Drawer>
 	);
 }
 
-export default SerialDrawer;
+export default SocketDrawer;
 
 
 

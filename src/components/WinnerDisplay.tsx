@@ -1,4 +1,4 @@
-import styled from '@emotion/styled';
+import styled from '@emotion/styled/macro';
 import { Button } from '@mui/material';
 import { useState } from 'react';
 import { useGameStore } from '../store/GameStore';

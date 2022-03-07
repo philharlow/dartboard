@@ -19,6 +19,15 @@ const defaultPlayers: Player[] = [
 		name: "Knodel",
 	},
 	{
+		name: "Josh",
+	},
+	{
+		name: "Erik",
+	},
+	{
+		name: "Jake",
+	},
+	{
 		name: "Bellina",
 	},
 ];
