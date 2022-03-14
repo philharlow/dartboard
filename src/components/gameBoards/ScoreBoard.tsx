@@ -1,13 +1,14 @@
 import styled from '@emotion/styled/macro';
 import { useEffect, useState } from 'react';
-import Game301 from '../../gameTypes/Game301';
-import { DartThrow, useGameStore } from '../../store/GameStore';
+import { useGameStore } from '../../store/GameStore';
+import { DartThrow } from '../../types/GameTypes';
 
 const ScoresTable = styled.table`
 	border: 1px solid white;
     border-collapse: collapse;
 	flex-grow: 0;
     margin: 10px;
+	height: fit-content;
 `;
 const ScoreRow = styled.tr`
 	&.current {
@@ -50,8 +51,7 @@ function ScoreBoard() {
 	const players = useGameStore(store => store.players);
 	const currentPlayerIndex = useGameStore(store => store.currentPlayerIndex);
 	const currentRound = useGameStore(store => store.currentRound);
-	const currentGame = useGameStore(store => store.currentGame);
-	const game301 = currentGame as Game301;
+	const scores = useGameStore(store => store.scores);
 
 	const [ currentDiv, setCurrentDiv ] = useState<HTMLDivElement | null>(null);
 
@@ -63,19 +63,16 @@ function ScoreBoard() {
         });
 	}, [currentDiv]);
 
-	const scores: Record<string, number> = {};
+	
 	const dartsPerRound: Record<string, DartThrow[][]> = {};
 	players.forEach(player => {
-		const playerScore = game301.getScore(player);
-		scores[player.name] = playerScore;
-		
-		const playerDarts = dartThrows.filter(t => t.player === player.name);
+		const playerDarts = dartThrows.filter(t => t.player === player);
 		const dartsByRound: DartThrow[][] = [];
 		for (let i=0; i<=currentRound; i++) {
 			const roundDarts = playerDarts.filter(t => t.round === i);
 			dartsByRound[i] = roundDarts;
 		}
-		dartsPerRound[player.name] = dartsByRound;
+		dartsPerRound[player] = dartsByRound;
 	});
 
 	const rounds: JSX.Element[] = [];
@@ -95,7 +92,7 @@ function ScoreBoard() {
 		const roundPoints = darts.reduce((acc, dart) => acc + dart.totalScore, 0);
 		const shownScore = bust ? "Bust" : (darts.length ? roundPoints : "");
 		const throwCells: JSX.Element[] = [];
-		for (let i=0; i<game301.throwsPerRound; i++)
+		for (let i=0; i<3; i++)
 			throwCells.push(getThrowCell(i, darts[i]));
 		
 		const ref = currentCell ? { ref: setCurrentDiv } : { }
@@ -118,11 +115,11 @@ function ScoreBoard() {
 					{rounds}
 				</ScoreRow>
 				{players.map((player, i) => {
-					const score = scores[player.name];
-					const dartsByRound = dartsPerRound[player.name];
+					const score = scores[i];
+					const dartsByRound = dartsPerRound[player];
 
-					return <ScoreRow key={player.name} className={i === currentPlayerIndex ? "current" : ""}>
-							<ScoreCell>{player.name}</ScoreCell>
+					return <ScoreRow key={player} className={i === currentPlayerIndex ? "current" : ""}>
+							<ScoreCell>{player}</ScoreCell>
 							<ScoreCell>{score}</ScoreCell>
 							{dartsByRound.map((darts, d) => getTurnCell(darts, d, i === currentPlayerIndex && d === currentRound))}
 						</ScoreRow>

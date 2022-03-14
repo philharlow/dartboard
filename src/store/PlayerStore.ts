@@ -1,56 +1,25 @@
 import create from 'zustand'
-
-export interface Player {
-	name: string;
-	pronunciation?: string;
-};
-
-const defaultPlayers: Player[] = [
-	{
-		name: "Phil",
-	},
-	{
-		name: "Mike",
-	},
-	{
-		name: "Jay",
-	},
-	{
-		name: "Knodel",
-	},
-	{
-		name: "Josh",
-	},
-	{
-		name: "Erik",
-	},
-	{
-		name: "Jake",
-	},
-	{
-		name: "Bellina",
-	},
-];
+import { Player, defaultPlayers } from '../types/PlayerTypes';
 
 export type PlayerStore = {
-	players: Player[];
+	allPlayers: Player[];
 	addPlayer: (player: Player) => void;
 	updatePlayer: (player: Player) => void;
 	removePlayer: (player: Player) => void;
 };
 
 export const usePlayerStore = create<PlayerStore>((set, get) => ({
-	players: defaultPlayers,
+	allPlayers: defaultPlayers,
 	addPlayer: (player: Player): void =>  {
-	  const { players } = get();
-	  set({ players: [ ...players, player ] });
+	  const { allPlayers } = get();
+	  set({ allPlayers: [ ...allPlayers, player ] });
 	},
 	updatePlayer: (player: Player): void =>  {
-	  const { players } = get();
-	  set({ players: [ ...players.filter(p => p.name !== player.name), player ] });
+	  const { allPlayers } = get();
+	  set({ allPlayers: [ ...allPlayers.filter(p => p.name !== player.name), player ] });
 	},
 	removePlayer: (player: Player) => {
-		const { players } = get();
-		set({ players: players.filter(p => p.name !== player.name) });
+		const { allPlayers } = get();
+		set({ allPlayers: allPlayers.filter(p => p.name !== player.name) });
 	},
   }));

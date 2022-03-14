@@ -1,39 +1,37 @@
-import { cloneDeep } from "lodash";
-import ledManager from "../LedManager";
-import { speak } from "../store/AudioStore";
-import { DartThrow, useGameStore } from "../store/GameStore";
-import { Player } from "../store/PlayerStore";
-import { Hint, Ring } from "../types/LedTypes";
-import GameType from "./GameType";
+import _, { cloneDeep } from "lodash";
+import ledController from "../LedController";
+//import { speak } from "../../src/store/AudioStore";
+import { DartThrow, GameType } from "../../src/types/GameTypes";
+import { Hint, Ring } from "../../src/types/LedTypes";
+import { Player } from "../../src/types/PlayerTypes";
+import GameBase from "./GameBase";
+import { socketServer, speak } from "../sockerServer";
+import gameController from "../gameController";
+import { SocketEvent } from "../../src/types/SocketTypes";
 
-class Game301 extends GameType {
+class Game301 extends GameBase {
 	startingScore = 0;
-	settingsOptions = [
-		{
-			name: "Starting Score",
-			propName: "startingScore",
-			options: [ 301, 501, 601, 701, 101 ]
-		},
-	];
+	
 
 	constructor() {
 		super({
-			name: "301/501",
+			name: "301/X01",
 			minPlayers: 1,
 			maxPlayers: 8,
 			pronounciation: ("3o1"),
+			gameType: GameType.Game301,
+			settingsOptions: [
+				{
+					name: "Starting Score",
+					propName: "startingScore",
+					options: [ 301, 501, 601, 701, 101 ]
+				},
+			],
 		});
 	}
-
-	setOptions() {
-		super.setOptions();
-		this.name = "" + this.startingScore;
-	}
-
-	getScore(player: Player) {
-		const { dartThrows, } = useGameStore.getState();
-
-		const darts = dartThrows.filter(t => t.player === player.name);
+	
+	getScore(player: string, dartThrows: DartThrow[]) {
+		const darts = dartThrows.filter(t => t.player === player);
 		let score = this.startingScore;
 		//const score = darts.reduce((score, dart) => score - dart.totalScore, this.startingScore);
 		const roundDarts = darts.reduce<DartThrow[][]>((rounds, dart) => { rounds[dart.round] = [ ...rounds[dart.round] || [], dart ]; return rounds; }, []);
@@ -47,14 +45,19 @@ class Game301 extends GameType {
 
 		return score;
 	}
-	
+
+	setOptions() {
+		super.setOptions();
+		gameController.updateGameStatus({ currentGameName: "" + this.startingScore });
+	}
+
 	addDartThrow(score: number, ring: Ring) {
-		const { dartThrows, setDartThrows, waitingForThrow, currentRound, players, currentPlayerIndex, finishGame, winningPlayerIndex } = useGameStore.getState();
+		const { dartThrows, waitingForThrow, currentRound, players, currentPlayerIndex, winningPlayerIndex } = gameController.gameStatus;
 		const currentPlayer = players[currentPlayerIndex];
 		console.log("addDartThrow", score, ring, currentPlayer);
 		
-		ledManager.flashLed(score, ring);
-		if (!players.length || winningPlayerIndex !== undefined) {
+		ledController.flashLed(score, ring);
+		if (!players.length || winningPlayerIndex > -1) {
 			return;
 		}
 		if (!waitingForThrow) {
@@ -66,7 +69,7 @@ class Game301 extends GameType {
 		const multiplier = this.getMultiplier(ring);
 		const totalScore = score * multiplier;
 		const newThrow: DartThrow = {
-			player: currentPlayer.name,
+			player: currentPlayer,
 			score,
 			ring,
 			multiplier,
@@ -75,9 +78,9 @@ class Game301 extends GameType {
 			bust: false,
 		}
 		clonedDarts.push(newThrow);
-		const playerDarts = clonedDarts.filter(t => t.player === currentPlayer.name);
+		const playerDarts = clonedDarts.filter(t => t.player === currentPlayer);
 		
-		const playerScore = this.getScore(currentPlayer) - totalScore;
+		const playerScore = this.getScore(currentPlayer, dartThrows) - totalScore;
 		console.log("playerscore will be", playerScore);
 
 		const scoreMessage = ring === Ring.Miss ? " miss" : this.getSpokenScore(score, ring);
@@ -87,37 +90,39 @@ class Game301 extends GameType {
 		if (playerScore < 0) {
 			newThrow.bust = true;
 			newThrow.totalScore = 0;
-			// Mark all darts this round as busts
-			//playerDarts.filter((d => d.round === currentRound)).forEach(dart => this.bustDart(dart));
 			speak("Bust!!", true);
 			this.roundEnded();
 		// Winner!
 		} else if (playerScore === 0) {
-			speak("Well done!. " + currentPlayer.name + " wins!");
-			finishGame(currentPlayerIndex);
-			ledManager.animSolidWipe();
+			speak("Well done!. " + currentPlayer + " wins!");
+			this.finishGame(currentPlayerIndex);
+			ledController.animSolidWipe();
 		// Thrown 3 darts
 		} else if (playerDarts.filter((d => d.round === currentRound)).length === this.throwsPerRound)
 			this.roundEnded();
 
 
-		setDartThrows(clonedDarts);
+		socketServer.emit(SocketEvent.ADD_DART_THROW, newThrow);
+		gameController.gameStatus.dartThrows.push(newThrow);
+		//setDartThrows(clonedDarts);
 		this.updateHints();
+		this.updateScores();
 	};
 
 	waitingForThrowSet() {
 		super.waitingForThrowSet();
-		ledManager.animWipe();
+		ledController.animWipe();
 	}
 
 	async updateHints() {
 		const {
 			players,
 			currentPlayerIndex,
-		} = useGameStore.getState();
+			dartThrows,
+		} = gameController.gameStatus;
 
 		const currentPlayer = players[currentPlayerIndex];
-		const score = this.getScore(currentPlayer);
+		const score = this.getScore(currentPlayer, dartThrows);
 
 		const hints: Hint[] = [];
 		if (score <= 60) {
@@ -138,7 +143,7 @@ class Game301 extends GameType {
 			}
 			//console.log("hints", score, hints)
 		}
-		ledManager.setHints(hints);
+		ledController.setHints(hints);
 	}
 
 	getSpokenScore(score: number, ring: Ring) {

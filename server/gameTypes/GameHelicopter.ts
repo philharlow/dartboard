@@ -1,10 +1,13 @@
 import { cloneDeep, fill } from "lodash";
-import ledManager, { scoreOrder } from "../LedManager";
-import { speak } from "../store/AudioStore";
-import { DartThrow, useGameStore } from "../store/GameStore";
-import { Player } from "../store/PlayerStore";
-import { Ring } from "../types/LedTypes";
-import GameType, { FinalPlace } from "./GameType";
+import ledController from "../LedController";
+//import { speak } from "../../src/store/AudioStore";
+import { DartThrow, FinalPlace, GameType } from "../../src/types/GameTypes";
+import { Ring, scoreOrder } from "../../src/types/LedTypes";
+import { Player } from "../../src/types/PlayerTypes";
+import GameBase from "./GameBase";
+import { socketServer, speak } from "../sockerServer";
+import gameController from "../gameController";
+import { SocketEvent } from "../../src/types/SocketTypes";
 
 
 enum Difficulty {
@@ -13,35 +16,44 @@ enum Difficulty {
 	Hard = "Hard",
 }
 
-class GameHelicopter extends GameType {
+class GameHelicopter extends GameBase {
 	throwsPerRound = 3;
 	numBlades = 4;
 	difficulty = Difficulty.Easy;
 	tickInterval?: NodeJS.Timer;
 	
-	settingsOptions = [
-		{
-			name: "Difficulty",
-			propName: "difficulty",
-			options: [ Difficulty.Easy, Difficulty.Medium, Difficulty.Hard ]
-		},
-	];
 
 	constructor() {
 		super({
 			name: "Helicopter",
 			minPlayers: 1,
 			maxPlayers: 8,
+			gameType: GameType.GameHelicopter,
+			settingsOptions: [
+				{
+					name: "Difficulty",
+					propName: "difficulty",
+					options: [ Difficulty.Easy, Difficulty.Medium, Difficulty.Hard ]
+				},
+			],
 		});
 	}
 
-	gameSelected() {
-		ledManager.animQuadSpin();
+	getScore(player: string, dartThrows: DartThrow[]) {
+		const darts = dartThrows.filter(t => t.player === player);
+		const score = darts.reduce((acc, dart) => acc + dart.totalScore, 0);
+
+		return score;
+	}
+
+	starting() {
+		console.log("helicopter starting");
+		ledController.animQuadSpin();
 	}
 
 	setOptions() {
 		super.setOptions();
-		this.name = this.gameDef.name + " - " + this.difficulty;
+		gameController.updateGameStatus({ currentGameName: this.gameDef.name + " - " + this.difficulty });
 	}
 
 	getSpeed() {
@@ -50,18 +62,9 @@ class GameHelicopter extends GameType {
 		return 1;
 	}
 
-	getScore(player: Player): number {
-		const { dartThrows, } = useGameStore.getState();
-
-		const darts = dartThrows.filter(t => t.player === player.name);
-		const score = darts.reduce((acc, dart) => acc + dart.totalScore, 0);
-
-		return score;
-	}
-
 	waitingForThrowSet() {
 		super.waitingForThrowSet();
-		const { waitingForThrow } = useGameStore.getState(); 
+		const { waitingForThrow } = gameController.gameStatus; 
 
 		if (this.tickInterval) {
 			clearInterval(this.tickInterval);
@@ -78,12 +81,12 @@ class GameHelicopter extends GameType {
 
 	paused = 0;
 	addDartThrow(score: number, ring: Ring) {
-		const { dartThrows, setDartThrows, waitingForThrow, currentRound, players, currentPlayerIndex, finishGame, winningPlayerIndex } = useGameStore.getState();
+		const { dartThrows, waitingForThrow, currentRound, players, currentPlayerIndex, winningPlayerIndex } = gameController.gameStatus;
 		const currentPlayer = players[currentPlayerIndex];
 		//console.log("addDartThrow", score, ring, player);
 		
-		ledManager.flashLed(score, ring);
-		if (!players.length || winningPlayerIndex !== undefined) {
+		ledController.flashLed(score, ring);
+		if (!players.length || winningPlayerIndex > -1) {
 			return;
 		}
 		if (!waitingForThrow) {
@@ -102,7 +105,7 @@ class GameHelicopter extends GameType {
 
 		const clonedDarts = cloneDeep(dartThrows);
 		const newThrow: DartThrow = {
-			player: currentPlayer.name,
+			player: currentPlayer,
 			score,
 			ring: hit ? ring : Ring.Miss,
 			multiplier: hitScore,
@@ -113,31 +116,34 @@ class GameHelicopter extends GameType {
 		}
 		clonedDarts.push(newThrow);
 		
-		const playerDarts = clonedDarts.filter(t => t.player === currentPlayer.name);
-		const playerScore = this.getScore(currentPlayer) + hitScore;
+		const playerDarts = clonedDarts.filter(t => t.player === currentPlayer);
+		const playerScore = this.getScore(currentPlayer, dartThrows) + hitScore;
 		console.log("playerscore will be", playerScore);
 
 		const scoreMessage = hit ? "hit!" : "miss";
 		speak(scoreMessage, true);
 
 		if (playerScore === this.numBlades) {
-			speak("Well done!. " + currentPlayer.name + " wins!");
-			finishGame(currentPlayerIndex);
-			ledManager.animSolidWipe();
+			speak("Well done!. " + currentPlayer + " wins!");
+			this.finishGame(currentPlayerIndex);
+			ledController.animSolidWipe();
 		// Thrown 3 darts
 		} else if (playerDarts.filter((d => d.round === currentRound)).length === this.throwsPerRound)
 			this.roundEnded();
 
-		setDartThrows(clonedDarts);
+		socketServer.emit(SocketEvent.ADD_DART_THROW, newThrow);
+		gameController.gameStatus.dartThrows.push(newThrow);
+		//setDartThrows(clonedDarts);
 		this.draw();
+		this.updateScores();
 	}
 
 	updateScores() {
-		const { dartThrows, players, currentPlayerIndex } = useGameStore.getState();
+		const { dartThrows, players, currentPlayerIndex } = gameController.gameStatus;
 		const currentPlayer = players[currentPlayerIndex];
 		
 		const bladesExist = fill(Array(this.numBlades), true);
-		const playerDarts = dartThrows.filter(t => t.player === currentPlayer.name);
+		const playerDarts = dartThrows.filter(t => t.player === currentPlayer);
 		playerDarts.forEach(dart => {
 			if (dart.extra !== undefined)
 				bladesExist[dart.extra] = false;
@@ -162,19 +168,19 @@ class GameHelicopter extends GameType {
 
 		this.draw();
 
-		ledManager.dispatchUpdate();
+		ledController.dispatchUpdate();
 	}
 
 	draw = () => {
-		ledManager.setAllOn(false, false); // Clear board
+		ledController.setAllOn(false, false); // Clear board
 		
 		this.blades.forEach((blade, i) => {
 			if (blade === undefined) return;
 			const score = scoreOrder[blade%20];
-			ledManager.setScoreOn(score, true, false);
+			ledController.setScoreOn(score, true, false);
 		});
 
-		ledManager.dispatchUpdate();
+		ledController.dispatchUpdate();
 	}
 
 	playersSet() {
@@ -182,8 +188,12 @@ class GameHelicopter extends GameType {
 	}
 
 	getFinalScores(): FinalPlace[] {
-		const { players, } = useGameStore.getState();
-		const places: FinalPlace[] = players.map((player, i) => ({player, place: i, score: this.getScore(player) || 0})).sort((a, b) => b.score - a.score);
+		const { players, dartThrows } = gameController.gameStatus;
+		const places: FinalPlace[] = players.map((player, i) => ({
+			playerName: player,
+			place: i,
+			score: this.getScore(player, dartThrows) || 0
+		})).sort((a, b) => b.score - a.score);
 		let lastScore = places[0].score;
 		let currentPlace = 1;
 		places.forEach(playerScore => {

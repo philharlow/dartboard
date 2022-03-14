@@ -1,7 +1,10 @@
 import styled from '@emotion/styled/macro';
 import { Button } from '@mui/material';
 import { useState } from 'react';
+import { emit } from '../SocketInterface';
 import { useGameStore } from '../store/GameStore';
+import { FinalPlace } from '../types/GameTypes';
+import { SocketEvent } from '../types/SocketTypes';
 
 const BlurBackground = styled.div`
 	position: absolute;
@@ -70,10 +73,14 @@ const getPrettyPlace = (place: number) => {
 function WinnerDisplay() {
 	const [ hidden, setHidden ] = useState(false);
 	const selectGame = useGameStore(store => store.selectGame);
-	const currentGame = useGameStore(store => store.currentGame);
+	const currentGame = useGameStore(store => store.gameList?.[store.currentGameType]);
 	const players = useGameStore(store => store.players);
 	const winningPlayerIndex = useGameStore(store => store.winningPlayerIndex);
-	const finalScores = currentGame!.getFinalScores();
+	const finalScores: FinalPlace[] = [];// currentGame!.getFinalScores();
+
+	const undoLastDart = () => {
+		emit(SocketEvent.UNDO_LAST_DART, true);
+	}
 	
 	if (hidden)
 		return null;
@@ -86,7 +93,7 @@ function WinnerDisplay() {
 					🏆
 				</Icon>
 				<Title>
-					{players[winningPlayerIndex!].name} Wins!
+					{players[winningPlayerIndex!]} Wins!
 				</Title>
 				<FinalScoresTable>
 					<tbody>
@@ -94,7 +101,7 @@ function WinnerDisplay() {
 							{finalScores.map((place, i) => <th key={i}>{getPrettyPlace(place.place)}</th>)}
 						</tr>
 						<tr>
-							{finalScores.map((place, i) => <th key={i}>{place.player.name}</th>)}
+							{finalScores.map((place, i) => <th key={i}>{place.playerName}</th>)}
 						</tr>
 						<tr>
 							{finalScores.map((place, i) => <th key={i}>{place.score}</th>)}
@@ -102,13 +109,13 @@ function WinnerDisplay() {
 					</tbody>
 				</FinalScoresTable>
 				<ButtonRow>
-					<Button variant='contained' onClick={() => currentGame?.undoLastDart()}>
+					<Button variant='contained' onClick={() => undoLastDart()}>
 						Undo
 					</Button>
 					<Button variant='contained' onClick={() => selectGame(undefined)}>
 						Change Game
 					</Button>
-					<Button variant='contained' onClick={() => selectGame(currentGame)}>
+					<Button variant='contained' onClick={() => selectGame(currentGame?.gameType)}>
 						Replay Game
 					</Button>
 				</ButtonRow>

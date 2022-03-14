@@ -29,7 +29,7 @@ const BoldCell = styled(ScoreCell)`
 function SmallScoreBoard() {
 	const players = useGameStore(store => store.players);
 	const currentPlayerIndex = useGameStore(store => store.currentPlayerIndex);
-	const currentGame = useGameStore(store => store.currentGame);
+	const scores = useGameStore(store => store.scores);
 	const [ currentDiv, setCurrentDiv ] = useState<HTMLDivElement | null>(null);
 
 	useEffect(() => {
@@ -48,10 +48,10 @@ function SmallScoreBoard() {
 					<BoldCell>Score</BoldCell>
 				</ScoreRow>
 				{players.map((player, i) => {
-					const score = currentGame?.getScore(player);
+					const score = scores[i];
 
-					return <ScoreRow key={player.name} className={i === currentPlayerIndex ? "current" : ""} ref={i === currentPlayerIndex ? setCurrentDiv : null}>
-							<ScoreCell>{player.name}</ScoreCell>
+					return <ScoreRow key={player} className={i === currentPlayerIndex ? "current" : ""} ref={i === currentPlayerIndex ? setCurrentDiv : null}>
+							<ScoreCell>{player}</ScoreCell>
 							<ScoreCell>{score}</ScoreCell>
 						</ScoreRow>
 				})}

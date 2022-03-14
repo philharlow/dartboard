@@ -6,10 +6,10 @@ import BackButton from '../BackButton';
 import ScoreBoard from './ScoreBoard';
 import TurnBoard from './TurnBoard';
 import WinnerDisplay from '../WinnerDisplay';
-import GameType, { addDartThrow } from '../../gameTypes/GameType';
-import Game301 from '../../gameTypes/Game301';
-import GameBaseball from '../../gameTypes/GameBaseball';
 import BaseballBoard from './BaseballBoard';
+import { GameType } from '../../types/GameTypes';
+import { emit, sendDartThrow } from '../../SocketInterface';
+import { SocketEvent } from '../../types/SocketTypes';
 
 const RootDiv = styled.div`
 	display: flex;
@@ -63,36 +63,41 @@ const ScoreboardWrapper = styled.div`
 `;
 
 const getScoreBoard = (game?: GameType) => {
-	if (game instanceof GameBaseball) return BaseballBoard;
-	if (game instanceof Game301) return ScoreBoard;
+	if (game === GameType.GameBaseball) return BaseballBoard;
+	if (game === GameType.Game301) return ScoreBoard;
 	return ScoreBoard;
 }
 const getTurnBoard = (game?: GameType) => {
-	if (game instanceof Game301) return TurnBoard;
+	if (game === GameType.Game301) return TurnBoard;
 	return TurnBoard;
 }
 
 function GameBoard() {
-  const currentGame = useGameStore(store => store.currentGame);
+	const currentGame = useGameStore(store => store.gameList?.[store.currentGameType]);
   const selectGame = useGameStore(store => store.selectGame);
   const dartThrows = useGameStore(store => store.dartThrows);
+  const currentGameName = useGameStore(store => store.currentGameName);
   const waitingForThrow = useGameStore(store => store.waitingForThrow);
   const winningPlayerIndex = useGameStore(store => store.winningPlayerIndex);
 
   const addMiss = () => {
-    addDartThrow(0, Ring.Miss);
+    sendDartThrow(0, Ring.Miss);
+  }
+  const undoLastDart = () => {
+	emit(SocketEvent.UNDO_LAST_DART, true);
+  }
+  const nextPlayer = () => {
+	emit(SocketEvent.NEXT_PLAYER, true);
   }
 
-  const ScoreBoard = getScoreBoard(currentGame);
-  const TurnBoard = getTurnBoard(currentGame);
+  const ScoreBoard = getScoreBoard(currentGame?.gameType);
+  const TurnBoard = getTurnBoard(currentGame?.gameType);
   return (
     <RootDiv>
-		<GameTypeDisplay>{ currentGame?.name }</GameTypeDisplay>
+		<GameTypeDisplay>{ currentGameName ?? currentGame?.name }</GameTypeDisplay>
 		<ContentRow>
 			<ScoreboardWrapper>
-				<div>
-					<ScoreBoard />
-				</div>
+				<ScoreBoard />
 			</ScoreboardWrapper>
 			<TurnBoard />
 		</ContentRow>
@@ -100,12 +105,12 @@ function GameBoard() {
 			<UndoButton
 				disabled={dartThrows.length % 3 === 0 && waitingForThrow}
 				variant="contained"
-				onClick={() => currentGame?.undoLastDart()}
+				onClick={() => undoLastDart()}
 			>
 				Undo
 			</UndoButton>
 			<MissButton
-				disabled={!waitingForThrow || winningPlayerIndex !== undefined}
+				disabled={!waitingForThrow || winningPlayerIndex !> -1}
 				variant="contained"
 				onClick={() => addMiss()}
 			>
@@ -114,13 +119,13 @@ function GameBoard() {
 			<NextPlayerButton
 				disabled={waitingForThrow}
 				variant="contained"
-				onClick={() => currentGame?.nextPlayer()}
+				onClick={() => nextPlayer()}
 			>
 				Next Player
 			</NextPlayerButton>
 		</ButtonRow>
-		<BackButton onClick={() => selectGame(undefined)} />
-      	{winningPlayerIndex !== undefined && <WinnerDisplay />}
+		<BackButton onClick={() => window.confirm("Are you sure you want to exit?") && selectGame(undefined)} />
+      	{winningPlayerIndex > -1 && <WinnerDisplay />}
     </RootDiv>
   );
 }

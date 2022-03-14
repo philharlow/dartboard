@@ -1,93 +1,73 @@
 import create from 'zustand'
-import GameType, { SelectedSetting } from '../gameTypes/GameType';
-import { Ring } from '../types/LedTypes';
-import { Player } from './PlayerStore';
+import { emit, socket } from '../SocketInterface';
+import { DartThrow, GameDefinition, GameStatus, GameType, SelectedSetting } from '../types/GameTypes';
+import { SocketEvent } from '../types/SocketTypes';
 
-export interface GameDefinition {
-	name: string;
-	minPlayers: number;
-	maxPlayers: number;
-	pronounciation?: string;
-}
-
-export interface DartThrow {
-	player: string;
-	score: number;
-	multiplier: number;
-	totalScore: number;
-	ring: Ring;
-	round: number;
-	bust: boolean;
-	extra?: number;
-}
-
-export type GameStore = {
-	currentGame?: GameType;
-	players: Player[];
-	dartThrows: DartThrow[];
-	currentRound: number;
-	waitingForThrow: boolean;
-	currentPlayerIndex: number;
-	winningPlayerIndex?: number;
-	selectedSettings?: SelectedSetting[];
+export type GameStore = GameStatus & {
+	gameList?: GameDefinition[];
+	selectGame: (gameType?: GameType) => void;
 	setDartThrows: (dartThrows: DartThrow[]) => void;
 	setCurrentRound: (round: number) => void;
 	setWaitingForThrow: (waitingForThrow: boolean) => void;
-	setPlayers: (players: Player[]) => void;
-	selectGame: (gameType?: GameType) => void;
+	setPlayers: (players: string[]) => void;
 	setCurrentPlayerIndex: (currentPlayerIndex: number) => void;
 	finishGame: (winningPlayerIndex: number) => void;
-	setWinningPlayerIndex: (winningPlayerIndex?: number) => void;
-	setSelectedSettings: (selectedSettings?: SelectedSetting[]) => void;
+	setWinningPlayerIndex: (winningPlayerIndex: number) => void;
+	setSelectedSettings: (selectedSettings: SelectedSetting[]) => void;
+	fetchGameList: () => void;
+};
+
+const setViaSocket = (change: Partial<GameStore>) => {
+	socket?.emit(SocketEvent.UPDATE_GAME_STATUS, change);
 };
 
 export const useGameStore = create<GameStore>((set, get) => ({
+	currentGameType: GameType.None,
 	players: [],
+	scores: [],
 	dartThrows: [],
 	currentRound: 0,
 	waitingForThrow: false,
 	currentPlayerIndex: 0,
+	winningPlayerIndex: -1,
+	selectGame: (game?: GameType) => {
+		//currentGame?.cleanup();
+		emit(SocketEvent.START_GAME, game);
+	},
 	setWaitingForThrow: (waitingForThrow: boolean) => {
-		const { currentGame } = get();
-		set({ waitingForThrow });
-		currentGame?.waitingForThrowSet();
+		setViaSocket({ waitingForThrow });
+		//currentGame?.waitingForThrowSet();
 	},
 	setDartThrows: (dartThrows: DartThrow[]) => {
-		set({ dartThrows });
+		setViaSocket({ dartThrows });
 	},
 	setCurrentRound: (currentRound: number) => {
-		set({ currentRound });
+		setViaSocket({ currentRound });
 	},
-	setPlayers: (players: Player[]) => {
-		const { currentGame } = get();
-		set({ players });
-		currentGame?.playersSet();
+	setSelectedSettings: (selectedSettings: SelectedSetting[]) => {
+		emit(SocketEvent.SET_SETTINGS, selectedSettings);
+		//currentGame?.setOptions();
 	},
-	selectGame: (game?: GameType) => {
-		const { currentGame } = get();
-		currentGame?.cleanup();
-		set({ currentGame: game,
-			players: [],
-			dartThrows: [],
-			currentPlayerIndex: 0,
-			currentRound: 0,
-			winningPlayerIndex: undefined,
-			selectedSettings: undefined,
-		});
-		game?.gameSelected();
+	setPlayers: (players: string[]) => {
+		emit(SocketEvent.SET_PLAYERS, players);
+		//currentGame?.playersSet();
 	},
 	setCurrentPlayerIndex: (currentPlayerIndex: number) => {
-		set({ currentPlayerIndex });
+		setViaSocket({ currentPlayerIndex });
 	},
 	finishGame: (winningPlayerIndex: number) => {
-		set({ winningPlayerIndex, waitingForThrow: false });
+		setViaSocket({ winningPlayerIndex, waitingForThrow: false });
 	},
-	setWinningPlayerIndex: (winningPlayerIndex?: number) => {
-		set({ winningPlayerIndex });
+	setWinningPlayerIndex: (winningPlayerIndex: number) => {
+		setViaSocket({ winningPlayerIndex });
 	},
-	setSelectedSettings: (selectedSettings?: SelectedSetting[]) => {
-		set({ selectedSettings });
-		const { currentGame } = get();
-		currentGame?.setOptions();
+	
+	fetchGameList: async () => {
+		set({ gameList: [] });
+		const resp = await fetch(document.location.protocol + '//' + document.location.hostname + ":4000/gameList");
+		const gameList = await resp.json();
+		if (gameList)
+			set({ gameList });
+		console.log("got gameList", gameList);
 	},
   }));

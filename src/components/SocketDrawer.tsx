@@ -2,7 +2,7 @@ import styled from '@emotion/styled/macro';
 import Drawer, { DrawerPosition } from './Drawer';
 import { Button, Switch } from '@mui/material';
 import { useConnectionStore } from '../store/ConnectionStore';
-import { connectSocket, writeToSocket } from '../SocketInterface';
+import { connectSocket } from '../SocketInterface';
 
 
 const Title = styled.div`
@@ -33,13 +33,8 @@ function SocketDrawer() {
 				/>
 			<br />
 			<br />
-			<Button variant='contained' onClick={() => connectSocket()}>
+			<Button disabled={socketConnected} variant='contained' onClick={() => connectSocket()}>
 				Connect
-			</Button>
-			<br />
-			<br />
-			<Button disabled={!socketConnected} variant='contained' onClick={() => writeToSocket("leds", ["yay!"])}>
-				Send something
 			</Button>
 		</Drawer>
 	);

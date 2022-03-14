@@ -1,19 +1,22 @@
 import styled from '@emotion/styled/macro';
 import { useEffect, useState } from 'react';
-import GameBaseball, { Base, getBaseName } from '../../gameTypes/GameBaseball';
-import { DartThrow, useGameStore } from '../../store/GameStore';
+import { useGameStore } from '../../store/GameStore';
+import { playSound } from '../../tools/AudioTools';
+import { Base, DartThrow } from '../../types/GameTypes';
 import SmallScoreBoard from './SmallScoreBoard';
 
 const BaseballRoot = styled.div`
 	display: flex;
 	flex-direction: row;
 	align-items: center;
+	flex-grow: 1;
 `;
 const Field = styled.div`
 	background: green;
 	width: 300px;
 	height: 300px;
 	position: relative;
+	overflow: hidden;
 `;
 const Infield = styled.div`
 	background: #cc7d06b5;
@@ -65,32 +68,31 @@ const RunnerDiv = styled(FirstBase)`
 	border-radius: 10px;
 	width: 20px;
 	height: 20px;
-	transition: left 1000ms ease-in-out, bottom 1000ms ease-in-out;
-	&.home {
-		left: 50%;
-		bottom: 20%;
-	}
-	&.first {
-		left: 80%;
-		bottom: 50%;
-	}
-	&.second {
-		left: 50%;
-		bottom: 80%;
-	}
-	&.third {
-		left: 20%;
-		bottom: 50%;
-	}
-	&.dugout {
-		left: 60%;
-		bottom: -10%;
-	}
+	transition: left 500ms ease-in-out, bottom 500ms ease-in-out;
+    text-align: center;
+    line-height: 18px;
 `;
 
-interface Runner {
-	base: Base;
-	index: number;
+const getPos = (base: Base, offset: number): { left: string, bottom: string } => {
+	// Dugout
+	let pos = { left: 60 + offset, bottom: 0 };
+	if (base === Base.AtBat) pos = { left: 50, bottom: 20 };
+	if (base === Base.Home) pos = { left: 50, bottom: 20 };
+	if (base === Base.First) pos = { left: 80, bottom: 50 };
+	if (base === Base.Second) pos = { left: 50, bottom: 80 };
+	if (base === Base.Third) pos = { left: 20, bottom: 50 };
+	if (base >= Base.Dugout) pos = { left: 40 - offset, bottom: 0 };
+	return {
+		left: pos.left + "%",
+		bottom: pos.bottom + "%",
+	};
+}
+
+const initialBases: Base[] = [];
+for (let i=0; i<3; i++) initialBases.push(Base.OnDeck);
+
+const prettyBase = (base: Base) => {
+	return Base[base];
 }
 
 function BaseballBoard() {
@@ -98,38 +100,66 @@ function BaseballBoard() {
 	const players = useGameStore(store => store.players);
 	const currentPlayerIndex = useGameStore(store => store.currentPlayerIndex);
 	const currentRound = useGameStore(store => store.currentRound);
-	const currentGame = useGameStore(store => store.currentGame);
-	const gameBaseball = currentGame as GameBaseball;
 	const currentPlayer = players[currentPlayerIndex];
 
 
 	const [ roundDarts, setRoundDarts ] = useState<DartThrow[]>([]);
-	const [ runners, setRunners ] = useState<Runner[]>([]);
+	const [ runnerSnapshots, setRunnerSnapshots ] = useState<number[][]>([]);
+	const [ snapshotIndex, setSnapshotIndex ] = useState(0);
 
 	useEffect(() => {
-		console.log("new dartThrows");
-		setRoundDarts(dartThrows.filter(({ player, round }) => player === currentPlayer.name && round === currentRound));
-	}, [currentPlayer.name, currentRound, dartThrows]);
+		//console.log("new dartThrows");
+		setRoundDarts(dartThrows.filter(({ player, round }) => player === currentPlayer && round === currentRound));
 
+		if (dartThrows.slice(-1)?.[0]?.totalScore)
+			playSound("sounds/baseball.mp3", 0.5);
+		
+	}, [currentPlayer, currentRound, dartThrows]);
+	
 	useEffect(() => {
-		console.log("new round darts");
-		const newRunners: Runner[] = [];
-		for (let i=0; i < roundDarts.length; i++) {
-			const dart = roundDarts[i];
-			if (dart.totalScore) {
-				// Advance runners
-				newRunners.forEach((runner) => runner.base += dart.totalScore);
-				const runner: Runner = {
-					base: dart.totalScore,
-					index: i,
-				};
-				newRunners.push(runner);
+		if (snapshotIndex + 1 < runnerSnapshots.length)
+			setTimeout(() => {
+				setSnapshotIndex(snapshotIndex + 1);
+			}, 500);
+	}, [runnerSnapshots, snapshotIndex]);
+
+	
+	useEffect(() => {
+		
+		const snapShots: number[][] = [];
+		const totalPos = [-1, -1, -1];
+		snapShots.push([ ...totalPos ]);
+		for (let i=0; i<3; i++) {
+			const roundScore = roundDarts[i]?.totalScore;
+			if (roundScore === 0)
+				totalPos[i] = -2;
+			else {
+				if (i <= roundDarts.length) {
+					totalPos[i] += 1;
+					snapShots.push([ ...totalPos ]);
+				}
+				for (let r = 0; r < roundScore; r++) {
+					for (let y=0; y<=i; y++)
+						if (totalPos[y] >= -1 && totalPos[y] < Base.Dugout) {
+							totalPos[y] += 1;
+					}
+					snapShots.push([ ...totalPos ]);
+				}
+			}
+			for (let x=0; x<=i; x++) {
+				if (totalPos[x] === Base.Home) {
+					totalPos[x] += 1;
+					snapShots.push([ ...totalPos ]);
+				}
 			}
 		}
-		//newRunners.((runner) => runner.base >= Base.Dugout);
-		setRunners(newRunners);
-		
-	}, [roundDarts]);
+		// console.log("snapShots", snapShots.map(t => t.map(prettyBase).join(",")));
+		setRunnerSnapshots(snapShots);
+		setSnapshotIndex(Math.min(snapshotIndex, snapShots.length - 1));
+
+	}, [roundDarts, snapshotIndex]);
+
+	const currentBases = runnerSnapshots[snapshotIndex] || [];
 
 	return (
 		<BaseballRoot>
@@ -142,7 +172,12 @@ function BaseballBoard() {
 				<FirstBase />
 				<SecondBase />
 				<ThirdBase />
-				{runners.map((runner, i) => <RunnerDiv key={runner.index} className={getBaseName(runner.base)} />)}
+				{currentBases.map((base, i) => <RunnerDiv
+					key={i}
+					style={getPos(base, i * 10)}
+				>
+					{i + 1}
+				</RunnerDiv>)}
 			</Field>
 		</BaseballRoot>
 	);

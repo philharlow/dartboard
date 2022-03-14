@@ -1,10 +1,14 @@
 import styled from '@emotion/styled/macro';
-import { gameList } from '../gameTypes/GamesList';
+import { useEffect } from 'react';
+import { useConnectionStore } from '../store/ConnectionStore';
 import { useGameStore } from '../store/GameStore';
 
 const StartScreenDiv = styled.div`
     height: 100%;
 	width: 100%;
+    display: flex;
+    align-items: center;
+    place-content: center;
 `;
 
 const Slider = styled.div`
@@ -47,21 +51,36 @@ const Players = styled.div`
 
 
 function GameSelectionScreen() {
-	const selectGame = useGameStore(store =>store.selectGame);
+	const selectGame = useGameStore(store => store.selectGame);
+	const gameList = useGameStore(store => store.gameList);
+	const fetchGameList = useGameStore(store => store.fetchGameList);
+	const socketConnected = useConnectionStore(store => store.socketConnected);
+
+	useEffect(() => {
+		if (socketConnected && gameList === undefined) {
+			fetchGameList();
+		}
+	}, [fetchGameList, gameList, socketConnected]);
+
+	if (!gameList || !gameList.length) {
+		return <StartScreenDiv>
+			<div>Loading...</div>
+		</StartScreenDiv>
+	}
 
 	return (
 		<StartScreenDiv>
 			<Slider>
-				{gameList.map(currentGame =>
+				{gameList?.map(gameDef =>
 					<GameButton
-						key={currentGame.gameDef.name}
-						onClick={() => selectGame(currentGame)}
+						key={gameDef.name}
+						onClick={() => selectGame(gameDef.gameType)}
 						>
 							<Title>
-								{currentGame.gameDef.name}
+								{gameDef.name}
 							</Title>
 							<Players>
-								{currentGame.gameDef.minPlayers} - {currentGame.gameDef.maxPlayers} players
+								{gameDef.minPlayers} - {gameDef.maxPlayers} players
 							</Players>
 					</GameButton>)
 				}

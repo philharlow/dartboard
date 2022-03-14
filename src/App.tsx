@@ -18,7 +18,7 @@ const AppDiv = styled.div`
 `;
 
 function App() {
-  const currentGame = useGameStore(store => store.currentGame);
+	const currentGame = useGameStore(store => store.gameList?.[store.currentGameType]);
   const players = useGameStore(store => store.players);
   const selectedSettings = useGameStore(store => store.selectedSettings);
   console.log("app redraw");
@@ -26,7 +26,7 @@ function App() {
   let content: JSX.Element | undefined;
 
   if (!currentGame) content = <GameSelectionScreen />
-  else if (currentGame.settingsOptions.length && !selectedSettings) content = <SettingsSelectionScreen />
+  else if (!selectedSettings || !selectedSettings.length) content = <SettingsSelectionScreen />
   else if (!players.length) content = <PlayerSelectionScreen />
   else content = <GameBoard />
 
@@ -35,8 +35,8 @@ function App() {
     
 			<SocketDrawer />
 			<AudioDrawer />
-			<DartboardDrawer />
 			<ThrowsDrawer />
+			<DartboardDrawer />
   </AppDiv>;
 }
 

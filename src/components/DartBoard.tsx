@@ -3,7 +3,8 @@ import styled from '@emotion/styled/macro';
 import { useEffect, useState } from 'react';
 import { Led, Ring } from '../types/LedTypes';
 import { useLedStore } from '../store/LedStore';
-import { addDartThrow, parseDartCode } from '../gameTypes/GameType';
+import { parseDartCode } from '../types/GameTypes';
+import { sendDartThrow } from '../SocketInterface';
 
 const DartboardDiv = styled.div`
 	display: flex;
@@ -47,7 +48,7 @@ function DartBoard() {
 			const id = e.target.id;
 			// console.log("clicked", id)
 			const { ring, score } = parseDartCode(id);
-			addDartThrow(score, ring);
+			sendDartThrow(score, ring);
 		}
 	};
 

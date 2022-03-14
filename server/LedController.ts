@@ -1,22 +1,6 @@
 import { cloneDeep } from "lodash";
-import { useLedStore } from "./store/LedStore";
-import { Hint, Led, Ring } from "./types/LedTypes";
-
-export const scoreOrder = [20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5];
-const growOrder = [Ring.InnerBullseye, Ring.OuterBullseye, Ring.InnerSingle, Ring.Triple, Ring.OuterSingle, Ring.Double];
-
-export const countOns = (arr: Led[]) => arr.reduce((a, v) => (v.on ? a + 1 : a), 0);
-
-const initialLeds: Led[] = [];
-const on = false;
-for (let i=1; i<=20; i++) {
-	initialLeds.push({ring: Ring.InnerSingle, score: i, on});
-	initialLeds.push({ring: Ring.OuterSingle, score: i, on});
-	initialLeds.push({ring: Ring.Double, score: i, on});
-	initialLeds.push({ring: Ring.Triple, score: i, on});
-}
-initialLeds.push({ring: Ring.InnerBullseye, score: 25, on});
-initialLeds.push({ring: Ring.OuterBullseye, score: 25, on});
+import { Hint, Led, Ring, initialLeds, getLedsAsInts, scoreOrder, growOrder } from "../src/types/LedTypes";
+import { emit } from "./sockerServer";
 
 interface PendingFlash {
 	timeout: NodeJS.Timeout;
@@ -24,10 +8,22 @@ interface PendingFlash {
 	ring: Ring;
 }
 
-class LedManager {
-	leds: Led[] = initialLeds;
+
+export const countOns = (arr: Led[]) => arr.reduce((a, v) => (v.on ? a + 1 : a), 0);
+
+class LedController {
+	leds: Led[] = cloneDeep(initialLeds);
 	pendingFlashes: PendingFlash[] = [];
 	hints: Hint[] = [];
+	needsDispatch = false;
+
+	loop = () => {
+		if (this.needsDispatch) {
+			this.sendToSocket();
+			this.needsDispatch = false;
+		}
+	}
+	loopInterval = setInterval(this.loop, 1000 / 50);
 
 	setAllOn(on: boolean, dispatch: boolean = true): boolean {
 		let changed = false;
@@ -55,6 +51,7 @@ class LedManager {
 			this.setSingleLedOnLater(score, ring, true, i * 2 * duration);
 			this.setSingleLedOnLater(score, ring, false, (i * 2 + 1) * duration);
 		}
+		this.setSingleLedOnLater(score, ring, this.hints.find(h => h.score === score && h.ring === ring) !== undefined, (flashes * 2 + 2) * duration);
 	};
 
 	setHints = (hints: Hint[], dispatch: boolean = true) => {
@@ -122,10 +119,15 @@ class LedManager {
 	};
 
 	dispatchUpdate = () => {
-		const clone = cloneDeep(this.leds);
-		useLedStore.getState().setLeds(clone);
+		this.needsDispatch = true;
 	}
 
+	sendToSocket() {
+		const leds = cloneDeep(this.leds);
+		const ints = getLedsAsInts(leds);
+
+		emit("leds", ints);
+	}
 
 	// Animations
 	
@@ -192,6 +194,6 @@ class LedManager {
 }
 
 
-const ledManager = new LedManager();
+const ledController = new LedController();
 
-export default ledManager;
+export default ledController;

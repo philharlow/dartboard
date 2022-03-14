@@ -1,9 +1,0 @@
-{
-  "watch": ["server.js"],
-  "exec": "npm run start-server",
-  "ext": "ts, js",
-  "delay": "0",
-  "execMap": {
-    "ts": "ts-node"
-  }
-}

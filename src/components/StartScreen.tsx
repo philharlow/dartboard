@@ -1,5 +1,5 @@
 import styled from '@emotion/styled/macro';
-import { connectSerial } from '../SerialInterface';
+import { connectSocket } from '../SocketInterface';
 import AudioDrawer from './AudioDrawer';
 import SocketDrawer from './SocketDrawer';
 
@@ -33,7 +33,7 @@ const Title = styled.div`
 function GameSelectionScreen() {
 	return (
 		<StartScreenDiv>
-			<StartButton onClick={() => connectSerial()} >
+			<StartButton onClick={() => connectSocket()} >
 				<Title>
 					Start
 				</Title>

@@ -2,7 +2,7 @@ import styled from '@emotion/styled/macro';
 import { Button } from '@mui/material';
 import { useState } from 'react';
 import { useGameStore } from '../store/GameStore';
-import { Player, usePlayerStore } from '../store/PlayerStore';
+import { usePlayerStore } from '../store/PlayerStore';
 import BackButton from './BackButton';
 
 const RootDiv = styled.div`
@@ -62,39 +62,40 @@ const PlayerNumber = styled.div`
 
 
 function PlayerSelectionScreen() {
-	const currentGame = useGameStore(store =>store.currentGame);
-	const selectGame = useGameStore(store =>store.selectGame);
-	const setPlayers = useGameStore(store =>store.setPlayers);
-	const players = usePlayerStore(store =>store.players);
-	const [ selectedPlayers, setSelectedPlayers ] = useState<Player[]>([]);
-	const togglePlayer = (player: Player) => {
+	const currentGame = useGameStore(store => store.gameList?.[store.currentGameType]);
+	const currentGameName = useGameStore(store => store.currentGameName);
+	const selectGame = useGameStore(store => store.selectGame);
+	const setPlayers = useGameStore(store => store.setPlayers);
+	const allPlayers = usePlayerStore(store => store.allPlayers);
+	const [ selectedPlayers, setSelectedPlayers ] = useState<string[]>([]);
+	const togglePlayer = (player: string) => {
 		if (selectedPlayers.includes(player))
-			setSelectedPlayers(selectedPlayers.filter(p => p.name !== player.name));
+			setSelectedPlayers(selectedPlayers.filter(p => p !== player));
 		else
 			setSelectedPlayers([ ...selectedPlayers, player ]);
 	};
 
-	const validNumPlayers = currentGame && selectedPlayers.length >= currentGame.gameDef.minPlayers && selectedPlayers.length <= currentGame.gameDef.maxPlayers;
+	const validNumPlayers = currentGame && selectedPlayers.length >= currentGame.minPlayers && selectedPlayers.length <= currentGame.maxPlayers;
 
 
 	return (
 		<RootDiv>
 			<GameTitle>
-				{currentGame?.name}
+				{currentGameName || currentGame?.name}
 				<GamePlayers>
-					{currentGame?.gameDef.minPlayers} - {currentGame?.gameDef.maxPlayers} players
+					{currentGame?.minPlayers} - {currentGame?.maxPlayers} players
 				</GamePlayers>
 			</GameTitle>
 			<Slider>
-				{players.map((player) => (
+				{allPlayers.map((player) => (
 					<PlayerButton
 						key={player.name}
-						onClick={() => togglePlayer(player)}
-						className={selectedPlayers.includes(player) ? "selected" : ""}
+						onClick={() => togglePlayer(player.name)}
+						className={selectedPlayers.includes(player.name) ? "selected" : ""}
 						>
-							{selectedPlayers.includes(player) && (
+							{selectedPlayers.includes(player.name) && (
 								<PlayerNumber>
-									# {selectedPlayers.indexOf(player) + 1}
+									# {selectedPlayers.indexOf(player.name) + 1}
 								</PlayerNumber>
 							)}
 							{player.name}

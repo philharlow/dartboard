@@ -7,7 +7,6 @@ const DrawerRoot = styled.div`
 	background: #18181899;
 	transition: transform 500ms ease-in-out;
 	padding: 10px;
-	padding-bottom: 15px;
 	border-radius: 10px;
     box-shadow: 0 0 10px #0004;
 	&.right {
