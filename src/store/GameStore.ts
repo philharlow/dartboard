@@ -35,7 +35,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
 		emit(SocketEvent.START_GAME, game);
 	},
 	setWaitingForThrow: (waitingForThrow: boolean) => {
-		setViaSocket({ waitingForThrow });
+		emit(SocketEvent.SET_WAITING_FOR_THROW, waitingForThrow);
+		//setViaSocket({ waitingForThrow });
 		//currentGame?.waitingForThrowSet();
 	},
 	setDartThrows: (dartThrows: DartThrow[]) => {

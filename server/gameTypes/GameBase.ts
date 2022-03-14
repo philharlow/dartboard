@@ -102,6 +102,7 @@ class GameBase {
 			waitingForThrow: true,
 			winningPlayerIndex: -1,
 		})
+		this.waitingForThrowSet();
 		speak("Undone", true);
 		this.updateHints();
 		this.updateScores();
@@ -121,6 +122,7 @@ class GameBase {
 			currentPlayerIndex: nextPlayerIndex,
 			waitingForThrow: true,
 		});
+		this.waitingForThrowSet();
 		speak("alright, " + nextPlayer + "'s turn!");
 		this.updateHints();
 	}

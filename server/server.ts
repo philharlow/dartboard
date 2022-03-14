@@ -45,7 +45,7 @@ app.get('/gameStatus', (req, res) => {
 
   
 server.listen(port, () => {
-    console.log('listening on *:3001');
+    console.log('listening on *:' + port);
     console.log("Type to send dart commands");
 
     lineReader.addListener("line", (line) => {

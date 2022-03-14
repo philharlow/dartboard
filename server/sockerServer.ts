@@ -47,6 +47,10 @@ export class SocketServer {
 			socket.on(SocketEvent.UNDO_LAST_DART, () => {
 				gameController.undoLastDart();
 			});
+			socket.on(SocketEvent.SET_WAITING_FOR_THROW, (waitingForThrow: boolean) => {
+				gameController.updateGameStatus({ waitingForThrow });
+				gameController.currentGame?.waitingForThrowSet();
+			});
 			socket.on(SocketEvent.UPDATE_GAME_STATUS, (changes: Partial<GameStatus>) => {
 				console.log(SocketEvent.UPDATE_GAME_STATUS, changes);
 				this.io.emit(SocketEvent.UPDATE_GAME_STATUS, changes);

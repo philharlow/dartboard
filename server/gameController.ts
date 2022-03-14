@@ -1,7 +1,6 @@
 import { cloneDeep } from 'lodash';
 import { DartThrow, GameStatus, GameType, SelectedSetting } from '../src/types/GameTypes';
 import { Ring } from '../src/types/LedTypes';
-import { Player } from '../src/types/PlayerTypes';
 import { SocketEvent } from '../src/types/SocketTypes';
 import GameBase from './gameTypes/GameBase';
 import { gameList } from './gameTypes/GamesList';
@@ -49,6 +48,7 @@ class GameController {
         console.log('setPlayers:', players);
         this.updateGameStatus({ players, waitingForThrow: true });
         this.currentGame?.playersSet();
+        this.currentGame?.waitingForThrowSet();
     }
 
     addDartThrow(score: number, ring: Ring) {

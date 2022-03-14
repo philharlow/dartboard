@@ -64,11 +64,30 @@ class GameHelicopter extends GameBase {
 
 	waitingForThrowSet() {
 		super.waitingForThrowSet();
-		const { waitingForThrow } = gameController.gameStatus; 
+		
+		const { dartThrows, players, currentPlayerIndex } = gameController.gameStatus;
+		const currentPlayer = players[currentPlayerIndex];
+		
+		const bladesExist = fill(Array(this.numBlades), true);
+		const playerDarts = dartThrows.filter(t => t.player === currentPlayer);
+		playerDarts.forEach(dart => {
+			if (dart.extra !== undefined)
+				bladesExist[dart.extra] = false;
+		})
 
+		const offset = Math.floor(Math.random() * 20);
+		const spacing = Math.floor(20 / this.numBlades);
+		this.blades = bladesExist.map((exists, i) => exists ? (offset + i * spacing) % 20 : undefined);
+		console.log("waitingForThrowSet() blades", currentPlayer, this.blades, playerDarts)
+
+		this.updateTick();
+	}
+
+	updateTick() {
+		const { waitingForThrow } = gameController.gameStatus;
+		
 		if (this.tickInterval) {
-			clearInterval(this.tickInterval);
-			this.tickInterval = undefined;
+			return;
 		}
 
 		if (waitingForThrow) {
@@ -138,27 +157,10 @@ class GameHelicopter extends GameBase {
 		this.updateScores();
 	}
 
-	updateScores() {
-		const { dartThrows, players, currentPlayerIndex } = gameController.gameStatus;
-		const currentPlayer = players[currentPlayerIndex];
-		
-		const bladesExist = fill(Array(this.numBlades), true);
-		const playerDarts = dartThrows.filter(t => t.player === currentPlayer);
-		playerDarts.forEach(dart => {
-			if (dart.extra !== undefined)
-				bladesExist[dart.extra] = false;
-		})
-
-		const offset = Math.floor(Math.random() * 20);
-		const spacing = Math.floor(20 / this.numBlades);
-		this.blades = bladesExist.map((exists, i) => exists ? (offset + i * spacing) % 20 : undefined);
-		// console.log("updateScores() blades", currentPlayer, this.blades, playerDarts)
-	}
-
 	blades: (number | undefined)[] = [];
 
 	tick = () => {
-		console.log("tick");
+		// console.log("tick");
 		if (this.paused) return this.paused--;
 		
 		this.blades.forEach((blade, i) => {
@@ -183,8 +185,19 @@ class GameHelicopter extends GameBase {
 		ledController.dispatchUpdate();
 	}
 
-	playersSet() {
-		super.playersSet();
+	roundEnded() {
+		super.roundEnded();
+
+		this.clearTick();
+	}
+
+	clearTick() {
+		console.log("clear tick")
+		if (this.tickInterval) {
+			clearInterval(this.tickInterval);
+			this.tickInterval = undefined;
+			ledController.setAllOn(false);
+		}
 	}
 
 	getFinalScores(): FinalPlace[] {
