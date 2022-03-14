@@ -1,11 +1,11 @@
 import { cloneDeep } from 'lodash';
 import { DartThrow, GameStatus, GameType, SelectedSetting } from '../src/types/GameTypes';
-import { Ring } from '../src/types/ledTypes';
+import { Ring } from '../src/types/LedTypes';
 import { Player } from '../src/types/PlayerTypes';
 import { SocketEvent } from '../src/types/SocketTypes';
 import GameBase from './gameTypes/GameBase';
 import { gameList } from './gameTypes/GamesList';
-import ledController from './ledController';
+import ledController from './LedController';
 import { socketServer } from './sockerServer';
 
 console.log("gameController init")
