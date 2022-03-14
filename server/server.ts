@@ -26,6 +26,8 @@ let user = "world";
 
 app.use(cors());
 
+app.use('/', express.static('../build'))
+
 app.get('/', (req, res) => {
     res.send('Hello ' + user);
     //res.sendFile(__dirname + '/index.html');
