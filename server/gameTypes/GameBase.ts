@@ -34,6 +34,7 @@ class GameBase {
 
 	exiting() {
 		console.log(this.gameDef.name + " : exitting");
+		ledController.animShrink();
 	}
 
 	setOptions() {
@@ -91,7 +92,7 @@ class GameBase {
 	
 	getMultiplier(ring: Ring) {
 		if (ring === Ring.Triple) return 3;
-		if (ring === Ring.Double || ring === Ring.InnerBullseye) return 2;
+		if (ring === Ring.Double || ring === Ring.DoubleBullseye) return 2;
 		return 1;
 	}
 	
@@ -160,10 +161,6 @@ class GameBase {
 			playerScore.place = currentPlace;
 		});
 		return places;
-	}
-
-	cleanup() {
-		ledController.animShrink();
 	}
 
 }

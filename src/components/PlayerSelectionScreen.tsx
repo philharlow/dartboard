@@ -62,7 +62,7 @@ const PlayerNumber = styled.div`
 
 
 function PlayerSelectionScreen() {
-	const currentGame = useGameStore(store => store.gameList?.[store.currentGameType]);
+	const currentGame = useGameStore(store => store.gameList?.find(game => game.gameType === store.currentGameType));
 	const currentGameName = useGameStore(store => store.currentGameName);
 	const selectGame = useGameStore(store => store.selectGame);
 	const setPlayers = useGameStore(store => store.setPlayers);
@@ -87,7 +87,7 @@ function PlayerSelectionScreen() {
 				</GamePlayers>
 			</GameTitle>
 			<Slider>
-				{allPlayers.map((player) => (
+				{allPlayers?.map((player) => (
 					<PlayerButton
 						key={player.name}
 						onClick={() => togglePlayer(player.name)}

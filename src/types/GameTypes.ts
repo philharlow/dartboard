@@ -1,12 +1,12 @@
 import { getRingFromChar, Ring } from "./LedTypes";
 
 export enum GameType {
-	None = -1,
-	Game301,
-	GameBaseball,
-	GameCricket,
-	GameGolf,
-	GameHelicopter,
+	None = "",
+	Game301 = "301",
+	GameBaseball = "baseball",
+	GameCricket = "cricket",
+	GameGolf = "golf",
+	GameHelicopter = "helicopter",
 }
 
 
@@ -21,6 +21,7 @@ export interface GameStatus {
 	currentPlayerIndex: number;
 	winningPlayerIndex: number;
 	selectedSettings?: SelectedSetting[];
+	calibrated: boolean[];
 }
 
 export interface GameDefinition {
@@ -65,7 +66,7 @@ export const parseDartCode = (code: string) => {
 	if (ring === Ring.Miss || score === 0)
 		return { score: 0, ring: Ring.Miss }
 	if (score === 25)
-		return { ring: ring === Ring.InnerSingle ? Ring.OuterBullseye : Ring.InnerBullseye, score: 25 };
+		return { ring: ring === Ring.InnerSingle ? Ring.OuterBullseye : Ring.DoubleBullseye, score: 25 };
 	return { ring, score };
 }
 

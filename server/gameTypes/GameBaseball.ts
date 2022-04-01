@@ -78,7 +78,7 @@ class GameBaseball extends GameBase {
 	addDartThrow(score: number, ring: Ring) {
 		const { dartThrows, waitingForThrow, currentRound, players, currentPlayerIndex, winningPlayerIndex } = gameController.gameStatus;
 		const currentPlayer = players[currentPlayerIndex];
-		console.log("addDartThrow", score, ring, currentPlayer);
+		// console.log("addDartThrow", score, ring, currentPlayer);
 		
 		ledController.flashLed(score, ring);
 		if (!players.length || winningPlayerIndex > -1) {
@@ -115,7 +115,7 @@ class GameBaseball extends GameBase {
 		
 
 		const playerScore = this.getScore(currentPlayer, dartThrows) + multiplier;
-		console.log("playerscore will be", playerScore);
+		// console.log("playerscore will be", playerScore);
 
 		const scoreMessage = hit ? this.getSpokenScore(score, ring) : "miss";
 		speak(scoreMessage, true);
@@ -159,7 +159,7 @@ class GameBaseball extends GameBase {
 			hints.push({ score, ring: Ring.Triple });
 		});
 		if (roundDarts.length === 2) {
-			hints.push({ score: 25, ring: Ring.InnerBullseye });
+			hints.push({ score: 25, ring: Ring.DoubleBullseye });
 			hints.push({ score: 25, ring: Ring.OuterBullseye });
 		}
 		ledController.setHints(hints);
@@ -171,7 +171,7 @@ class GameBaseball extends GameBase {
 	}
 
 	getSpokenScore(score: number, ring: Ring) {
-		if (ring === Ring.InnerBullseye || ring === Ring.OuterBullseye) return "homerun";
+		if (ring === Ring.DoubleBullseye || ring === Ring.OuterBullseye) return "homerun";
 		if (ring === Ring.Triple) return "triple";
 		if (ring === Ring.Double) return "double";
 		return "single";

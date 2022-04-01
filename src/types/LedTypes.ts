@@ -2,7 +2,7 @@ import { cloneDeep } from "lodash";
 
 
 export enum Ring {
-	InnerBullseye,
+	DoubleBullseye,
 	OuterBullseye,
 	InnerSingle,
 	Triple,
@@ -17,6 +17,14 @@ export interface Led {
 	on: boolean;
 }
 
+export type LedsObj = {
+	[key: string]: Led;
+};
+
+export type CalibrationMap = {
+	[key: string]: string;
+};
+
 export interface Hint {
 	ring: Ring;
 	score: number;
@@ -24,7 +32,7 @@ export interface Hint {
 
 export const getCharFromRing = (ring: Ring) => {
 	if (ring === Ring.Triple) return "t";
-	if (ring === Ring.Double || ring === Ring.InnerBullseye) return "d";
+	if (ring === Ring.Double || ring === Ring.DoubleBullseye) return "d";
 	if (ring === Ring.OuterSingle) return "o";
 	return "s";
 };
@@ -37,57 +45,73 @@ export const getRingFromChar = (char: string) => {
 	return Ring.InnerSingle;
 }
 
-export const getLedsAsInts = (leds: Led[]) => {
-	const innerBullseye = leds.find(led => led.ring === Ring.InnerBullseye);
-	const outerBullseye = leds.find(led => led.ring === Ring.OuterBullseye);
-	const bullseyes = ((innerBullseye?.on ? 1 : 0) << 0) + ((outerBullseye?.on ? 1 : 0) << 1);
+export const getLedsAsInts = (ledsObj: LedsObj) => {
+	const doubleBullseye = ledsObj["d25"];
+	const outerBullseye = ledsObj["s25"];
+	const bullseyes = ((doubleBullseye?.on ? 1 : 0) << 0) + ((outerBullseye?.on ? 1 : 0) << 1);
 	const ints = [
-		getRingAsInt(leds, Ring.Double),
-		getRingAsInt(leds, Ring.OuterSingle),
-		getRingAsInt(leds, Ring.Triple),
-		getRingAsInt(leds, Ring.InnerSingle),
+		getRingAsInt(ledsObj, Ring.Double),
+		getRingAsInt(ledsObj, Ring.OuterSingle),
+		getRingAsInt(ledsObj, Ring.Triple),
+		getRingAsInt(ledsObj, Ring.InnerSingle),
 		bullseyes
 	];
 	return ints;
 }
 
-export const getRingAsInt = (leds: Led[], ring: Ring) => {
-	return leds.filter(led => led.ring === ring).reduce((acc, led, i) => acc + ((led.on ? 1 : 0) << i) , 0);
+export const getRingAsInt = (ledsObj: LedsObj, ring: Ring) => {
+	let acc = 0;
+	for (let i=0; i< 20; i++)
+		if (ledsObj[getLedKey(i + 1, ring)]?.on) // keys start at 1
+			acc += 1 << i;
+	return acc;
+	// return leds.filter(led => led.ring === ring).reduce((acc, led, i) => acc + ((led.on ? 1 : 0) << i) , 0);
 }
 
 // TODO: optimize this!
 export const getLedsFromInts = (ints: number[]) => {
-	const leds = cloneDeep(initialLeds);
-	setRingFromInt(leds, Ring.Double, ints[0]);
-	setRingFromInt(leds, Ring.OuterSingle, ints[1]);
-	setRingFromInt(leds, Ring.Triple, ints[2]);
-	setRingFromInt(leds, Ring.InnerSingle, ints[3]);
+	const ledsObj = cloneDeep(initialLedsObj);
+	setRingFromInt(ledsObj, Ring.Double, ints[0]);
+	setRingFromInt(ledsObj, Ring.OuterSingle, ints[1]);
+	setRingFromInt(ledsObj, Ring.Triple, ints[2]);
+	setRingFromInt(ledsObj, Ring.InnerSingle, ints[3]);
+
 	const bullseyes = ints[4];
-	const innerBullseye = leds.find(led => led.ring === Ring.InnerBullseye);
-	if (innerBullseye) innerBullseye.on = ((bullseyes >> 0) & 1) === 1;
-	const outerBullseye = leds.find(led => led.ring === Ring.OuterBullseye);
-	if (outerBullseye) outerBullseye.on = ((bullseyes >> 1) & 1) === 1;
-	return leds;
+	const doubleBullseye = ledsObj[getLedKey(25, Ring.DoubleBullseye)];
+	doubleBullseye.on = ((bullseyes >> 0) & 1) === 1;
+	const outerBullseye = ledsObj[getLedKey(25, Ring.OuterBullseye)];
+	outerBullseye.on = ((bullseyes >> 1) & 1) === 1;
+
+	return ledsObj;
 }
 
-export const setRingFromInt = (leds: Led[], ring: Ring, int: number) =>{
+export const setRingFromInt = (ledsObj: LedsObj, ring: Ring, int: number) =>{
 	for (let i=0; i< 20; i++) {
-		const led = leds.find(led => led.ring === ring && led.score === i + 1);
+		const led = ledsObj[getLedKey(i + 1, ring)]; // keys start at 1
 		if (led)
 			led.on = ((int >> i) & 1) === 1;
 	}
 }
 
 export const scoreOrder = [20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5];
-export const growOrder = [Ring.InnerBullseye, Ring.OuterBullseye, Ring.InnerSingle, Ring.Triple, Ring.OuterSingle, Ring.Double];
+export const wedgeOrder = [20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5];
+export const growOrder = [Ring.DoubleBullseye, Ring.OuterBullseye, Ring.InnerSingle, Ring.Triple, Ring.OuterSingle, Ring.Double];
 
-export const initialLeds: Led[] = [];
-const on = false;
-for (let i=1; i<=20; i++) {
-	initialLeds.push({ring: Ring.InnerSingle, score: i, on});
-	initialLeds.push({ring: Ring.OuterSingle, score: i, on});
-	initialLeds.push({ring: Ring.Double, score: i, on});
-	initialLeds.push({ring: Ring.Triple, score: i, on});
+export const getLedKey = (score: number, ring: Ring) => {
+	if (ring === Ring.Triple) return "t" + score;
+	if (ring === Ring.Double || ring === Ring.DoubleBullseye) return "d" + score;
+	if (ring === Ring.OuterSingle) return "o" + score;
+	return "s" + score;
 }
-initialLeds.push({ring: Ring.InnerBullseye, score: 25, on});
-initialLeds.push({ring: Ring.OuterBullseye, score: 25, on});
+
+export const initialLedsObj: LedsObj = {};
+const initialOn = false;
+const addLed = (score: number, ring: Ring, on: boolean) => initialLedsObj[getLedKey(score, ring)] = { score, ring, on };
+for (let i=1; i<=20; i++) {
+	addLed(i, Ring.InnerSingle, initialOn);
+	addLed(i, Ring.OuterSingle, initialOn);
+	addLed(i, Ring.Double, initialOn);
+	addLed(i, Ring.Triple, initialOn);
+}
+addLed(25, Ring.DoubleBullseye, initialOn);
+addLed(25, Ring.OuterBullseye, initialOn);

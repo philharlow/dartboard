@@ -54,7 +54,7 @@ class Game301 extends GameBase {
 	addDartThrow(score: number, ring: Ring) {
 		const { dartThrows, waitingForThrow, currentRound, players, currentPlayerIndex, winningPlayerIndex } = gameController.gameStatus;
 		const currentPlayer = players[currentPlayerIndex];
-		console.log("addDartThrow", score, ring, currentPlayer);
+		// console.log("addDartThrow", score, ring, currentPlayer);
 		
 		ledController.flashLed(score, ring);
 		if (!players.length || winningPlayerIndex > -1) {
@@ -81,7 +81,7 @@ class Game301 extends GameBase {
 		const playerDarts = clonedDarts.filter(t => t.player === currentPlayer);
 		
 		const playerScore = this.getScore(currentPlayer, dartThrows) - totalScore;
-		console.log("playerscore will be", playerScore);
+		// console.log("playerscore will be", playerScore);
 
 		const scoreMessage = ring === Ring.Miss ? " miss" : this.getSpokenScore(score, ring);
 		speak(scoreMessage, true);
@@ -114,22 +114,23 @@ class Game301 extends GameBase {
 		ledController.animWipe();
 	}
 
-	async updateHints() {
+	updateHints() {
 		const {
 			players,
 			currentPlayerIndex,
 			dartThrows,
+			waitingForThrow,
 		} = gameController.gameStatus;
 
 		const currentPlayer = players[currentPlayerIndex];
 		const score = this.getScore(currentPlayer, dartThrows);
 
 		const hints: Hint[] = [];
-		if (score <= 60) {
+		if (waitingForThrow && score <= 60) {
 			if (score === 25)
 				hints.push({score: 25, ring: Ring.OuterBullseye });
 			if (score === 50)
-				hints.push({score: 25, ring: Ring.InnerBullseye });
+				hints.push({score: 25, ring: Ring.DoubleBullseye });
 
 			for (let i=1; i<=20; i++) {
 				if (i === score) {
@@ -141,8 +142,8 @@ class Game301 extends GameBase {
 				if (i * 3 === score)
 					hints.push({score: i, ring: Ring.Triple });
 			}
-			//console.log("hints", score, hints)
 		}
+		//console.log("hints", score, hints)
 		ledController.setHints(hints);
 	}
 
@@ -150,13 +151,13 @@ class Game301 extends GameBase {
 		if (ring === Ring.Miss) return "miss";
 		if (ring === Ring.Triple) return "triple " + score;
 		const scoreStr = score === 25 ? "bullseye" : ""+score;
-		if (ring === Ring.Double || ring === Ring.InnerBullseye) return "double " + scoreStr;
+		if (ring === Ring.Double || ring === Ring.DoubleBullseye) return "double " + scoreStr;
 		return scoreStr;
 	}
 	
 	getMultiplier(ring: Ring) {
 		if (ring === Ring.Triple) return 3;
-		if (ring === Ring.Double || ring === Ring.InnerBullseye) return 2;
+		if (ring === Ring.Double || ring === Ring.DoubleBullseye) return 2;
 		return 1;
 	}
 }

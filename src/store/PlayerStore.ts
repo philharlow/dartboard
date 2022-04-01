@@ -1,25 +1,35 @@
 import create from 'zustand'
-import { Player, defaultPlayers } from '../types/PlayerTypes';
+import { serverFetch } from '../tools/ClientUtils';
+import { Player } from '../types/PlayerTypes';
 
 export type PlayerStore = {
-	allPlayers: Player[];
+	allPlayers?: Player[];
 	addPlayer: (player: Player) => void;
 	updatePlayer: (player: Player) => void;
 	removePlayer: (player: Player) => void;
+	fetchAllPlayers: () => void;
 };
 
 export const usePlayerStore = create<PlayerStore>((set, get) => ({
-	allPlayers: defaultPlayers,
 	addPlayer: (player: Player): void =>  {
 	  const { allPlayers } = get();
-	  set({ allPlayers: [ ...allPlayers, player ] });
+	  if (allPlayers)
+		  set({ allPlayers: [ ...allPlayers, player ] });
 	},
 	updatePlayer: (player: Player): void =>  {
 	  const { allPlayers } = get();
-	  set({ allPlayers: [ ...allPlayers.filter(p => p.name !== player.name), player ] });
+	  if (allPlayers)
+		  set({ allPlayers: [ ...allPlayers.filter(p => p.name !== player.name), player ] });
 	},
 	removePlayer: (player: Player) => {
 		const { allPlayers } = get();
-		set({ allPlayers: allPlayers.filter(p => p.name !== player.name) });
+		if(allPlayers)
+			set({ allPlayers: allPlayers.filter(p => p.name !== player.name) });
 	},
+	fetchAllPlayers: async () => {
+		const allPlayers = await serverFetch("allPlayers");
+		console.log("got allPlayers", allPlayers);
+		if (allPlayers)
+			set({ allPlayers });
+	}
   }));

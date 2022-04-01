@@ -1,6 +1,4 @@
 import styled from '@emotion/styled/macro';
-import { useEffect } from 'react';
-import { useConnectionStore } from '../store/ConnectionStore';
 import { useGameStore } from '../store/GameStore';
 
 const StartScreenDiv = styled.div`
@@ -53,20 +51,6 @@ const Players = styled.div`
 function GameSelectionScreen() {
 	const selectGame = useGameStore(store => store.selectGame);
 	const gameList = useGameStore(store => store.gameList);
-	const fetchGameList = useGameStore(store => store.fetchGameList);
-	const socketConnected = useConnectionStore(store => store.socketConnected);
-
-	useEffect(() => {
-		if (socketConnected && gameList === undefined) {
-			fetchGameList();
-		}
-	}, [fetchGameList, gameList, socketConnected]);
-
-	if (!gameList || !gameList.length) {
-		return <StartScreenDiv>
-			<div>Loading...</div>
-		</StartScreenDiv>
-	}
 
 	return (
 		<StartScreenDiv>

@@ -58,7 +58,7 @@ const Grow = styled.div`
 `;
 
 function SettingsSelectionScreen() {
-	const currentGame = useGameStore(store => store.gameList?.[store.currentGameType]);
+	const currentGame = useGameStore(store => store.gameList?.find(game => game.gameType === store.currentGameType));
 	const selectGame = useGameStore(store => store.selectGame);
 	const setSelectedSettings = useGameStore(store => store.setSelectedSettings);
 

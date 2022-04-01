@@ -73,7 +73,7 @@ const getTurnBoard = (game?: GameType) => {
 }
 
 function GameBoard() {
-	const currentGame = useGameStore(store => store.gameList?.[store.currentGameType]);
+	const currentGame = useGameStore(store => store.gameList?.find(game => game.gameType === store.currentGameType));
   const selectGame = useGameStore(store => store.selectGame);
   const dartThrows = useGameStore(store => store.dartThrows);
   const currentGameName = useGameStore(store => store.currentGameName);

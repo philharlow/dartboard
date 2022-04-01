@@ -73,7 +73,7 @@ const getPrettyPlace = (place: number) => {
 function WinnerDisplay() {
 	const [ hidden, setHidden ] = useState(false);
 	const selectGame = useGameStore(store => store.selectGame);
-	const currentGame = useGameStore(store => store.gameList?.[store.currentGameType]);
+	const currentGame = useGameStore(store => store.gameList?.find(game => game.gameType === store.currentGameType));
 	const players = useGameStore(store => store.players);
 	const winningPlayerIndex = useGameStore(store => store.winningPlayerIndex);
 	const finalScores: FinalPlace[] = [];// currentGame!.getFinalScores();

@@ -6,12 +6,14 @@ import { getCharFromRing, getLedsFromInts, Ring } from "./types/LedTypes";
 import { useGameStore } from "./store/GameStore";
 import { SocketEvent } from "./types/SocketTypes";
 import { speak } from "./store/AudioStore";
+import { serverFetch } from "./tools/ClientUtils";
+import { playSound } from "./tools/AudioTools";
 
 export let socket: Socket | undefined;
 
 
 export const connectSocket = async () => {
-  socket = io(":4000");
+  socket = io(":80");
 
   socket.on("connect", () => {
     console.log("WS connected!");
@@ -26,24 +28,28 @@ export const connectSocket = async () => {
     useConnectionStore.setState({ socketConnected: false });
   })
   
-  socket.on("leds", (msg) => {
+  socket.on(SocketEvent.UPDATE_LEDS, (msg) => {
     const cloned = getLedsFromInts(msg);
-    useLedStore.setState({ leds: cloned });
+    useLedStore.setState({ ledsObj: cloned });
   })
   
   socket.on(SocketEvent.UPDATE_GAME_STATUS, (changes: Partial<GameStatus>) => {
-    console.log("handling UPDATE_GAME_STATUS", changes);
+    //console.log("handling UPDATE_GAME_STATUS", changes);
     useGameStore.setState( changes as any );
   })
   
   socket.on(SocketEvent.ADD_DART_THROW, (newThrow: DartThrow) => {
-    console.log("handling ADD_DART_THROW", newThrow);
+    //console.log("handling ADD_DART_THROW", newThrow);
     const { dartThrows } = useGameStore.getState();
     useGameStore.setState( { dartThrows: [ ...dartThrows, newThrow ] } );
   })
   
+  socket.on(SocketEvent.SET_CALIBRATION_STEP, () => {
+    playSound("sounds/beep-xylo.mp3");
+  })
+  
   socket.on(SocketEvent.SPEAK, ({ message, immediate }) => {
-    console.log("handling SPEAK", message, immediate);
+    //console.log("handling SPEAK", message, immediate);
     speak(message, immediate);
   })
 };
@@ -52,13 +58,12 @@ export const sendDartThrow = (score: number, ring: Ring) => {
   socket?.emit(SocketEvent.ADD_DART_THROW, getCharFromRing(ring) + score);
 }
 
-export const emit = (topic: string, data: any) => {
+export const emit = (topic: SocketEvent, data: any) => {
   socket?.emit(topic, data);
 }
 
 export const fetchFreshState = async () => {
-		const resp = await fetch(document.location.protocol + '//' + document.location.hostname + ":4000/gameStatus");
-		const gameStatus = await resp.json();
+		const gameStatus = await serverFetch("gameStatus");
 		console.log("got gameStatus", gameStatus);
 		if (gameStatus)
 			useGameStore.setState( gameStatus );

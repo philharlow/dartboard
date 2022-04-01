@@ -1,7 +1,7 @@
 import { ReactComponent as DartboardSVG } from '../dartboard.svg';
 import styled from '@emotion/styled/macro';
-import { useEffect, useState } from 'react';
-import { Led, Ring } from '../types/LedTypes';
+import { useEffect, useRef, useState } from 'react';
+import { getLedKey, initialLedsObj, LedsObj, Ring } from '../types/LedTypes';
 import { useLedStore } from '../store/LedStore';
 import { parseDartCode } from '../types/GameTypes';
 import { sendDartThrow } from '../SocketInterface';
@@ -16,27 +16,22 @@ const DartboardDiv = styled.div`
 const ScaledDartboard = styled(DartboardSVG)`
 	//max-height: 100%;
 `;
-const getElementPrefix = (score: number, ring: Ring) => {
-	if (ring === Ring.Triple) return "t" + score;
-	if (ring === Ring.Double || ring === Ring.InnerBullseye) return "d" + score;
-	if (ring === Ring.OuterSingle) return "o" + score;
-	return "s" + score;
-};
 
-const getSVGElement = (id: string): SVGElement | undefined => {
-	const element = document.querySelector(id);
+const getSVGElement = (id: string, parent?: HTMLElement): SVGElement | undefined => {
+	const element = (parent ?? document).querySelector(id);
 	if (element instanceof SVGElement)
 		return element;
 };
 
 
 function DartBoard() {
-	const leds = useLedStore(store => store.leds);
-	const [ lastLeds, setLastLeds ] = useState<Led[]>(leds);
+	const ledsObj = useLedStore(store => store.ledsObj);
+	const [ lastLeds, setLastLeds ] = useState<LedsObj>(initialLedsObj);
+	const ref = useRef() as React.MutableRefObject<HTMLDivElement>;
 
 	const illuminateElement = (on: boolean, score: number, ring: Ring, className = "illuminated") => {
-		const elementName = getElementPrefix(score, ring)
-		const element = getSVGElement("#" + elementName);
+		const elementName = getLedKey(score, ring)
+		const element = getSVGElement("#" + elementName, ref.current);
 		if (element) {
 			if (on) element.classList.add(className);
 			else element.classList.remove(className);
@@ -54,19 +49,20 @@ function DartBoard() {
 
 	useEffect(() => {
 		let changed = false;
-		for (const led of leds) {
-			const lastLed = lastLeds.find(l => l.ring === led.ring && l.score === led.score);
+		Object.keys(ledsObj).forEach(ledKey => {
+			const led = ledsObj[ledKey];
+			const lastLed = lastLeds[ledKey];
 			if (led.on !== (lastLed?.on ?? false)) {
 				illuminateElement(led.on, led.score, led.ring);
 				changed = true;
 			}
-		}
+		});
 		if (changed)
-			setLastLeds(leds);
-	}, [lastLeds, leds]);
+			setLastLeds(ledsObj);
+	}, [lastLeds, ledsObj]);
 
   return (
-    <DartboardDiv>
+    <DartboardDiv ref={ref}>
 		<ScaledDartboard onMouseDown={handleClick} />
     </DartboardDiv>
   );

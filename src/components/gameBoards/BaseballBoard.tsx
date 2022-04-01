@@ -88,12 +88,10 @@ const getPos = (base: Base, offset: number): { left: string, bottom: string } =>
 	};
 }
 
+
 const initialBases: Base[] = [];
 for (let i=0; i<3; i++) initialBases.push(Base.OnDeck);
 
-const prettyBase = (base: Base) => {
-	return Base[base];
-}
 
 function BaseballBoard() {
 	const dartThrows = useGameStore(store => store.dartThrows);

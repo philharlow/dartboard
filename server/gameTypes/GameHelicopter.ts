@@ -51,14 +51,20 @@ class GameHelicopter extends GameBase {
 		ledController.animQuadSpin();
 	}
 
+	exiting() {
+		super.exiting();
+
+		this.clearTick();
+	}
+
 	setOptions() {
 		super.setOptions();
 		gameController.updateGameStatus({ currentGameName: this.gameDef.name + " - " + this.difficulty });
 	}
 
 	getSpeed() {
-		if (this.difficulty === Difficulty.Hard) return 10;
-		if (this.difficulty === Difficulty.Medium) return 6;
+		if (this.difficulty === Difficulty.Hard) return 2;
+		if (this.difficulty === Difficulty.Medium) return 1.5;
 		return 1;
 	}
 
@@ -78,7 +84,7 @@ class GameHelicopter extends GameBase {
 		const offset = Math.floor(Math.random() * 20);
 		const spacing = Math.floor(20 / this.numBlades);
 		this.blades = bladesExist.map((exists, i) => exists ? (offset + i * spacing) % 20 : undefined);
-		console.log("waitingForThrowSet() blades", currentPlayer, this.blades, playerDarts)
+		//console.log("waitingForThrowSet() blades", currentPlayer, this.blades, playerDarts)
 
 		this.updateTick();
 	}
@@ -137,7 +143,7 @@ class GameHelicopter extends GameBase {
 		
 		const playerDarts = clonedDarts.filter(t => t.player === currentPlayer);
 		const playerScore = this.getScore(currentPlayer, dartThrows) + hitScore;
-		console.log("playerscore will be", playerScore);
+		// console.log("playerscore will be", playerScore);
 
 		const scoreMessage = hit ? "hit!" : "miss";
 		speak(scoreMessage, true);
@@ -153,7 +159,9 @@ class GameHelicopter extends GameBase {
 		socketServer.emit(SocketEvent.ADD_DART_THROW, newThrow);
 		gameController.gameStatus.dartThrows.push(newThrow);
 		//setDartThrows(clonedDarts);
-		this.draw();
+		const winner = gameController.gameStatus.winningPlayerIndex;
+		if (winner === -1)
+			this.draw();
 		this.updateScores();
 	}
 
@@ -192,7 +200,7 @@ class GameHelicopter extends GameBase {
 	}
 
 	clearTick() {
-		console.log("clear tick")
+		//console.log("clear tick")
 		if (this.tickInterval) {
 			clearInterval(this.tickInterval);
 			this.tickInterval = undefined;
@@ -217,13 +225,6 @@ class GameHelicopter extends GameBase {
 			playerScore.place = currentPlace;
 		});
 		return places;
-	}
-
-	cleanup(): void {
-		super.cleanup();
-
-		if (this.tickInterval)
-			clearInterval(this.tickInterval);
 	}
 
 }

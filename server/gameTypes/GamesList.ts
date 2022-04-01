@@ -7,10 +7,10 @@ import GameGolf from "./GameGolf";
 import GameBase from "./GameBase";
 
 
-export const gameList: GameType[] = [];
-const addGame = (game: GameBase) => gameList[game.gameDef.gameType] = game;
-addGame(new Game301());
-addGame(new GameHelicopter());
-addGame(new GameBaseball());
-addGame(new GameGolf());
-addGame(new GameCricket());
+export const gameList: GameType[] = [
+	new Game301(),
+	new GameHelicopter(),
+	new GameBaseball(),
+	new GameGolf(),
+	new GameCricket(),
+];

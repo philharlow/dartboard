@@ -1,15 +1,16 @@
+import { cloneDeep } from 'lodash';
 import create from 'zustand'
-import { Led } from '../types/LedTypes';
+import { initialLedsObj, LedsObj } from '../types/LedTypes';
 
 
 export type LedStore = {
-	leds: Led[];
-	setLeds: (leds: Led[]) => void;
+	ledsObj: LedsObj;
+	setLeds: (ledsObj: LedsObj) => void;
 };
 
 export const useLedStore = create<LedStore>((set, get) => ({
-	leds: [],
-	setLeds: (leds: Led[]) => {
-		set({ leds });
+	ledsObj: cloneDeep(initialLedsObj),
+	setLeds: (ledsObj: LedsObj) => {
+		set({ ledsObj });
 	},
   }));

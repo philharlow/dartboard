@@ -2,7 +2,7 @@ import { Server } from 'socket.io';
 import { GameStatus, GameType, parseDartCode, SelectedSetting } from '../src/types/GameTypes';
 import { SocketEvent } from '../src/types/SocketTypes';
 import gameController from './gameController';
-import { gameList } from './gameTypes/GamesList';
+import ledController from './LedController';
 
 
 export class SocketServer {
@@ -21,6 +21,7 @@ export class SocketServer {
 		this.io.on('connection', (socket) => {
 			this.connections.push(socket);
 			console.log('a user connected', this.connections.length);
+			ledController.sendToSocket();
 
 			socket.on("disconnect", (reason) => {
 				this.connections.splice(this.connections.indexOf(socket), 1);
@@ -28,7 +29,7 @@ export class SocketServer {
 
 			});
 			socket.on(SocketEvent.ADD_DART_THROW, (dart) => {
-				console.log('socket get dart:', dart);
+				//console.log('socket get dart:', dart);
 				const { score, ring } = parseDartCode(dart);
 				gameController.addDartThrow(score, ring);
 			});
@@ -46,6 +47,12 @@ export class SocketServer {
 			});
 			socket.on(SocketEvent.UNDO_LAST_DART, () => {
 				gameController.undoLastDart();
+			});
+			socket.on(SocketEvent.CLEAR_CALIBRATION, () => {
+				gameController.clearCalibration();
+			});
+			socket.on(SocketEvent.SET_CALIBRATION_STEP, () => {
+				gameController.nextCalibrationStep();
 			});
 			socket.on(SocketEvent.SET_WAITING_FOR_THROW, (waitingForThrow: boolean) => {
 				gameController.updateGameStatus({ waitingForThrow });

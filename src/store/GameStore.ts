@@ -1,5 +1,6 @@
 import create from 'zustand'
 import { emit, socket } from '../SocketInterface';
+import { serverFetch } from '../tools/ClientUtils';
 import { DartThrow, GameDefinition, GameStatus, GameType, SelectedSetting } from '../types/GameTypes';
 import { SocketEvent } from '../types/SocketTypes';
 
@@ -30,8 +31,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
 	waitingForThrow: false,
 	currentPlayerIndex: 0,
 	winningPlayerIndex: -1,
+	calibrated: [false, false],
 	selectGame: (game?: GameType) => {
-		//currentGame?.cleanup();
 		emit(SocketEvent.START_GAME, game);
 	},
 	setWaitingForThrow: (waitingForThrow: boolean) => {
@@ -65,8 +66,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 	
 	fetchGameList: async () => {
 		set({ gameList: [] });
-		const resp = await fetch(document.location.protocol + '//' + document.location.hostname + ":4000/gameList");
-		const gameList = await resp.json();
+		const gameList = await serverFetch("gameList");
 		if (gameList)
 			set({ gameList });
 		console.log("got gameList", gameList);
