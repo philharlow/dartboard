@@ -2,6 +2,7 @@ import styled from '@emotion/styled/macro';
 import { Button, MenuItem, Select } from '@mui/material';
 import { cloneDeep } from 'lodash';
 import { useState } from 'react';
+import { speak } from '../store/AudioStore';
 import { useGameStore } from '../store/GameStore';
 import { SelectedSetting } from '../types/GameTypes';
 import BackButton from './BackButton';
@@ -15,7 +16,7 @@ const RootDiv = styled.div`
     padding-left: 20px;
 `;
 const GameTitle = styled.div`
-	font-size: 26px;
+	font-size: 46px;
 	text-align: center;
 	left: 50%;
 	top: 40px;
@@ -23,24 +24,28 @@ const GameTitle = styled.div`
 	position: absolute;
 `;
 const NextButton = styled(Button)`
-	position: absolute;
-	right: 30px;
-	bottom: 50px;
+	position: fixed;
+	right: 20px;
+	bottom: 20px;
 	font-size: 26px;
-	padding: 15px 25px;
+	padding: 35px 45px;
+	font-size: 40px;
 	background: #6a6a;
 	border-radius: 10px;
 `;
 const SettingRow = styled.div`
-	font-size: 26px;
+	font-size: 46px;
+	line-height: 70px;
     display: flex;
     flex-direction: row;
 	gap: 20px;
     border: 1px solid white;
     padding: 10px;
+	background: #0d0d0d61;
 `;
 const ColoredSelect = styled(Select)`
 	min-width: 200px;
+	font-size: 46px;
 	color: #fff;
 	fieldset {
 		border-color: #fff;
@@ -68,7 +73,8 @@ function SettingsSelectionScreen() {
 		const newSelections = cloneDeep(selections);
 		const selection = newSelections.find(s => s.name === name);
 		if (selection) selection.option = option;
-		setSelections(newSelections)
+		setSelections(newSelections);
+		speak("" + option);
 	}
 
 	return (

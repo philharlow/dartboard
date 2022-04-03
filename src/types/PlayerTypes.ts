@@ -1,7 +1,7 @@
 
 export interface Player {
 	name: string;
-	pronunciation?: string;
+	pronounciation?: string;
 };
 
 export const defaultPlayers: Player[] = [
@@ -16,6 +16,7 @@ export const defaultPlayers: Player[] = [
 	},
 	{
 		name: "Knodel",
+		pronounciation: "nodel",
 	},
 	{
 		name: "Josh",
@@ -30,3 +31,8 @@ export const defaultPlayers: Player[] = [
 		name: "Bellina",
 	},
 ];
+
+export const getPronounciation = (allPlayers: Player[], name: string) => {
+	const player = allPlayers.find(p => p.name === name);
+	return player?.pronounciation || name;
+};

@@ -9,6 +9,7 @@ const ScoresTable = styled.table`
 	flex-grow: 0;
     margin: 10px;
 	height: fit-content;
+	font-size: 26px;
 `;
 const ScoreRow = styled.tr`
 	&.current {
@@ -27,23 +28,31 @@ const BoldCell = styled(ScoreCell)`
 `;
 
 const ThrowDetails = styled.div`
-	width: 70px;
+	width: 120px;
 	display: flex;
 	align-items: center;
     justify-content: space-between;
 `;
 
 const ThrowList = styled.div`
-	width: 30px;
+	width: 60px;
 	display: flex;
 	flex-direction: column;
     font-weight: normal;
     border-collapse: collapse;
 `;
 const ThrowCell = styled.div`
-	height: 12px;
-	font-size: 10px;
-	border: 1px solid white;
+	height: 20px;
+	font-size: 20px;
+	line-height: 20px;
+	border: 1px solid #fff7;
+`;
+const FixedScoreCell = styled(ScoreCell)`
+	position: fixed;
+	left: 10px;
+	height: 65px;
+	width: 75px;
+	background: #0d0d0dc1;
 `;
 
 function ScoreBoard() {
@@ -61,6 +70,7 @@ function ScoreBoard() {
             block: 'center',
             inline: 'center',
         });
+		console.log("scrolling to", currentDiv)
 	}, [currentDiv]);
 
 	
@@ -119,7 +129,7 @@ function ScoreBoard() {
 					const dartsByRound = dartsPerRound[player];
 
 					return <ScoreRow key={player} className={i === currentPlayerIndex ? "current" : ""}>
-							<ScoreCell>{player}</ScoreCell>
+							<FixedScoreCell >{player}</FixedScoreCell>
 							<ScoreCell>{score}</ScoreCell>
 							{dartsByRound.map((darts, d) => getTurnCell(darts, d, i === currentPlayerIndex && d === currentRound))}
 						</ScoreRow>

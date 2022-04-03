@@ -4,11 +4,11 @@ import http from 'http';
 import readline from 'readline';
 import gameController from './gameController';
 import { parseDartCode } from '../src/types/GameTypes';
-import { defaultPlayers } from '../src/types/PlayerTypes';
 import ledController from './LedController';
 import { gameList } from './gameTypes/GamesList';
 import { startSocketServer } from './sockerServer';
 import { openSerialConnection } from './serialController';
+import { openLedSerialConnection } from './serialLedController';
 
 const app = express();
 const server = http.createServer(app);
@@ -16,6 +16,7 @@ const server = http.createServer(app);
 startSocketServer(server);
 
 openSerialConnection();
+openLedSerialConnection();
 
 gameController.init();
 
@@ -51,8 +52,7 @@ app.get('/gameStatus', (req, res) => {
 });
 
 app.get('/allPlayers', (req, res) => {
-    const players = defaultPlayers;
-    res.json(players);
+    res.json(gameController.allPlayers);
 });
 
   

@@ -5,6 +5,7 @@ import { Ring } from "../../src/types/LedTypes";
 import { delay } from "../../src/tools/Utils";
 import { speak } from "../sockerServer";
 import gameController from "../gameController";
+import { getPronounciation } from "../../src/types/PlayerTypes";
 
 
 
@@ -29,6 +30,11 @@ class GameBase {
 
 	starting() {
 		console.log(this.gameDef.name + " : starting");
+		speak((this.gameDef.pronounciation || this.gameDef.name) + ". " + (this.gameDef.settingsIntro ?? "Select your settings"));
+		this.startingAnim();
+	}
+
+	startingAnim() {
 		ledController.animGrow();
 	}
 
@@ -46,6 +52,7 @@ class GameBase {
 			if (options)
 				(this as any)[options.propName] = setting.option;
 		})
+		speak("Select Players");
 	}
 
 	playersSet() {
@@ -86,14 +93,9 @@ class GameBase {
 		console.log("addDartThrow() not implemented yet!")
 	}
 
-	getSpokenScore(score: number, ring: Ring) {
-		console.log("getSpokenScore() not implemented yet!")
-	}
-	
-	getMultiplier(ring: Ring) {
-		if (ring === Ring.Triple) return 3;
-		if (ring === Ring.Double || ring === Ring.DoubleBullseye) return 2;
-		return 1;
+	getSpokenScore(score: number, ring: Ring): string {
+		console.log("getSpokenScore() not implemented yet!");
+		return "";
 	}
 	
 	undoLastDart() {
@@ -132,7 +134,7 @@ class GameBase {
 		const { players, currentPlayerIndex } = gameController.gameStatus;
 		const nextPlayerIndex = (currentPlayerIndex + 1) % players.length;
 		const nextPlayer = players[nextPlayerIndex];
-		speak("Grab darts. " + nextPlayer + " is up next");
+		speak("Grab darts. " + getPronounciation(gameController.allPlayers , nextPlayer) + " is up next");
 		gameController.updateGameStatus({ waitingForThrow: false });
 		ledController.setHints([]);
 		this.roundEndedAnim();

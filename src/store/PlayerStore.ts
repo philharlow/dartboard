@@ -31,5 +31,5 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 		console.log("got allPlayers", allPlayers);
 		if (allPlayers)
 			set({ allPlayers });
-	}
+	},
   }));

@@ -1,5 +1,6 @@
 import styled from '@emotion/styled/macro';
 import { useGameStore } from '../store/GameStore';
+import { GameType } from '../types/GameTypes';
 
 const StartScreenDiv = styled.div`
     height: 100%;
@@ -22,9 +23,9 @@ const Slider = styled.div`
 `;
 
 const GameButton = styled.div`
-	width: 200px;
-	height: 200px;
-	background: #cccccc77;
+	width: 300px;
+	height: 300px;
+	background: #0d0d0d61;
 	flex-shrink: 0;
 	border-radius: 15px;
     display: flex;
@@ -40,10 +41,10 @@ const GameButton = styled.div`
 
 
 const Title = styled.div`
-	font-size: 30px;
+	font-size: 48px;
 `;
 const Players = styled.div`
-	font-size: 14px;
+	font-size: 24px;
 	padding-bottom: 20px;
 `;
 
@@ -52,13 +53,18 @@ function GameSelectionScreen() {
 	const selectGame = useGameStore(store => store.selectGame);
 	const gameList = useGameStore(store => store.gameList);
 
+	const startGame = (gameType: GameType) => {
+		selectGame(gameType);
+		//playSound("sounds/beeps/beep-tapped.aif")
+	}
+
 	return (
 		<StartScreenDiv>
 			<Slider>
 				{gameList?.map(gameDef =>
 					<GameButton
 						key={gameDef.name}
-						onClick={() => selectGame(gameDef.gameType)}
+						onClick={() => startGame(gameDef.gameType)}
 						>
 							<Title>
 								{gameDef.name}

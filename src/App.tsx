@@ -9,7 +9,6 @@ import GameSelectionScreen from './components/GameSelectionScreen';
 import PlayerSelectionScreen from './components/PlayerSelectionScreen';
 import SettingsDrawer from './components/SettingsDrawer';
 import SettingsSelectionScreen from './components/SettingsSelectionScreen';
-import SocketDrawer from './components/SocketDrawer';
 import ThrowsDrawer from './components/ThrowsDrawer';
 import { useConnectionStore } from './store/ConnectionStore';
 import { useGameStore } from './store/GameStore';
@@ -37,7 +36,7 @@ function App() {
 	const fetchGameList = useGameStore(store => store.fetchGameList);
 	const socketConnected = useConnectionStore(store => store.socketConnected);
 	const allPlayers = usePlayerStore(store => store.allPlayers);
-	const calibrated = useGameStore(store => store.calibrated);
+	const calibrationMode = useGameStore(store => store.calibrationMode);
 	const fetchAllPlayers = usePlayerStore(store => store.fetchAllPlayers);
 	
 	console.log("app redraw");
@@ -58,7 +57,7 @@ function App() {
   let content: JSX.Element | undefined;
 
 	if (!gameList || !gameList.length) content = <LoadingScreenDiv><div>Loading...</div>	</LoadingScreenDiv>
-  else if (!calibrated[0]/* || !calibrated[1]*/) content = <CalibrationScreen />
+  else if (calibrationMode) content = <CalibrationScreen />
   else if (!currentGame) content = <GameSelectionScreen />
   else if (!selectedSettings || !selectedSettings.length) content = <SettingsSelectionScreen />
   else if (!players.length) content = <PlayerSelectionScreen />
@@ -68,7 +67,6 @@ function App() {
       {content}
     
 			<SettingsDrawer />
-			<SocketDrawer />
 			<AudioDrawer />
 			<ThrowsDrawer />
 			<DartboardDrawer />

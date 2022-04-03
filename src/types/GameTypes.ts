@@ -21,7 +21,7 @@ export interface GameStatus {
 	currentPlayerIndex: number;
 	winningPlayerIndex: number;
 	selectedSettings?: SelectedSetting[];
-	calibrated: boolean[];
+	calibrationMode: CalibrationMode;
 }
 
 export interface GameDefinition {
@@ -30,6 +30,7 @@ export interface GameDefinition {
 	minPlayers: number;
 	maxPlayers: number;
 	pronounciation?: string;
+	settingsIntro?: string;
 	settingsOptions?: SettingOptions[];
 }
 
@@ -58,6 +59,12 @@ export interface SettingOptions {
 export interface SelectedSetting {
 	name: string;
 	option: any;
+}
+
+export enum CalibrationMode {
+	None,
+    Dartboard,
+    Leds,
 }
 
 export const parseDartCode = (code: string) => {

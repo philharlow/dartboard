@@ -110,6 +110,7 @@ class GameBaseball extends GameBase {
 			bust: false,
 		}
 		clonedDarts.push(newThrow);
+		roundDarts.push(newThrow);
 		const playerDarts = clonedDarts.filter(t => t.player === currentPlayer);
 		
 		
@@ -137,6 +138,12 @@ class GameBaseball extends GameBase {
 		//setDartThrows(clonedDarts);
 		this.updateHints();
 		this.updateScores();
+	}
+	
+	getMultiplier(ring: Ring) {
+		if (ring === Ring.Triple) return 3;
+		if (ring === Ring.Double || ring === Ring.DoubleBullseye) return 2;
+		return 1;
 	}
 
 	updateHints(): void {

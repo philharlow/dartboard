@@ -7,7 +7,7 @@ const RootDiv = styled.div`
 `;
 
 const Title = styled.div`
-	font-size: 36px;
+	font-size: 46px;
 	text-align: center;
 	padding-bottom: 10px;
 	border: 1px solid white;
@@ -20,22 +20,23 @@ const TurnTable = styled.div`
 	flex-direction: row;
 	align-self: center;
 	text-align: center;
+	font-size: 26px;
 `;
 const TurnColumn = styled.div`
 	display: flex;
 	height: 100%;
 	flex-direction: column;
+    line-height: 32px;
 	&.current {
 		background: #fff3;
 	}
 `;
 const ScoreCell = styled.div`
 	text-align: center;
-	width: 75px;
-	height: 30px;
+	width: 100px;
+	height: 35px;
 	padding: 5px;
 	border: 1px solid white;
-    line-height: 26px;
 `;
 const BoldCell = styled(ScoreCell)`
 	font-weight: bold;
@@ -50,29 +51,28 @@ function TurnBoard() {
 	const dartThrows = useGameStore(store => store.dartThrows);
 	const players = useGameStore(store => store.players);
 	const currentPlayerIndex = useGameStore(store => store.currentPlayerIndex);
-	const waitingForThrow = useGameStore(store => store.waitingForThrow);
-	const round = Math.floor((dartThrows.length + (waitingForThrow ? 0 : -1)) / (players.length * 3)) ;
+	const currentRound = useGameStore(store => store.currentRound);
 	const currentPlayer = players[currentPlayerIndex];
 
-	const darts = dartThrows.filter(t => t.player === currentPlayer);
-	const turnDarts = darts.slice(round * 3);
-	const turnTotal = turnDarts.reduce((acc, dart) => acc + dart.totalScore, 0);
-	const bust = turnDarts.some(dart => dart.bust);
+	const playerDarts = dartThrows.filter(t => t.player === currentPlayer);
+	const roundDarts = playerDarts.filter(t => t.round === currentRound);
+	const turnTotal = roundDarts.reduce((acc, dart) => acc + dart.totalScore, 0);
+	const bust = roundDarts.some(dart => dart.bust);
 	const className = bust ? "bust": "";
 
-	const dartsPerTurn = 3;
+	const dartsPerTurn = Math.max(3, roundDarts.length);
 
 	const throws: JSX.Element[] = [];
 	for (let i=1; i<=dartsPerTurn; i++)
-		throws.push(<BoldCell key={i} className={className + (i === turnDarts.length ? " flash" : "")}>Throw {i}</BoldCell>);
+		throws.push(<BoldCell key={i} className={className + (i === roundDarts.length ? " flash" : "")}>Throw {i}</BoldCell>);
 	const scores: JSX.Element[] = [];
 	for (let i=0; i<dartsPerTurn; i++)
-		if (turnDarts[i]) {
-			const scoreCellClass = className + (i+1 === turnDarts.length ? " flash" : "");
-			if (turnDarts[i].ring === Ring.Miss)
+		if (roundDarts[i]) {
+			const scoreCellClass = className + (i+1 === roundDarts.length ? " flash" : "");
+			if (roundDarts[i].ring === Ring.Miss)
 				scores.push(<ScoreCell key={i} className={scoreCellClass}>Miss</ScoreCell> );
 			else
-				scores.push(<ScoreCell key={i} className={scoreCellClass}>{turnDarts[i].multiplier} x {turnDarts[i].score}</ScoreCell> );
+				scores.push(<ScoreCell key={i} className={scoreCellClass}>{roundDarts[i].multiplier} x {roundDarts[i].score}</ScoreCell> );
 		} else
 			scores.push(<ScoreCell key={i}></ScoreCell> );
 

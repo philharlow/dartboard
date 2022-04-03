@@ -1,6 +1,7 @@
 import { cloneDeep } from "lodash";
 import { Hint, Led, Ring, getLedsAsInts, scoreOrder, growOrder, initialLedsObj, getLedKey, LedsObj } from "../src/types/LedTypes";
 import { SocketEvent } from "../src/types/SocketTypes";
+import { updateFromLedObj, writeToLedController } from "./serialLedController";
 import { emit } from "./sockerServer";
 
 interface PendingFlash {
@@ -53,7 +54,10 @@ class LedController {
 			this.setSingleLedOnLater(score, ring, true, i * 2 * duration);
 			this.setSingleLedOnLater(score, ring, false, (i * 2 + 1) * duration);
 		}
-		this.setSingleLedOnLater(score, ring, this.getHintOn(score, ring), (flashes * 2 + 2) * duration);
+		const timeout = setTimeout(() => {
+			this.setSingleLedOn(score, ring, this.getHintOn(score, ring));
+		}, (flashes * 2) * duration);
+		this.pendingFlashes.push({ timeout, score, ring });
 	};
 
 	getHintOn(score: number, ring: Ring): boolean {
@@ -136,11 +140,21 @@ class LedController {
 
 	dispatchUpdate = () => {
 		this.needsDispatch = true;
+		this.sendToSerial();
+	}
+
+	sendToSerial() {
+		const ledsObj = cloneDeep(this.ledsObj);
+		//const ints = getLedsAsSerialInts(ledsObj);
+
+		updateFromLedObj(ledsObj);
 	}
 
 	sendToSocket() {
 		const ledsObj = cloneDeep(this.ledsObj);
 		const ints = getLedsAsInts(ledsObj);
+
+		//console.log("leds", ledsObj)
 
 		emit(SocketEvent.UPDATE_LEDS, ints);
 	}

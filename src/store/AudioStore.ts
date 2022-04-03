@@ -60,6 +60,7 @@ const _speak = (message: string) => {
 	return new Promise(resolve => {
 		const { selectedVoice, volume } = useAudioStore.getState();
 		if (volume <= 0) return;
+		console.log("speaking", message);
 		
 		speechSynthesis.cancel();
 		const msg = new SpeechSynthesisUtterance(message);

@@ -25,6 +25,15 @@ export type CalibrationMap = {
 	[key: string]: string;
 };
 
+interface LedMatrixCoord {
+    col: number;
+    row: number;
+}
+
+export type LedCalibrationMap = {
+	[key: string]: LedMatrixCoord;
+};
+
 export interface Hint {
 	ring: Ring;
 	score: number;
@@ -96,8 +105,18 @@ export const setRingFromInt = (ledsObj: LedsObj, ring: Ring, int: number) =>{
 export const scoreOrder = [20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5];
 export const wedgeOrder = [20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5];
 export const growOrder = [Ring.DoubleBullseye, Ring.OuterBullseye, Ring.InnerSingle, Ring.Triple, Ring.OuterSingle, Ring.Double];
+export const ledKeysFromRingThenScore: {[ index: number]: string[]} = [];
+for (const ring of growOrder) ledKeysFromRingThenScore[ring] = [];
 
 export const getLedKey = (score: number, ring: Ring) => {
+	if (ring === Ring.Miss || score <= 0) return "";
+	return ledKeysFromRingThenScore[ring][score];
+	//if (ring === Ring.Triple) return "t" + score;
+	//if (ring === Ring.Double || ring === Ring.DoubleBullseye) return "d" + score;
+	//if (ring === Ring.OuterSingle) return "o" + score;
+	//return "s" + score;
+}
+export const getLedKeySlow = (score: number, ring: Ring) => {
 	if (ring === Ring.Triple) return "t" + score;
 	if (ring === Ring.Double || ring === Ring.DoubleBullseye) return "d" + score;
 	if (ring === Ring.OuterSingle) return "o" + score;
@@ -106,7 +125,11 @@ export const getLedKey = (score: number, ring: Ring) => {
 
 export const initialLedsObj: LedsObj = {};
 const initialOn = false;
-const addLed = (score: number, ring: Ring, on: boolean) => initialLedsObj[getLedKey(score, ring)] = { score, ring, on };
+const addLed = (score: number, ring: Ring, on: boolean) => {
+	ledKeysFromRingThenScore[ring][score] = getLedKeySlow(score, ring);
+	initialLedsObj[getLedKey(score, ring)] = { score, ring, on }
+};
+
 for (let i=1; i<=20; i++) {
 	addLed(i, Ring.InnerSingle, initialOn);
 	addLed(i, Ring.OuterSingle, initialOn);

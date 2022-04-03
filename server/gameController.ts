@@ -1,12 +1,14 @@
 import { cloneDeep } from 'lodash';
-import { DartThrow, GameStatus, GameType, parseDartCode, SelectedSetting } from '../src/types/GameTypes';
-import { CalibrationMap, Ring } from '../src/types/LedTypes';
+import { CalibrationMode, DartThrow, GameStatus, GameType, parseDartCode, SelectedSetting } from '../src/types/GameTypes';
+import { CalibrationMap, LedCalibrationMap, Ring } from '../src/types/LedTypes';
 import { calibrationOrder, SocketEvent } from '../src/types/SocketTypes';
 import { getDartCalibration, getLedCalibration, setDartCalibration, setLedCalibration } from './dbController';
 import GameBase from './gameTypes/GameBase';
 import { gameList } from './gameTypes/GamesList';
 import ledController from './LedController';
+import { ledCalibrationStep } from './serialLedController';
 import { socketServer } from './sockerServer';
+import { defaultPlayers } from '../src/types/PlayerTypes';
 
 const resetGameStatus: GameStatus = {
     currentGameType: GameType.None,
@@ -18,30 +20,36 @@ const resetGameStatus: GameStatus = {
     currentPlayerIndex: 0,
     winningPlayerIndex: -1,
     selectedSettings: [],
-    calibrated: [false, false],
+    calibrationMode: CalibrationMode.None,
 };
 
 const dartCalibration: CalibrationMap = getDartCalibration();
-const ledCalibration: CalibrationMap = getLedCalibration();
+export const ledCalibration: LedCalibrationMap = getLedCalibration();
 console.log("Loaded calibrations", Object.keys(dartCalibration).length, Object.keys(ledCalibration).length);
+
+const ROWS = 8;
 
 
 class GameController {
     currentGame?: GameBase;
     
+    allPlayers = defaultPlayers;
     gameStatus: GameStatus = cloneDeep(resetGameStatus);
     calibrationStep: number = 0;
 
     init() {
-        this.calibrationStep = Object.keys(dartCalibration).length;
+        this.calibrationStep = (Object.keys(dartCalibration).length + Object.keys(ledCalibration).length) % calibrationOrder.length;
         this.updateCalibrationState();
     }
 
     updateCalibrationState() {
-        this.updateGameStatus({ calibrated: [
-            Object.keys(dartCalibration).length >= calibrationOrder.length,
-            Object.keys(ledCalibration).length >= calibrationOrder.length
-        ]});
+        this.updateGameStatus({ calibrationMode: this.getCalibrationMode()});
+    }
+
+    getCalibrationMode() {
+        if (Object.keys(dartCalibration).length < calibrationOrder.length) return CalibrationMode.Dartboard;
+        if (Object.keys(ledCalibration).length < calibrationOrder.length) return CalibrationMode.Leds;
+        return CalibrationMode.None;
     }
 
     startGame(gameType: GameType) {
@@ -52,13 +60,14 @@ class GameController {
         }
         this.currentGame = gameList.find(game => game.gameDef.gameType === gameType);
         this.currentGame?.starting();
-        this.updateGameStatus({ currentGameType: gameType });
+        this.updateGameStatus({ currentGameType: gameType, currentGameName: undefined });
     }
     
     setSettings(settings: SelectedSetting[]) {
         console.log('starsetSettingstGame:', settings);
         this.updateGameStatus({ selectedSettings: settings });
-        this.currentGame?.setOptions();
+        if (settings.length > 0)
+            this.currentGame?.setOptions();
     }
 
     setPlayers(players: string[]) {
@@ -113,7 +122,7 @@ class GameController {
     }
 
     clearCalibration = () => {
-        this.calibrationStep = -1;
+        this.calibrationStep = 0;
         for (const key in dartCalibration) delete dartCalibration[key];
         for (const key in ledCalibration) delete ledCalibration[key];
         setDartCalibration(dartCalibration);
@@ -123,39 +132,61 @@ class GameController {
         this.updateCalibrationState();
     }
 
+    lastStep = 0;
     nextCalibrationStep() {
-        //console.log("nextCalibration", this.calibrationStep)
-        // Turn off last led
-        this.calibrationStep++;
-        if (this.calibrationStep > 0) {
-            const { score, ring } = parseDartCode(calibrationOrder[this.calibrationStep - 1]);
-            ledController.setSingleLedOn(score, ring, false);
+        console.log("nextCalibration", this.gameStatus.calibrationMode, this.calibrationStep)
+        if (this.gameStatus.calibrationMode === CalibrationMode.Dartboard) {
+            //console.log("nextCalibration", this.calibrationStep)
+            // Turn off last led
+            if (this.lastStep >= 0) {
+                const { score, ring } = parseDartCode(calibrationOrder[this.lastStep]);
+                ledController.setSingleLedOn(score, ring, false);
+            }
+            socketServer.emit(SocketEvent.SET_CALIBRATION_STEP, this.calibrationStep);
+            if (this.calibrationStep >= calibrationOrder.length) {
+                console.log("finished calibration!");
+                
+                this.updateCalibrationState();
+                return;
+            }
+            //console.log("nextCalibration", this.calibrationStep, calibrationOrder[this.calibrationStep])
+            const { score, ring } = parseDartCode(calibrationOrder[this.calibrationStep]);
+            ledController.setSingleLedOn(score, ring, true);
         }
-        socketServer.emit(SocketEvent.SET_CALIBRATION_STEP, this.calibrationStep);
-        if (this.calibrationStep >= calibrationOrder.length) {
-            console.log("finished calibration!");
-            
-            this.updateCalibrationState();
-            return;
+        if (this.gameStatus.calibrationMode === CalibrationMode.Leds) {
+            if (this.calibrationStep >= calibrationOrder.length) {
+                console.log("finished led calibration!");
+                
+                this.updateCalibrationState();
+                return;
+            }
+
+            ledCalibrationStep(this.calibrationStep);
         }
-        //console.log("nextCalibration", this.calibrationStep, calibrationOrder[this.calibrationStep])
-        const { score, ring } = parseDartCode(calibrationOrder[this.calibrationStep]);
-        ledController.setSingleLedOn(score, ring, true);
     }
 
     addDartMatrixHit(coord: string) {
-        if (this.calibrationStep >= calibrationOrder.length) {
-            const dartCode = dartCalibration[coord];
-            //console.log("got matrix hit:", dartCode, coord)
-            const { score, ring } = parseDartCode(dartCode);
-            this.addDartThrow(score, ring);
+        if (this.gameStatus.calibrationMode === CalibrationMode.Dartboard) {
+            dartCalibration[coord] = calibrationOrder[this.calibrationStep];
+            setDartCalibration(dartCalibration);
+            //console.log("dartCalibration:", dartCalibration);
+            this.calibrationStep++;
+            this.nextCalibrationStep();
             return;
         }
-        dartCalibration[coord] = calibrationOrder[this.calibrationStep];
-        setDartCalibration(dartCalibration);
-        //console.log("dartCalibration:", dartCalibration);
-        this.nextCalibrationStep();
-
+        if (this.gameStatus.calibrationMode === CalibrationMode.Leds) {
+            const dartCode = dartCalibration[coord];
+            ledCalibration[dartCode] = { row: Math.floor(this.calibrationStep / ROWS), col: this.calibrationStep % ROWS };
+            setLedCalibration(ledCalibration);
+            console.log("ledCalibration:", ledCalibration);
+            this.calibrationStep++;
+            this.nextCalibrationStep();
+            return;
+        }
+        const dartCode = dartCalibration[coord];
+        //console.log("got matrix hit:", dartCode, coord)
+        const { score, ring } = parseDartCode(dartCode);
+        this.addDartThrow(score, ring);
     }
 
 }

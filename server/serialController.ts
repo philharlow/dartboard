@@ -13,7 +13,7 @@ export const openSerialConnection = () => {
         return;
     }
     const path = process.platform === "win32" ? "COM20" : "/dev/ttyACM0";
-    console.log('opening serial on ', path);
+    console.log('opening serial on', path);
     port = new SerialPort({ path, baudRate: 115200 });
     parser = port.pipe(new ReadlineParser({ delimiter: '\n' }));
     // Read the port data

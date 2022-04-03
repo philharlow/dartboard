@@ -19,7 +19,7 @@ function SettingsDrawer() {
 	};
 
 	return (
-		<Drawer position={DrawerPosition.Top} tabStyle={{left: "5%"}} drawerStyle={{left: "5%"}} tabLabel="⚙️">
+		<Drawer position={DrawerPosition.Top} tabStyle={{right: "0%"}} drawerStyle={{right: "0%"}} tabLabel="⚙️">
 			<Title>
 				Settings
 			</Title>

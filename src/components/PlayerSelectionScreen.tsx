@@ -22,22 +22,22 @@ const Slider = styled.div`
 	padding: 0 50px;
 `;
 const PlayerButton = styled.div`
-	width: 100px;
-	height: 100px;
-	background: #cccccc77;
+	width: 200px;
+	height: 200px;
+	background: #0d0d0d61;
 	flex-shrink: 0;
     display: flex;
 	flex-direction: column;
     align-items: center;
     justify-content: center;
-	font-size: 20px;
+	font-size: 40px;
 	//max-height: 100%;
 	&.selected {
 		background: #6a6a;
 	}
 `;
 const GameTitle = styled.div`
-	font-size: 26px;
+	font-size: 46px;
 	text-align: center;
 	left: 50%;
 	top: 40px;
@@ -45,14 +45,15 @@ const GameTitle = styled.div`
 	position: absolute;
 `;
 const GamePlayers = styled.div`
-	font-size: 16px;
+	font-size: 26px;
 `;
 const NextButton = styled(Button)`
-	position: absolute;
-	right: 30px;
-	bottom: 50px;
+	position: fixed;
+	right: 20px;
+	bottom: 20px;
 	font-size: 26px;
-	padding: 15px 25px;
+	padding: 35px 45px;
+	font-size: 40px;
 	background: #6a6a;
 	border-radius: 10px;
 `;
@@ -64,7 +65,7 @@ const PlayerNumber = styled.div`
 function PlayerSelectionScreen() {
 	const currentGame = useGameStore(store => store.gameList?.find(game => game.gameType === store.currentGameType));
 	const currentGameName = useGameStore(store => store.currentGameName);
-	const selectGame = useGameStore(store => store.selectGame);
+	const setSelectedSettings = useGameStore(store => store.setSelectedSettings);
 	const setPlayers = useGameStore(store => store.setPlayers);
 	const allPlayers = usePlayerStore(store => store.allPlayers);
 	const [ selectedPlayers, setSelectedPlayers ] = useState<string[]>([]);
@@ -102,7 +103,7 @@ function PlayerSelectionScreen() {
 					</PlayerButton>
 				))}
 			</Slider>
-			<BackButton onClick={() => selectGame(undefined)} />
+			<BackButton onClick={() => setSelectedSettings([])} />
 			<NextButton
 				disabled={!validNumPlayers}
 				variant="contained"

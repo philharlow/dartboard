@@ -1,7 +1,7 @@
 import create from 'zustand'
 import { emit, socket } from '../SocketInterface';
 import { serverFetch } from '../tools/ClientUtils';
-import { DartThrow, GameDefinition, GameStatus, GameType, SelectedSetting } from '../types/GameTypes';
+import { CalibrationMode, DartThrow, GameDefinition, GameStatus, GameType, SelectedSetting } from '../types/GameTypes';
 import { SocketEvent } from '../types/SocketTypes';
 
 export type GameStore = GameStatus & {
@@ -31,7 +31,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 	waitingForThrow: false,
 	currentPlayerIndex: 0,
 	winningPlayerIndex: -1,
-	calibrated: [false, false],
+	calibrationMode: CalibrationMode.None,
 	selectGame: (game?: GameType) => {
 		emit(SocketEvent.START_GAME, game);
 	},

@@ -48,7 +48,7 @@ function AudioDrawer() {
 	}
 
 	return (
-		<Drawer position={DrawerPosition.Top} tabStyle={{right:"2%"}} drawerStyle={{width: 200, right: 0, paddingBottom: 50}} tabLabel="Audio">
+		<Drawer position={DrawerPosition.Top} tabStyle={{right:"44px"}} drawerStyle={{width: 200, right: 0, paddingBottom: 50}} tabLabel="Audio">
 			<Title>
 				Volume
 			</Title>

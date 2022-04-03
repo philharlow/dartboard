@@ -20,6 +20,7 @@ class Game301 extends GameBase {
 			maxPlayers: 8,
 			pronounciation: ("3o1"),
 			gameType: GameType.Game301,
+			settingsIntro: "Select your starting score",
 			settingsOptions: [
 				{
 					name: "Starting Score",
@@ -90,7 +91,7 @@ class Game301 extends GameBase {
 		if (playerScore < 0) {
 			newThrow.bust = true;
 			newThrow.totalScore = 0;
-			speak("Bust!!", true);
+			speak(scoreMessage + "! Bust!!", true);
 			this.roundEnded();
 		// Winner!
 		} else if (playerScore === 0) {
@@ -144,7 +145,14 @@ class Game301 extends GameBase {
 			}
 		}
 		//console.log("hints", score, hints)
-		ledController.setHints(hints);
+		if (!_.isEqual(ledController.hints, hints)) {
+			ledController.setHints(hints);
+			if (hints.length > 0) {
+				const scoresLeft: string[] = hints.map(({ score, ring }) => "a " + this.getSpokenScore(score, ring));
+				const str = currentPlayer + " just needs " + _.uniq(scoresLeft).join(", or ") + " to win!";
+				speak(str);
+			}
+		}
 	}
 
 	getSpokenScore(score: number, ring: Ring) {

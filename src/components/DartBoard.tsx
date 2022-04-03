@@ -30,6 +30,7 @@ function DartBoard() {
 	const ref = useRef() as React.MutableRefObject<HTMLDivElement>;
 
 	const illuminateElement = (on: boolean, score: number, ring: Ring, className = "illuminated") => {
+		console.log("illuminating", score, ring, on)
 		const elementName = getLedKey(score, ring)
 		const element = getSVGElement("#" + elementName, ref.current);
 		if (element) {
@@ -57,6 +58,7 @@ function DartBoard() {
 				changed = true;
 			}
 		});
+		console.log("shcnaged", ledsObj, changed)
 		if (changed)
 			setLastLeds(ledsObj);
 	}, [lastLeds, ledsObj]);

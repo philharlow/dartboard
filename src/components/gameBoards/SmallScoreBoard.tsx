@@ -9,6 +9,7 @@ const ScoresTable = styled.table`
 	flex-grow: 1;
     align-self: flex-start;
     margin: 10px;
+	font-size: 46px;
 `;
 const ScoreRow = styled.tr`
 	&.current {
@@ -20,6 +21,7 @@ const ScoreCell = styled.th`
 	padding: 5px;
 	text-align: center;
 	border: 1px solid white;
+	font-size: 46px;
 `;
 const BoldCell = styled(ScoreCell)`
 	font-weight: bold;

@@ -18,7 +18,7 @@ const RootDiv = styled.div`
 	flex-grow: 1;
 `;
 const GameTypeDisplay = styled.div`
-	font-size: 32px;
+	font-size: 46px;
 	padding: 10px;
 	padding-left: 100px;
 `;
@@ -34,32 +34,41 @@ const ButtonRow = styled.div`
 	display: flex;
 	flex-direction: row;
 	gap: 20px;
+	height: 130px;
 	justify-content: space-between;
 	padding: 5px 10px;
 `;
-const NextPlayerButton = styled(Button)`
+const BaseButton = styled(Button)`
 	font-size: 26px;
+	border-radius: 10px;
+	padding: 10px 50px;
+`;
+const NextPlayerButton = styled(BaseButton)`
 	background-color: #6a6a;
-	border-radius: 10px;
-	padding: 10px 20px;
+	:enabled:hover {
+		background-color: #6a6a;
+    }
 `;
-const MissButton = styled(Button)`
-	font-size: 26px;
+const MissButton = styled(BaseButton)`
 	background-color: #d6422faa;
-	border-radius: 10px;
-	padding: 10px 20px;
+	:enabled:hover {
+		background-color: #d6422faa;
+    }
 `;
-const UndoButton = styled(Button)`
-	font-size: 26px;
-	background-color: #d6422faa;
-	border-radius: 10px;
-	padding: 10px 20px;
+const UndoButton = styled(BaseButton)`
+	background-color: #24aee4aa;
+	:enabled:hover {
+		background-color: #24aee4aa;
+    }
 `;
 const ScoreboardWrapper = styled.div`
 	display: flex;
 	flex-grow: 1;
 	height: 100%;
 	overflow: auto;
+	&::-webkit-scrollbar { 
+		display: none;
+	}
 `;
 
 const getScoreBoard = (game?: GameType) => {
@@ -79,15 +88,29 @@ function GameBoard() {
   const currentGameName = useGameStore(store => store.currentGameName);
   const waitingForThrow = useGameStore(store => store.waitingForThrow);
   const winningPlayerIndex = useGameStore(store => store.winningPlayerIndex);
+  const currentRound = useGameStore(store => store.currentRound);
+  const players = useGameStore(store => store.players);
+  const currentPlayerIndex = useGameStore(store => store.currentPlayerIndex);
+  const currentPlayer = players[currentPlayerIndex];
+
+  const playerDarts = dartThrows.filter(t => t.player === currentPlayer);
+  const roundDarts = playerDarts.filter(t => t.round === currentRound);
 
   const addMiss = () => {
     sendDartThrow(0, Ring.Miss);
+	setTimeout(() => {
+		(document.activeElement as HTMLElement).blur();
+	}, 1000);
   }
   const undoLastDart = () => {
 	emit(SocketEvent.UNDO_LAST_DART, true);
+	setTimeout(() => {
+		(document.activeElement as HTMLElement).blur();
+	}, 1000);
   }
   const nextPlayer = () => {
 	emit(SocketEvent.NEXT_PLAYER, true);
+	(document.activeElement as HTMLElement).blur();
   }
 
   const ScoreBoard = getScoreBoard(currentGame?.gameType);
@@ -103,7 +126,7 @@ function GameBoard() {
 		</ContentRow>
 		<ButtonRow>
 			<UndoButton
-				disabled={dartThrows.length % 3 === 0 && waitingForThrow}
+				disabled={roundDarts.length === 0 && waitingForThrow}
 				variant="contained"
 				onClick={() => undoLastDart()}
 			>

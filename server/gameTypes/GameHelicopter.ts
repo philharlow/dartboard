@@ -46,8 +46,7 @@ class GameHelicopter extends GameBase {
 		return score;
 	}
 
-	starting() {
-		console.log("helicopter starting");
+	startingAnim() {
 		ledController.animQuadSpin();
 	}
 

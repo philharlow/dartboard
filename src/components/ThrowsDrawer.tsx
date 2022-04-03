@@ -14,7 +14,7 @@ function ThrowsDrawer() {
 	const dartThrows = useGameStore(store =>store.dartThrows);
 
 	return (
-		<Drawer position={DrawerPosition.Top} tabStyle={{right: "22%"}} drawerStyle={{right: 0, width: 200, maxHeight: 200, overflowY: "auto"}} tabLabel="Throws">
+		<Drawer position={DrawerPosition.Top} tabStyle={{right: "110px"}} drawerStyle={{right: 0, width: 200, maxHeight: 200, overflowY: "auto"}} tabLabel="Throws">
 			<Title>
 				Throws
 			</Title>

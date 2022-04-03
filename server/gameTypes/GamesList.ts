@@ -9,8 +9,8 @@ import GameBase from "./GameBase";
 
 export const gameList: GameType[] = [
 	new Game301(),
+	new GameCricket(),
+	new GameGolf(),
 	new GameHelicopter(),
 	new GameBaseball(),
-	new GameGolf(),
-	new GameCricket(),
 ];

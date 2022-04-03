@@ -1,5 +1,5 @@
 import { LocalStorage } from "node-localstorage";
-import { CalibrationMap } from "../src/types/LedTypes";
+import { CalibrationMap, LedCalibrationMap } from "../src/types/LedTypes";
 import { CalibrationObj } from "../src/types/SocketTypes";
 
 global.localStorage = new LocalStorage('./scratch');
@@ -40,8 +40,8 @@ export const setDartCalibration = (calibration: CalibrationMap) => {
 
 const LED_CALIBRATION = "LED_CALIBRATION";
 export const getLedCalibration = () => {
-    return (getJsonValue(LED_CALIBRATION) || {}) as CalibrationMap;
+    return (getJsonValue(LED_CALIBRATION) || {}) as LedCalibrationMap;
 }
-export const setLedCalibration = (calibration: CalibrationMap) => {
+export const setLedCalibration = (calibration: LedCalibrationMap) => {
     return setJsonValue(LED_CALIBRATION, calibration);
 }
