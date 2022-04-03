@@ -13,7 +13,7 @@ export let socket: Socket | undefined;
 
 
 export const connectSocket = async () => {
-  socket = io(":80");
+  socket = io(":4000");
 
   socket.on("connect", () => {
     console.log("WS connected!");

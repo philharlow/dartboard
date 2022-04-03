@@ -1,4 +1,4 @@
-export const serverPort = 80;
+export const serverPort = 4000;
 export const serverUrl = document.location.protocol + '//' + document.location.hostname + ":" + serverPort + "/";
 
 export const serverFetch = async (path: string) => {
