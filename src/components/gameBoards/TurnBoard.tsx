@@ -12,7 +12,7 @@ const Title = styled.div`
 	padding-bottom: 10px;
 	border: 1px solid white;
 	overflow: hidden;
-	background: #fff3;
+	background: #0d0d0d6f;
 `;
 
 const TurnTable = styled.div`
@@ -51,6 +51,7 @@ function TurnBoard() {
 	const dartThrows = useGameStore(store => store.dartThrows);
 	const players = useGameStore(store => store.players);
 	const currentPlayerIndex = useGameStore(store => store.currentPlayerIndex);
+	const waitingForThrow = useGameStore(store => store.waitingForThrow);
 	const currentRound = useGameStore(store => store.currentRound);
 	const currentPlayer = players[currentPlayerIndex];
 
@@ -78,17 +79,15 @@ function TurnBoard() {
 
 	return (
 		<RootDiv>
-			<Title>
+			<Title className={waitingForThrow ? "waiting" : ""}>
 				{currentPlayer}
 			</Title>
 			<TurnTable>
 				<TurnColumn>
-					<BoldCell>Player</BoldCell>
 					{throws}
 					<TotalCell>Total</TotalCell>
 				</TurnColumn>
 				<TurnColumn>
-					<BoldCell>Throw</BoldCell>
 					{scores}
 					<TotalCell>{turnTotal}</TotalCell>
 				</TurnColumn>

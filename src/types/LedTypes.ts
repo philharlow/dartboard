@@ -31,7 +31,7 @@ interface LedMatrixCoord {
 }
 
 export type LedCalibrationMap = {
-	[key: string]: LedMatrixCoord;
+	[key: string]: LedMatrixCoord[];
 };
 
 export interface Hint {

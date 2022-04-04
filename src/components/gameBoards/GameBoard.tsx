@@ -33,7 +33,6 @@ const ContentRow = styled.div`
 const ButtonRow = styled.div`
 	display: flex;
 	flex-direction: row;
-	gap: 20px;
 	height: 130px;
 	justify-content: space-between;
 	padding: 5px 10px;
@@ -143,6 +142,7 @@ function GameBoard() {
 				disabled={waitingForThrow}
 				variant="contained"
 				onClick={() => nextPlayer()}
+				className={!waitingForThrow ? "waiting" : ""}
 			>
 				Next Player
 			</NextPlayerButton>

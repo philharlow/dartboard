@@ -1,4 +1,5 @@
 import styled from '@emotion/styled/macro';
+import { Button } from '@mui/material';
 import { useGameStore } from '../store/GameStore';
 import { GameType } from '../types/GameTypes';
 
@@ -47,6 +48,13 @@ const Players = styled.div`
 	font-size: 24px;
 	padding-bottom: 20px;
 `;
+const PlayersButton = styled(Button)`
+	position: fixed;
+	font-size: 20px;
+	right: 20px;
+	bottom: 20px;
+	padding: 20px 30px;
+`;
 
 
 function GameSelectionScreen() {
@@ -54,7 +62,9 @@ function GameSelectionScreen() {
 	const gameList = useGameStore(store => store.gameList);
 
 	const startGame = (gameType: GameType) => {
-		selectGame(gameType);
+		setTimeout(() => {
+			selectGame(gameType);
+		}, 100);
 		//playSound("sounds/beeps/beep-tapped.aif")
 	}
 
@@ -75,6 +85,9 @@ function GameSelectionScreen() {
 					</GameButton>)
 				}
 			</Slider>
+			<PlayersButton variant='contained'>
+				Edit Players
+			</PlayersButton>
 		</StartScreenDiv>
 	);
 }

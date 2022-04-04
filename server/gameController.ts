@@ -154,7 +154,8 @@ class GameController {
             ledController.setSingleLedOn(score, ring, true);
         }
         if (this.gameStatus.calibrationMode === CalibrationMode.Leds) {
-            if (this.calibrationStep >= calibrationOrder.length) {
+            socketServer.emit(SocketEvent.SET_CALIBRATION_STEP, this.calibrationStep);
+            if (this.calibrationStep >= calibrationOrder.length + 2) { // 2 extra for extra bullseye leds
                 console.log("finished led calibration!");
                 
                 this.updateCalibrationState();
@@ -172,21 +173,19 @@ class GameController {
             //console.log("dartCalibration:", dartCalibration);
             this.calibrationStep++;
             this.nextCalibrationStep();
-            return;
-        }
-        if (this.gameStatus.calibrationMode === CalibrationMode.Leds) {
+        } else if (this.gameStatus.calibrationMode === CalibrationMode.Leds) {
             const dartCode = dartCalibration[coord];
-            ledCalibration[dartCode] = { row: Math.floor(this.calibrationStep / ROWS), col: this.calibrationStep % ROWS };
+            ledCalibration[dartCode] = [ ...(ledCalibration[dartCode] || []), { row: Math.floor(this.calibrationStep / ROWS), col: this.calibrationStep % ROWS }];
             setLedCalibration(ledCalibration);
-            console.log("ledCalibration:", ledCalibration);
+            // console.log("ledCalibration:", ledCalibration);
             this.calibrationStep++;
             this.nextCalibrationStep();
-            return;
+        } else {
+            const dartCode = dartCalibration[coord];
+            //console.log("got matrix hit:", dartCode, coord)
+            const { score, ring } = parseDartCode(dartCode);
+            this.addDartThrow(score, ring);
         }
-        const dartCode = dartCalibration[coord];
-        //console.log("got matrix hit:", dartCode, coord)
-        const { score, ring } = parseDartCode(dartCode);
-        this.addDartThrow(score, ring);
     }
 
 }

@@ -7,6 +7,7 @@ import DartboardDrawer from './components/DartboardDrawer';
 import GameBoard from './components/gameBoards/GameBoard';
 import GameSelectionScreen from './components/GameSelectionScreen';
 import PlayerSelectionScreen from './components/PlayerSelectionScreen';
+import Popup from './components/Popup';
 import SettingsDrawer from './components/SettingsDrawer';
 import SettingsSelectionScreen from './components/SettingsSelectionScreen';
 import ThrowsDrawer from './components/ThrowsDrawer';
@@ -54,23 +55,24 @@ function App() {
 	}, [fetchAllPlayers, allPlayers, socketConnected]);
 
 
-  let content: JSX.Element | undefined;
+	let content: JSX.Element | undefined;
 
 	if (!gameList || !gameList.length) content = <LoadingScreenDiv><div>Loading...</div>	</LoadingScreenDiv>
-  else if (calibrationMode) content = <CalibrationScreen />
-  else if (!currentGame) content = <GameSelectionScreen />
-  else if (!selectedSettings || !selectedSettings.length) content = <SettingsSelectionScreen />
-  else if (!players.length) content = <PlayerSelectionScreen />
-  else content = <GameBoard />
+	else if (calibrationMode) content = <CalibrationScreen />
+	else if (!currentGame) content = <GameSelectionScreen />
+	else if (!selectedSettings || !selectedSettings.length) content = <SettingsSelectionScreen />
+	else if (!players.length) content = <PlayerSelectionScreen />
+	else content = <GameBoard />
 
-  return <AppDiv>
-      {content}
-    
+	return <AppDiv>
+		{content}
+
 			<SettingsDrawer />
 			<AudioDrawer />
 			<ThrowsDrawer />
 			<DartboardDrawer />
-  </AppDiv>;
+			<Popup />
+	</AppDiv>;
 }
 
 export default App;

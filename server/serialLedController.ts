@@ -1,7 +1,6 @@
 import { SerialPort } from 'serialport';
-import { ReadlineParser } from '@serialport/parser-readline';
-import gameController, { ledCalibration } from './gameController';
-import { LedCalibrationMap, LedsObj } from '../src/types/LedTypes';
+import { ledCalibration } from './gameController';
+import { LedsObj } from '../src/types/LedTypes';
 
 const retryTime = 10 * 1000;
 let retriesLeft = 10;
@@ -47,13 +46,15 @@ export const writeToLedController = (arr: number[]) => {
     //const output = "b" + arr.map(val => String.fromCharCode(val)).join("") + "\n";
     const output = "a" + arr.map(val => val).join(",") + "\n";
     //console.log("writing leds", output);
+    port?.flush();
     port?.write(output);
 }
 
 export const ledOn = (dartCode: string, on = true, write = false) => {
     if (!ledCalibration[dartCode]) return;
-    const { row, col } = ledCalibration[dartCode];
-    ledOnRowCol(row, col, on, write);
+    const leds = ledCalibration[dartCode];
+    for (const { row, col } of leds)
+        ledOnRowCol(row, col, on, write);
 }
 
 export const ledOnRowCol = (row: number, col: number, on = true, write = false) => {

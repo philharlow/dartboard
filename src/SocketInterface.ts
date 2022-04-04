@@ -52,6 +52,11 @@ export const connectSocket = async () => {
     //console.log("handling SPEAK", message, immediate);
     speak(message, immediate);
   })
+  
+  socket.on(SocketEvent.SHOW_POPUP, (popupMessage) => {
+    //console.log("handling SHOW_POPUP", popupMessage);
+    useConnectionStore.setState({popupMessage});
+  })
 };
 
 export const sendDartThrow = (score: number, ring: Ring) => {

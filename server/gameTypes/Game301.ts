@@ -5,7 +5,7 @@ import { DartThrow, GameType } from "../../src/types/GameTypes";
 import { Hint, Ring } from "../../src/types/LedTypes";
 import { Player } from "../../src/types/PlayerTypes";
 import GameBase from "./GameBase";
-import { socketServer, speak } from "../sockerServer";
+import { showPopup, socketServer, speak } from "../sockerServer";
 import gameController from "../gameController";
 import { SocketEvent } from "../../src/types/SocketTypes";
 
@@ -92,6 +92,8 @@ class Game301 extends GameBase {
 			newThrow.bust = true;
 			newThrow.totalScore = 0;
 			speak(scoreMessage + "! Bust!!", true);
+         
+
 			this.roundEnded();
 		// Winner!
 		} else if (playerScore === 0) {
@@ -102,6 +104,9 @@ class Game301 extends GameBase {
 		} else if (playerDarts.filter((d => d.round === currentRound)).length === this.throwsPerRound)
 			this.roundEnded();
 
+		const popupMessage = newThrow.ring === Ring.Miss ? "Miss" :
+			(newThrow.bust ? "BUST " : "") + newThrow.multiplier + " x " + newThrow.score;
+		showPopup(popupMessage);
 
 		socketServer.emit(SocketEvent.ADD_DART_THROW, newThrow);
 		gameController.gameStatus.dartThrows.push(newThrow);

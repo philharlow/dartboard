@@ -85,3 +85,7 @@ export const emit = (topic: string, data: any) => {
 export const speak = (message: string, immediate?: boolean) => {
 	socketServer?.emit(SocketEvent.SPEAK, { message, immediate });
 };
+
+export const showPopup = (message: string, sound?: string) => {
+	socketServer?.emit(SocketEvent.SHOW_POPUP, { message, sound });
+};

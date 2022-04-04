@@ -47,11 +47,18 @@ const ThrowCell = styled.div`
 	line-height: 20px;
 	border: 1px solid #fff7;
 `;
+const FixedCell = styled(ScoreCell)`
+	position: sticky;
+	left: 10px;
+	width: 100px;
+	background: #0d0d0dc1;
+`;
 const FixedScoreCell = styled(ScoreCell)`
-	position: fixed;
+	position: sticky;
 	left: 10px;
 	height: 65px;
-	width: 75px;
+	width: 100px;
+	line-height: 70px;
 	background: #0d0d0dc1;
 `;
 
@@ -59,6 +66,7 @@ function ScoreBoard() {
 	const dartThrows = useGameStore(store => store.dartThrows);
 	const players = useGameStore(store => store.players);
 	const currentPlayerIndex = useGameStore(store => store.currentPlayerIndex);
+	const waitingForThrow = useGameStore(store => store.waitingForThrow);
 	const currentRound = useGameStore(store => store.currentRound);
 	const scores = useGameStore(store => store.scores);
 
@@ -106,13 +114,13 @@ function ScoreBoard() {
 			throwCells.push(getThrowCell(i, darts[i]));
 		
 		const ref = currentCell ? { ref: setCurrentDiv } : { }
-		return <ScoreCell key={i}>
-			<ThrowDetails { ...ref }>
-				<ThrowList className={bust ? "bust" : ""}>
-					{throwCells}
-				</ThrowList>
-				{shownScore}
-			</ThrowDetails>
+		return <ScoreCell key={i} className={currentCell ? "waiting" : ""}>
+				<ThrowDetails { ...ref }>
+					<ThrowList className={bust ? "bust" : ""}>
+						{throwCells}
+					</ThrowList>
+					{shownScore}
+				</ThrowDetails>
 			</ScoreCell>
 	}
 
@@ -120,7 +128,7 @@ function ScoreBoard() {
 		<ScoresTable>
 			<tbody>
 				<ScoreRow>
-					<BoldCell>Player</BoldCell>
+					<FixedCell>Player</FixedCell>
 					<BoldCell>Score</BoldCell>
 					{rounds}
 				</ScoreRow>
@@ -129,9 +137,9 @@ function ScoreBoard() {
 					const dartsByRound = dartsPerRound[player];
 
 					return <ScoreRow key={player} className={i === currentPlayerIndex ? "current" : ""}>
-							<FixedScoreCell >{player}</FixedScoreCell>
+							<FixedScoreCell className={i === currentPlayerIndex && waitingForThrow ? "waiting" : ""}>{player}</FixedScoreCell>
 							<ScoreCell>{score}</ScoreCell>
-							{dartsByRound.map((darts, d) => getTurnCell(darts, d, i === currentPlayerIndex && d === currentRound))}
+							{dartsByRound.map((darts, d) => getTurnCell(darts, d, i === currentPlayerIndex && d === currentRound && waitingForThrow))}
 						</ScoreRow>
 				})}
 			</tbody>

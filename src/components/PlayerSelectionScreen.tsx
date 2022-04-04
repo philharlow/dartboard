@@ -49,10 +49,10 @@ const GamePlayers = styled.div`
 `;
 const NextButton = styled(Button)`
 	position: fixed;
-	right: 20px;
-	bottom: 20px;
+	right: 10px;
+	bottom: 10px;
 	font-size: 26px;
-	padding: 35px 45px;
+	padding: 30px 40px;
 	font-size: 40px;
 	background: #6a6a;
 	border-radius: 10px;

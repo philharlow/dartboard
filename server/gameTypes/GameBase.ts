@@ -134,7 +134,7 @@ class GameBase {
 		const { players, currentPlayerIndex } = gameController.gameStatus;
 		const nextPlayerIndex = (currentPlayerIndex + 1) % players.length;
 		const nextPlayer = players[nextPlayerIndex];
-		speak("Grab darts. " + getPronounciation(gameController.allPlayers , nextPlayer) + " is up next");
+		speak("Grab darts and hit next player. " + getPronounciation(gameController.allPlayers , nextPlayer) + " is up next");
 		gameController.updateGameStatus({ waitingForThrow: false });
 		ledController.setHints([]);
 		this.roundEndedAnim();
