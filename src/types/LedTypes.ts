@@ -2,12 +2,12 @@ import { cloneDeep } from "lodash";
 
 
 export enum Ring {
-	DoubleBullseye,
-	OuterBullseye,
-	InnerSingle,
-	Triple,
-	OuterSingle,
 	Double,
+	OuterSingle,
+	Triple,
+	InnerSingle,
+	OuterBullseye,
+	DoubleBullseye,
 	Miss,
 }
 
@@ -116,6 +116,17 @@ export const getLedKey = (score: number, ring: Ring) => {
 	//if (ring === Ring.OuterSingle) return "o" + score;
 	//return "s" + score;
 }
+export const getLedCode = (score: number, ring: Ring) => {
+	const ringScore = 20 * ring;
+	const wedgeScore = score - 1;
+	return ringScore + wedgeScore;
+}
+export const getScoreFromCode = (code: number) => {
+	const ring: Ring = Math.floor(code / 20);
+	const score = (code % 20) + 1;
+	return { score, ring };
+}
+
 export const getLedKeySlow = (score: number, ring: Ring) => {
 	if (ring === Ring.Triple) return "t" + score;
 	if (ring === Ring.Double || ring === Ring.DoubleBullseye) return "d" + score;

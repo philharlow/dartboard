@@ -97,19 +97,12 @@ function GameBoard() {
 
   const addMiss = () => {
     sendDartThrow(0, Ring.Miss);
-	setTimeout(() => {
-		(document.activeElement as HTMLElement).blur();
-	}, 1000);
   }
   const undoLastDart = () => {
 	emit(SocketEvent.UNDO_LAST_DART, true);
-	setTimeout(() => {
-		(document.activeElement as HTMLElement).blur();
-	}, 1000);
   }
   const nextPlayer = () => {
 	emit(SocketEvent.NEXT_PLAYER, true);
-	(document.activeElement as HTMLElement).blur();
   }
 
   const ScoreBoard = getScoreBoard(currentGame?.gameType);

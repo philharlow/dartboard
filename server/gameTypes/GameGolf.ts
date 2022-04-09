@@ -109,6 +109,7 @@ class GameGolf extends GameBase {
 
 		const scoreMessage = ring === Ring.Miss ? " miss" : this.getSpokenScore(score, ring);
 		speak(scoreMessage, true);
+		gameController.gameStatus.dartThrows.push(newThrow);
 
 		// Bust!
 		if (playerScore < 0) {
@@ -128,7 +129,6 @@ class GameGolf extends GameBase {
 
 
 		socketServer.emit(SocketEvent.ADD_DART_THROW, newThrow);
-		gameController.gameStatus.dartThrows.push(newThrow);
 		//setDartThrows(clonedDarts);
 		this.updateHints();
 		this.updateScores();

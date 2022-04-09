@@ -21,6 +21,7 @@ const resetGameStatus: GameStatus = {
     winningPlayerIndex: -1,
     selectedSettings: [],
     calibrationMode: CalibrationMode.None,
+    finalScores: [],
 };
 
 const dartCalibration: CalibrationMap = getDartCalibration();

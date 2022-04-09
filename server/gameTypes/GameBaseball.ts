@@ -120,6 +120,7 @@ class GameBaseball extends GameBase {
 
 		const scoreMessage = hit ? this.getSpokenScore(score, ring) : "miss";
 		speak(scoreMessage, true);
+		gameController.gameStatus.dartThrows.push(newThrow);
 		
 		/*if (playerScore === 0) {
 			speak("Well done!. " + currentPlayer.name + " wins!");
@@ -134,7 +135,6 @@ class GameBaseball extends GameBase {
 		}
 
 		socketServer.emit(SocketEvent.ADD_DART_THROW, newThrow);
-		gameController.gameStatus.dartThrows.push(newThrow);
 		//setDartThrows(clonedDarts);
 		this.updateHints();
 		this.updateScores();

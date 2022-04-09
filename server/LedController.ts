@@ -58,6 +58,10 @@ class LedController {
 			this.setSingleLedOn(score, ring, this.getHintOn(score, ring));
 		}, (flashes * 2) * duration);
 		this.pendingFlashes.push({ timeout, score, ring });
+
+		// TODO: do this in a better place
+		if (score === 25)
+			this.animBullseye();
 	};
 
 	getHintOn(score: number, ring: Ring): boolean {
@@ -206,9 +210,8 @@ class LedController {
 		setTimeout(() => this.drawHints(), ringTime * 2 * growOrder.length);
 	};
 	
-	animGrow = () => {
+	animGrow = (ringTime = 150) => {
 		this.cancelPendingFlashes();
-		const ringTime = 150;
 		growOrder.forEach((ring, i) =>  {
 			setTimeout(() => this.setRingOn(ring, true), ringTime * i);
 			setTimeout(() => this.setRingOn(ring, false), ringTime * (i + 1));
@@ -224,6 +227,10 @@ class LedController {
 			setTimeout(() => this.setRingOn(ring, false), ringTime * (i + 1));
 		});
 		setTimeout(() => this.drawHints(), ringTime * growOrder.length + 1);
+	};
+
+	animBullseye = () => {
+		this.animGrow(50);
 	};
 	
 	

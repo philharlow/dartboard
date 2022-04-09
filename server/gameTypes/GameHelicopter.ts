@@ -1,7 +1,7 @@
 import { cloneDeep, fill } from "lodash";
 import ledController from "../LedController";
 //import { speak } from "../../src/store/AudioStore";
-import { DartThrow, FinalPlace, GameType } from "../../src/types/GameTypes";
+import { DartThrow, FinalScore, GameType } from "../../src/types/GameTypes";
 import { Ring, scoreOrder } from "../../src/types/LedTypes";
 import { Player } from "../../src/types/PlayerTypes";
 import GameBase from "./GameBase";
@@ -146,6 +146,7 @@ class GameHelicopter extends GameBase {
 
 		const scoreMessage = hit ? "hit!" : "miss";
 		speak(scoreMessage, true);
+		gameController.gameStatus.dartThrows.push(newThrow);
 
 		if (playerScore === this.numBlades) {
 			speak("Well done!. " + currentPlayer + " wins!");
@@ -156,7 +157,6 @@ class GameHelicopter extends GameBase {
 			this.roundEnded();
 
 		socketServer.emit(SocketEvent.ADD_DART_THROW, newThrow);
-		gameController.gameStatus.dartThrows.push(newThrow);
 		//setDartThrows(clonedDarts);
 		const winner = gameController.gameStatus.winningPlayerIndex;
 		if (winner === -1)
@@ -207,9 +207,9 @@ class GameHelicopter extends GameBase {
 		}
 	}
 
-	getFinalScores(): FinalPlace[] {
+	getFinalScores(): FinalScore[] {
 		const { players, dartThrows } = gameController.gameStatus;
-		const places: FinalPlace[] = players.map((player, i) => ({
+		const places: FinalScore[] = players.map((player, i) => ({
 			playerName: player,
 			place: i,
 			score: this.getScore(player, dartThrows) || 0

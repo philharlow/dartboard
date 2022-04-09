@@ -11,7 +11,7 @@ export const openLedSerialConnection = () => {
         console.log('openLedSerialConnection() already has port!');
         return;
     }
-    const path = process.platform === "win32" ? "COM3" : "/dev/ttyACM1";
+    const path = process.platform === "win32" ? "COM4" : "/dev/ttyACM1";
     console.log('opening led serial on', path);
     port = new SerialPort({ path, baudRate: 115200 });
     // Read the port data
@@ -45,8 +45,8 @@ export const writeToLedController = (arr: number[]) => {
     // TODO fix this on arduino side
     //const output = "b" + arr.map(val => String.fromCharCode(val)).join("") + "\n";
     const output = "a" + arr.map(val => val).join(",") + "\n";
-    //console.log("writing leds", output);
-    port?.flush();
+    // console.log("writing leds. length:", arr.length, output);
+    // port?.flush();
     port?.write(output);
 }
 

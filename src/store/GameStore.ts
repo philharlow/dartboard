@@ -26,6 +26,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 	currentGameType: GameType.None,
 	players: [],
 	scores: [],
+	finalScores: [],
 	dartThrows: [],
 	currentRound: 0,
 	waitingForThrow: false,

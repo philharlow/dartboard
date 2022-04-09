@@ -22,6 +22,7 @@ export interface GameStatus {
 	winningPlayerIndex: number;
 	selectedSettings?: SelectedSetting[];
 	calibrationMode: CalibrationMode;
+	finalScores: FinalScore[];
 }
 
 export interface GameDefinition {
@@ -45,7 +46,7 @@ export interface DartThrow {
 	extra?: number;
 }
 
-export interface FinalPlace {
+export interface FinalScore {
 	playerName: string;
 	score: number;
 	place: number;

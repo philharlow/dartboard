@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import styled from '@emotion/styled/macro';
-import { useConnectionStore } from '../store/ConnectionStore';
+import { PopupMessage, useConnectionStore } from '../store/ConnectionStore';
 
 const PopupRoot = styled.div`
 	display: none;
@@ -30,26 +30,29 @@ const PopupRoot = styled.div`
 
 function Popup() {
 	const [ open, setOpen ] = useState(false);
+	const [popupMessage, setPopupMessage ] = useState<PopupMessage>();
 	const storePopupMessage = useConnectionStore(store => store.popupMessage);
-	const setPopupMessage = useConnectionStore(store => store.setPopupMessage);
+	const setStorePopupMessage = useConnectionStore(store => store.setPopupMessage);
 
 	useEffect(() => {
-		setOpen(false);
-		if (storePopupMessage)
+		if (storePopupMessage) {
+			setPopupMessage(storePopupMessage);
+			setStorePopupMessage(undefined);
+		}
+	}, [setPopupMessage, setStorePopupMessage, storePopupMessage]);
+
+	useEffect(() => {
+		if (popupMessage) {
+			setOpen(false);
 			setTimeout(() => {
 				setOpen(true);
-				setPopupMessage(undefined);
 			}, 1);
-	}, [setPopupMessage, storePopupMessage]);
+		}
+	}, [popupMessage]);
 
-	const classes: string[] = [];
-	if (open)
-		classes.push("open");
-
-	let message = storePopupMessage?.message ?? "";
 	return (
-		<PopupRoot className={classes.join(" ")} >
-			{ message }
+		<PopupRoot className={open ? "open" : ""} >
+			{ popupMessage?.message ?? "" }
 		</PopupRoot>
 	);
 }

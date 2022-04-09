@@ -53,12 +53,12 @@ class Game301 extends GameBase {
 	}
 
 	addDartThrow(score: number, ring: Ring) {
-		const { dartThrows, waitingForThrow, currentRound, players, currentPlayerIndex, winningPlayerIndex } = gameController.gameStatus;
+		const { dartThrows, waitingForThrow, currentRound, players, currentPlayerIndex } = gameController.gameStatus;
 		const currentPlayer = players[currentPlayerIndex];
 		// console.log("addDartThrow", score, ring, currentPlayer);
 		
 		ledController.flashLed(score, ring);
-		if (!players.length || winningPlayerIndex > -1) {
+		if (!players.length) {
 			return;
 		}
 		if (!waitingForThrow) {
@@ -86,6 +86,7 @@ class Game301 extends GameBase {
 
 		const scoreMessage = ring === Ring.Miss ? " miss" : this.getSpokenScore(score, ring);
 		speak(scoreMessage, true);
+		gameController.gameStatus.dartThrows.push(newThrow);
 
 		// Bust!
 		if (playerScore < 0) {
@@ -109,7 +110,6 @@ class Game301 extends GameBase {
 		showPopup(popupMessage);
 
 		socketServer.emit(SocketEvent.ADD_DART_THROW, newThrow);
-		gameController.gameStatus.dartThrows.push(newThrow);
 		//setDartThrows(clonedDarts);
 		this.updateHints();
 		this.updateScores();

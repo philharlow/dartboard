@@ -1,9 +1,9 @@
 import ledController from "../LedController";
 //import { speak } from "../../src/store/AudioStore";
-import { DartThrow, FinalPlace, GameDefinition } from "../../src/types/GameTypes";
+import { DartThrow, FinalScore, GameDefinition } from "../../src/types/GameTypes";
 import { Ring } from "../../src/types/LedTypes";
 import { delay } from "../../src/tools/Utils";
-import { speak } from "../sockerServer";
+import { showPopup, speak } from "../sockerServer";
 import gameController from "../gameController";
 import { getPronounciation } from "../../src/types/PlayerTypes";
 
@@ -69,7 +69,7 @@ class GameBase {
 
 	finishGame(winningPlayerIndex: number) {
 		
-		gameController.updateGameStatus({ winningPlayerIndex, waitingForThrow: false });
+		gameController.updateGameStatus({ winningPlayerIndex, finalScores: this.getFinalScores(), waitingForThrow: false });
 	}
 
 	getScore(player: string, dartThrows: DartThrow[]) {
@@ -127,6 +127,8 @@ class GameBase {
 		});
 		this.waitingForThrowSet();
 		speak("alright, " + nextPlayer + "'s turn!");
+		
+		showPopup(nextPlayer + " is up");
 		this.updateHints();
 	}
 
@@ -145,9 +147,9 @@ class GameBase {
 		ledController.animSolidWipe();
 	}
 
-	getFinalScores() : FinalPlace[] {
+	getFinalScores() : FinalScore[] {
 		const { players, dartThrows } = gameController.gameStatus;
-		const places: FinalPlace[] = players.map((player, i) => ({
+		const places: FinalScore[] = players.map((player, i) => ({
 			playerName: player,
 			place: i,
 			score: this.getScore(player, dartThrows) || 0

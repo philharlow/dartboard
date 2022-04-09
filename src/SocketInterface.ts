@@ -54,7 +54,6 @@ export const connectSocket = async () => {
   })
   
   socket.on(SocketEvent.SHOW_POPUP, (popupMessage) => {
-    //console.log("handling SHOW_POPUP", popupMessage);
     useConnectionStore.setState({popupMessage});
   })
 };

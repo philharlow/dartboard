@@ -3,11 +3,10 @@ import { Button } from '@mui/material';
 import { useState } from 'react';
 import { emit } from '../SocketInterface';
 import { useGameStore } from '../store/GameStore';
-import { FinalPlace } from '../types/GameTypes';
 import { SocketEvent } from '../types/SocketTypes';
 
 const BlurBackground = styled.div`
-	position: absolute;
+	position: fixed;
 	top: 0%;
 	bottom: 0%;
 	right: 0%;
@@ -22,7 +21,7 @@ const WinnerOverlay = styled.div`
     left: 10%;
 	display: flex;
 	flex-direction: column;
-	background: #ccca;
+	background: #4d4d4daa;
 	border-radius: 10px;
     align-items: center;
 	justify-content: space-evenly;
@@ -44,12 +43,46 @@ const FinalScoresTable = styled.table`
 	border: 1px white solid;
   	border-collapse: collapse;
     table-layout: fixed;
+	font-size: 24px;
 	th {
 		border: 1px white solid;
-		width: 70px;
+		padding: 0px 30px;
+	}
+	td {
+		border: 1px white solid;
+		text-align: center;
 	}
 `;
 
+const BaseButton = styled(Button)`
+	font-size: 20px;
+	border-radius: 10px;
+	padding: 10px 20px;
+`;
+const ContinueButton = styled(BaseButton)`
+	background-color: #6a6a;
+	:enabled:hover {
+		background-color: #6a6a;
+    }
+`;
+const ChangeGameButton = styled(BaseButton)`
+	background-color: #a6aa66aa;
+	:enabled:hover {
+		background-color: #a6aa66aa;
+    }
+`;
+const ReplayButton = styled(BaseButton)`
+	background-color: #8b2fd6aa;
+	:enabled:hover {
+		background-color: #8b2fd6aa;
+    }
+`;
+const UndoButton = styled(BaseButton)`
+	background-color: #24aee4aa;
+	:enabled:hover {
+		background-color: #24aee4aa;
+    }
+`;
 const CloseButton = styled.div`
 	position: absolute;
 	top: 5px;
@@ -76,7 +109,7 @@ function WinnerDisplay() {
 	const currentGame = useGameStore(store => store.gameList?.find(game => game.gameType === store.currentGameType));
 	const players = useGameStore(store => store.players);
 	const winningPlayerIndex = useGameStore(store => store.winningPlayerIndex);
-	const finalScores: FinalPlace[] = [];// currentGame!.getFinalScores();
+	const finalScores = useGameStore(store => store.finalScores);
 
 	const undoLastDart = () => {
 		emit(SocketEvent.UNDO_LAST_DART, true);
@@ -101,23 +134,26 @@ function WinnerDisplay() {
 							{finalScores.map((place, i) => <th key={i}>{getPrettyPlace(place.place)}</th>)}
 						</tr>
 						<tr>
-							{finalScores.map((place, i) => <th key={i}>{place.playerName}</th>)}
+							{finalScores.map((place, i) => <td key={i}>{place.playerName}</td>)}
 						</tr>
 						<tr>
-							{finalScores.map((place, i) => <th key={i}>{place.score}</th>)}
+							{finalScores.map((place, i) => <td key={i}>{place.score}</td>)}
 						</tr>
 					</tbody>
 				</FinalScoresTable>
 				<ButtonRow>
-					<Button variant='contained' onClick={() => undoLastDart()}>
+					<UndoButton variant='contained' onClick={() => undoLastDart()}>
 						Undo
-					</Button>
-					<Button variant='contained' onClick={() => selectGame(undefined)}>
+					</UndoButton>
+					<ChangeGameButton variant='contained' onClick={() => selectGame(undefined)}>
 						Change Game
-					</Button>
-					<Button variant='contained' onClick={() => selectGame(currentGame?.gameType)}>
+					</ChangeGameButton>
+					<ReplayButton variant='contained' onClick={() => selectGame(currentGame?.gameType)}>
 						Replay Game
-					</Button>
+					</ReplayButton>
+					<ContinueButton variant='contained' onClick={() => setHidden(true)}>
+						Continue
+					</ContinueButton>
 				</ButtonRow>
 			</WinnerOverlay>
 		</BlurBackground>
