@@ -29,7 +29,7 @@ class GameBaseball extends GameBase {
 				{
 					name: "Innings",
 					propName: "innings",
-					options: [9, 8, 7, 6, 10, 11, 12]
+					options: [9, 8, 7, 6, 10, 11, 12, 2]
 				}
 			]
 		});
@@ -94,6 +94,7 @@ class GameBaseball extends GameBase {
 		const clonedDarts = cloneDeep(dartThrows);
 		const multiplier = this.getMultiplier(ring);
 		let totalScore = multiplier;
+		const inning = currentRound + 1;
 		const roundDarts = clonedDarts.filter((dart) => dart.player === currentPlayer && dart.round === currentRound);
 		const lastThrow = roundDarts.length === 2;
 		if (score === 25 && lastThrow) {
@@ -128,16 +129,34 @@ class GameBaseball extends GameBase {
 			ledController.animSolidWipe();
 		// Thrown 3 darts
 		} else */
-		if (playerDarts.filter((d => d.round === currentRound)).length === this.throwsPerRound) {
-			const inningRuns = this.getRoundScore(roundDarts);
-			speak(currentPlayer + " scored " + inningRuns + " run" + (inningRuns === 1 ? "" : "s"))
-			this.roundEnded();
-		}
 
 		socketServer.emit(SocketEvent.ADD_DART_THROW, newThrow);
 		//setDartThrows(clonedDarts);
 		this.updateHints();
 		this.updateScores();
+
+		if (playerDarts.filter((d => d.round === currentRound)).length === this.throwsPerRound) {
+			const inningRuns = this.getRoundScore(roundDarts);
+			if (currentPlayerIndex + 1 === players.length && inning === this.innings) {
+				const winningPlayerIndex = this.getWinnerIndex();
+				speak("Well done!. " + players[winningPlayerIndex] + " wins!");
+				this.finishGame(winningPlayerIndex);
+				ledController.animSolidWipe();
+			} else {
+				speak(currentPlayer + " scored " + inningRuns + " run" + (inningRuns === 1 ? "" : "s"))
+				this.roundEnded();
+			}
+		}
+	}
+
+	getWinnerIndex() {
+		const { scores } = gameController.gameStatus;
+		let maxScore = scores[0];
+		let winnerIndex = 0;
+		scores.forEach((score, i) => {
+			if (score > maxScore) winnerIndex = i;
+		})
+		return winnerIndex;
 	}
 	
 	getMultiplier(ring: Ring) {

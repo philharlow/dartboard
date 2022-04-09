@@ -48,11 +48,14 @@ export class SocketServer {
 			socket.on(SocketEvent.UNDO_LAST_DART, () => {
 				gameController.undoLastDart();
 			});
-			socket.on(SocketEvent.CLEAR_CALIBRATION, () => {
-				gameController.clearCalibration();
+			socket.on(SocketEvent.CLEAR_CALIBRATION, (darts: boolean) => {
+				gameController.clearCalibration(darts);
 			});
 			socket.on(SocketEvent.SET_CALIBRATION_STEP, () => {
 				gameController.nextCalibrationStep();
+			});
+			socket.on(SocketEvent.HECKLE, (text) => {
+				speak(text);
 			});
 			socket.on(SocketEvent.SET_WAITING_FOR_THROW, (waitingForThrow: boolean) => {
 				gameController.updateGameStatus({ waitingForThrow });

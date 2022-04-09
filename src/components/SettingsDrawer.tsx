@@ -13,9 +13,13 @@ const Title = styled.div`
 
 function SettingsDrawer() {
 
-	const clearCalibration = () => {
-		if(window.confirm("Are you sure you want to clear calibrations?"))
+	const clearDartCalibration = () => {
+		if(window.confirm("Are you sure you want to clear dart calibrations?"))
 			emit(SocketEvent.CLEAR_CALIBRATION, true);
+	};
+	const clearLEDCalibration = () => {
+		if(window.confirm("Are you sure you want to clear led calibrations?"))
+			emit(SocketEvent.CLEAR_CALIBRATION, false);
 	};
 
 	return (
@@ -23,8 +27,11 @@ function SettingsDrawer() {
 			<Title>
 				Settings
 			</Title>
-			<Button variant="contained" onClick={clearCalibration} >
-				Clear Calibration
+			<Button variant="contained" onClick={clearDartCalibration} >
+				Clear Dart Calibration
+			</Button>
+			<Button variant="contained" onClick={clearLEDCalibration} >
+				Clear LED Calibration
 			</Button>
 		</Drawer>
 	);

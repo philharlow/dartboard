@@ -15,6 +15,7 @@ export enum SocketEvent {
 	SET_CALIBRATION_STEP = "SET_CALIBRATION_STEP",
 	CLEAR_CALIBRATION = "CLEAR_CALIBRATION",
 	SHOW_POPUP = "SHOW_POPUP",
+	HECKLE = "HECKLE",
 }
 
 export type CalibrationObj = {

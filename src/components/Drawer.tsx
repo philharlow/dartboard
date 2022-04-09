@@ -9,6 +9,9 @@ const DrawerRoot = styled.div`
 	padding: 10px;
 	border-radius: 10px;
     box-shadow: 0 0 10px #0004;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
 	&.right {
 		right: 0px;
 	}

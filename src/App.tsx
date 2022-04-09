@@ -11,6 +11,7 @@ import Popup from './components/Popup';
 import SettingsDrawer from './components/SettingsDrawer';
 import SettingsSelectionScreen from './components/SettingsSelectionScreen';
 import ThrowsDrawer from './components/ThrowsDrawer';
+import HeckleDrawer from './components/HeckleDrawer';
 import { useConnectionStore } from './store/ConnectionStore';
 import { useGameStore } from './store/GameStore';
 import { usePlayerStore } from './store/PlayerStore';
@@ -70,6 +71,7 @@ function App() {
 			<SettingsDrawer />
 			<AudioDrawer />
 			<ThrowsDrawer />
+			<HeckleDrawer />
 			<DartboardDrawer />
 			<Popup />
 	</AppDiv>;

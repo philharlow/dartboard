@@ -9,7 +9,6 @@ import { sendDartThrow } from '../SocketInterface';
 const DartboardDiv = styled.div`
 	display: flex;
 	flex-direction: column;
-	flex: 1;
 	min-width: 400px;
 	min-height: 400px;
 `;

@@ -11,7 +11,7 @@ export const openLedSerialConnection = () => {
         console.log('openLedSerialConnection() already has port!');
         return;
     }
-    const path = process.platform === "win32" ? "COM4" : "/dev/ttyACM1";
+    const path = process.platform === "win32" ? "COM4" : "/dev/ttyUSB0";
     console.log('opening led serial on', path);
     port = new SerialPort({ path, baudRate: 115200 });
     // Read the port data

@@ -13,7 +13,7 @@ const StartScreenDiv = styled.div`
 	flex-direction: column;
     align-items: center;
     place-content: center;
-	gap: 50px;
+    justify-content: space-around;
 `;
 
 const Title = styled.div`

@@ -122,12 +122,15 @@ class GameController {
         socketServer.emit(SocketEvent.UPDATE_GAME_STATUS, changes);
     }
 
-    clearCalibration = () => {
+    clearCalibration = (darts: boolean) => {
         this.calibrationStep = 0;
-        for (const key in dartCalibration) delete dartCalibration[key];
-        for (const key in ledCalibration) delete ledCalibration[key];
-        setDartCalibration(dartCalibration);
-        setLedCalibration(ledCalibration);
+        if (darts) {
+            for (const key in dartCalibration) delete dartCalibration[key];
+            setDartCalibration(dartCalibration);
+        } else {
+            for (const key in ledCalibration) delete ledCalibration[key];
+            setLedCalibration(ledCalibration);
+        }
         ledController.setAllOn(false);
         console.log("calibrations cleared");
         this.updateCalibrationState();

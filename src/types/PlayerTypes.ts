@@ -30,6 +30,12 @@ export const defaultPlayers: Player[] = [
 	{
 		name: "Bellina",
 	},
+	{
+		name: "Kenny",
+	},
+	{
+		name: "Jessie",
+	},
 ];
 
 export const getPronounciation = (allPlayers: Player[], name: string) => {
