@@ -3,7 +3,7 @@ import ledController from "../LedController";
 import { DartThrow, FinalScore, GameDefinition } from "../../src/types/GameTypes";
 import { Ring } from "../../src/types/LedTypes";
 import { delay } from "../../src/tools/Utils";
-import { showPopup, speak } from "../sockerServer";
+import { showPopup, speak } from "../socketServer";
 import gameController from "../gameController";
 import { getPronounciation } from "../../src/types/PlayerTypes";
 

@@ -2,7 +2,7 @@ import { cloneDeep } from "lodash";
 import { Hint, Led, Ring, getLedsAsInts, scoreOrder, growOrder, initialLedsObj, getLedKey, LedsObj } from "../src/types/LedTypes";
 import { SocketEvent, SoundFX } from "../src/types/SocketTypes";
 import { updateFromLedObj, writeToLedController } from "./serialLedController";
-import { emit } from "./sockerServer";
+import { emit } from "./socketServer";
 
 interface PendingFlash {
 	timeout: NodeJS.Timeout;

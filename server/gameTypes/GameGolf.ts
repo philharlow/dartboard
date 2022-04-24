@@ -4,7 +4,7 @@ import { Hint, Ring } from "../../src/types/LedTypes";
 import { SocketEvent } from "../../src/types/SocketTypes";
 import gameController from "../gameController";
 import ledController from "../LedController";
-import { showPopup, socketServer, speak } from "../sockerServer";
+import { showPopup, socketServer, speak } from "../socketServer";
 import GameBase from "./GameBase";
 
 

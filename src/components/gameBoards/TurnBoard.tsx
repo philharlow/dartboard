@@ -2,7 +2,7 @@ import styled from '@emotion/styled/macro';
 import { useGameStore } from '../../store/GameStore';
 import { Ring } from '../../types/LedTypes';
 
-const RootDiv = styled.div`
+const TurnBoardDiv = styled.div`
     padding-right: 10px;
 `;
 
@@ -78,7 +78,7 @@ function TurnBoard() {
 			scores.push(<ScoreCell key={i}></ScoreCell> );
 
 	return (
-		<RootDiv>
+		<TurnBoardDiv>
 			<Title className={waitingForThrow ? "waiting" : ""}>
 				{currentPlayer}
 			</Title>
@@ -92,7 +92,7 @@ function TurnBoard() {
 					<TotalCell>{turnTotal}</TotalCell>
 				</TurnColumn>
 			</TurnTable>
-		</RootDiv>
+		</TurnBoardDiv>
 	);
 }
 

@@ -4,7 +4,7 @@ import ledController from "../LedController";
 import { Base, DartThrow, GameType } from "../../src/types/GameTypes";
 import { Hint, Ring } from "../../src/types/LedTypes";
 import GameBase from "./GameBase";
-import { socketServer, speak } from "../sockerServer";
+import { socketServer, speak } from "../socketServer";
 import gameController from "../gameController";
 import { SocketEvent } from "../../src/types/SocketTypes";
 import { delay } from "../../src/tools/Utils";

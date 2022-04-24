@@ -5,7 +5,7 @@ import { DartThrow, GameType } from "../../src/types/GameTypes";
 import { Hint, Ring } from "../../src/types/LedTypes";
 import { Player } from "../../src/types/PlayerTypes";
 import GameBase from "./GameBase";
-import { showPopup, socketServer, speak } from "../sockerServer";
+import { showPopup, socketServer, speak } from "../socketServer";
 import gameController from "../gameController";
 import { SocketEvent } from "../../src/types/SocketTypes";
 

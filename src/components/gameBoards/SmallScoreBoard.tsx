@@ -31,6 +31,8 @@ const BoldCell = styled(ScoreCell)`
 function SmallScoreBoard() {
 	const players = useGameStore(store => store.players);
 	const currentPlayerIndex = useGameStore(store => store.currentPlayerIndex);
+	const innings = useGameStore(store => store.selectedSettings?.find(s => s.name === "Innings")?.option ?? 9);
+	const currentRound = useGameStore(store => store.currentRound);
 	const scores = useGameStore(store => store.scores);
 	const [ currentDiv, setCurrentDiv ] = useState<HTMLDivElement | null>(null);
 
@@ -44,6 +46,7 @@ function SmallScoreBoard() {
 
 	return (
 		<ScoresTable>
+			{currentRound + 1}/{innings} inning
 			<tbody>
 				<ScoreRow>
 					<BoldCell>Player</BoldCell>

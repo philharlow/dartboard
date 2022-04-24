@@ -6,7 +6,7 @@ import gameController from './gameController';
 import { parseDartCode } from '../src/types/GameTypes';
 import ledController from './LedController';
 import { gameList } from './gameTypes/GamesList';
-import { startSocketServer } from './sockerServer';
+import { startSocketServer } from './socketServer';
 import { openSerialConnection } from './serialController';
 import { openLedSerialConnection } from './serialLedController';
 import { initGPIO } from './gpioController';

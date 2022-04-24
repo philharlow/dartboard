@@ -7,7 +7,7 @@ import GameBase from './gameTypes/GameBase';
 import { gameList } from './gameTypes/GamesList';
 import ledController from './LedController';
 import { ledCalibrationStep } from './serialLedController';
-import { socketServer } from './sockerServer';
+import { socketServer } from './socketServer';
 import { defaultPlayers } from '../src/types/PlayerTypes';
 
 const resetGameStatus: GameStatus = {
