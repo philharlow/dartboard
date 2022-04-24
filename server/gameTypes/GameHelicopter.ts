@@ -46,6 +46,12 @@ class GameHelicopter extends GameBase {
 		return score;
 	}
 
+	hasPlayerWon(playerIndex: number): boolean {
+		const { scores } = gameController.gameStatus;
+		if (scores[playerIndex] === 4) return true;
+		return false;
+	}
+
 	startingAnim() {
 		ledController.animQuadSpin();
 	}

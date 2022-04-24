@@ -125,7 +125,7 @@ function GameBoard() {
 				Undo
 			</UndoButton>
 			<MissButton
-				disabled={!waitingForThrow || winningPlayerIndex !> -1}
+				disabled={!waitingForThrow}
 				variant="contained"
 				onClick={() => addMiss()}
 			>

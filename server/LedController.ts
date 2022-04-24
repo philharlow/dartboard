@@ -1,6 +1,6 @@
 import { cloneDeep } from "lodash";
 import { Hint, Led, Ring, getLedsAsInts, scoreOrder, growOrder, initialLedsObj, getLedKey, LedsObj } from "../src/types/LedTypes";
-import { SocketEvent } from "../src/types/SocketTypes";
+import { SocketEvent, SoundFX } from "../src/types/SocketTypes";
 import { updateFromLedObj, writeToLedController } from "./serialLedController";
 import { emit } from "./sockerServer";
 
@@ -229,8 +229,11 @@ class LedController {
 		setTimeout(() => this.drawHints(), ringTime * growOrder.length + 1);
 	};
 
+	// TODO clean this up, make it dependent on a real score
 	animBullseye = () => {
 		this.animGrow(50);
+		
+		emit(SocketEvent.PLAY_SOUND, SoundFX.BULLS_EYE);
 	};
 	
 	

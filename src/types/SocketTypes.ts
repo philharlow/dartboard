@@ -16,6 +16,7 @@ export enum SocketEvent {
 	CLEAR_CALIBRATION = "CLEAR_CALIBRATION",
 	SHOW_POPUP = "SHOW_POPUP",
 	HECKLE = "HECKLE",
+	PLAY_SOUND = "PLAY_SOUND",
 }
 
 export type CalibrationObj = {
@@ -35,3 +36,9 @@ for (let i=0; i<20; i++) {
 	calibrationOrder.push(getLedKey(score, Ring.OuterSingle));
 	calibrationOrder.push(getLedKey(score, Ring.Double));
 }
+
+export enum SoundFX {
+	BULLS_EYE = "sounds/bullseye.mp3",
+	BASEBALL_HIT = "sounds/baseball.mp3",
+	BEEP_XYLO = "sounds/beep-xylo.mp3",
+};

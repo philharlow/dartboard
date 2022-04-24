@@ -110,15 +110,23 @@ class GameBase {
 		this.updateHints();
 		this.updateScores();
 	}
+	
+	hasPlayerWon(playerIndex: number): boolean {
+		return false;
+	}
 
 	nextPlayer() {
-		const { players,  currentPlayerIndex,  currentRound, } = gameController.gameStatus;
-		const nextPlayerIndex = (currentPlayerIndex + 1) % players.length;
+		const { players,  currentPlayerIndex,  currentRound } = gameController.gameStatus;
+		let nextPlayerIndex = (currentPlayerIndex + 1) % players.length;
+		for (let i=0; i< players.length; i++) {
+			if (this.hasPlayerWon(nextPlayerIndex))
+				nextPlayerIndex = (nextPlayerIndex + 1) % players.length;
+		}
 		const nextPlayer = players[nextPlayerIndex];
 		
 
 		// Next round
-		if (nextPlayerIndex === 0)
+		if (nextPlayerIndex < currentPlayerIndex )
 			gameController.updateGameStatus({ currentRound: currentRound + 1 });
 		
 		gameController.updateGameStatus({
@@ -136,7 +144,7 @@ class GameBase {
 		const { players, currentPlayerIndex } = gameController.gameStatus;
 		const nextPlayerIndex = (currentPlayerIndex + 1) % players.length;
 		const nextPlayer = players[nextPlayerIndex];
-		speak("Grab darts and hit next player. " + getPronounciation(gameController.allPlayers , nextPlayer) + " is up next");
+		speak("Grab darts and hit next player. "); // + getPronounciation(gameController.allPlayers , nextPlayer) + " is up next");
 		gameController.updateGameStatus({ waitingForThrow: false });
 		ledController.setHints([]);
 		this.roundEndedAnim();

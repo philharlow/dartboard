@@ -9,6 +9,7 @@ import { gameList } from './gameTypes/GamesList';
 import { startSocketServer } from './sockerServer';
 import { openSerialConnection } from './serialController';
 import { openLedSerialConnection } from './serialLedController';
+import { initGPIO } from './gpioController';
 
 const app = express();
 const server = http.createServer(app);
@@ -20,6 +21,7 @@ openLedSerialConnection();
 
 gameController.init();
 
+initGPIO();
 
 
 const lineReader = readline.createInterface({
@@ -36,6 +38,7 @@ let user = "world";
 app.use(cors());
 
 app.use('/', express.static('../build'))
+app.use('/heckler', express.static('../build'))
 
 app.get('/', (req, res) => {
     res.send('Hello ' + user);

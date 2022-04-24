@@ -61,13 +61,20 @@ const _speak = (message: string) => {
 		const { selectedVoice, volume } = useAudioStore.getState();
 		if (volume <= 0) return;
 		console.log("speaking", message);
+		//alert("fully " + (window.document as any).fully + " window.fully " + (window as any).fully);
 		
-		speechSynthesis.cancel();
-		const msg = new SpeechSynthesisUtterance(message);
-		msg.voice = speechSynthesis.getVoices()[selectedVoice];
-		msg.volume = volume;
-		msg.onend = resolve;
-		window.speechSynthesis.speak(msg);
+		if (speechSynthesis) {
+			speechSynthesis.cancel();
+			const msg = new SpeechSynthesisUtterance(message);
+			msg.voice = speechSynthesis.getVoices()[selectedVoice];
+			msg.volume = volume;
+			msg.onend = resolve;
+			window.speechSynthesis.speak(msg);
+		} else if ((window as any).fully) {
+			// Fully kiosk browser support
+			(window as any).fully.stopTextToSpeech();
+			(window as any).fully.textToSpeech(message);
+		}
 	});
 }
 export const speak = (message: string, immediate = false ) => {

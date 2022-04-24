@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useGameStore } from '../../store/GameStore';
 import { playSound } from '../../tools/AudioTools';
 import { Base, DartThrow } from '../../types/GameTypes';
+import { SoundFX } from '../../types/SocketTypes';
 import SmallScoreBoard from './SmallScoreBoard';
 
 const BaseballRoot = styled.div`
@@ -110,7 +111,7 @@ function BaseballBoard() {
 		setRoundDarts(dartThrows.filter(({ player, round }) => player === currentPlayer && round === currentRound));
 
 		if (dartThrows.slice(-1)?.[0]?.totalScore)
-			playSound("sounds/baseball.mp3", 0.5);
+			playSound(SoundFX.BASEBALL_HIT, 0.5);
 		
 	}, [currentPlayer, currentRound, dartThrows]);
 	

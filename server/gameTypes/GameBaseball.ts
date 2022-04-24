@@ -149,6 +149,10 @@ class GameBaseball extends GameBase {
 		}
 	}
 
+	hasPlayerWon(playerIndex: number): boolean {
+		return false;
+	}
+
 	getWinnerIndex() {
 		const { scores } = gameController.gameStatus;
 		let maxScore = scores[0];

@@ -4,7 +4,7 @@ import { DartThrow, GameStatus } from "./types/GameTypes";
 import { useLedStore } from "./store/LedStore";
 import { getCharFromRing, getLedsFromInts, Ring } from "./types/LedTypes";
 import { useGameStore } from "./store/GameStore";
-import { SocketEvent } from "./types/SocketTypes";
+import { SocketEvent, SoundFX } from "./types/SocketTypes";
 import { speak } from "./store/AudioStore";
 import { serverFetch } from "./tools/ClientUtils";
 import { playSound } from "./tools/AudioTools";
@@ -45,7 +45,11 @@ export const connectSocket = async () => {
   })
   
   socket.on(SocketEvent.SET_CALIBRATION_STEP, () => {
-    playSound("sounds/beep-xylo.mp3");
+    playSound(SoundFX.BEEP_XYLO);
+  })
+  
+  socket.on(SocketEvent.PLAY_SOUND, (pathToSound) => {
+    playSound(pathToSound);
   })
   
   socket.on(SocketEvent.SPEAK, ({ message, immediate }) => {

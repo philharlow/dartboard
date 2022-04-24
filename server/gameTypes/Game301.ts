@@ -30,6 +30,12 @@ class Game301 extends GameBase {
 			],
 		});
 	}
+
+	hasPlayerWon(playerIndex: number): boolean {
+		const { scores } = gameController.gameStatus;
+		if (scores[playerIndex] === 0) return true;
+		return false;
+	}
 	
 	getScore(player: string, dartThrows: DartThrow[]) {
 		const darts = dartThrows.filter(t => t.player === player);

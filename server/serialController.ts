@@ -1,6 +1,7 @@
 import { SerialPort } from 'serialport';
 import { ReadlineParser } from '@serialport/parser-readline';
 import gameController from './gameController';
+import { forceCooldown } from './gpioController';
 
 const retryTime = 10 * 1000;
 let retriesLeft = 10;
@@ -41,6 +42,7 @@ export const openSerialConnection = () => {
     parser.on('data', data =>{
         if (data.includes(",")) {
             // console.log('got coordinate:', data);
+            forceCooldown();
             gameController.addDartMatrixHit(data.replace("\r", ""));
         }
     });

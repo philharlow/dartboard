@@ -4,6 +4,7 @@ import { speak, useAudioStore } from '../store/AudioStore';
 import { MenuItem, Select, Slider } from '@mui/material';
 import { useEffect } from 'react';
 import { playSound } from '../tools/AudioTools';
+import { SoundFX } from '../types/SocketTypes';
 
 const Title = styled.div`
 	font-weight: bold;
@@ -24,20 +25,23 @@ const ColoredSelect = styled(Select)`
 `;
 
 function AudioDrawer() {
-	const volume = useAudioStore(store =>store.volume);
-	const setVolume = useAudioStore(store =>store.setVolume);
-	const selectedVoice = useAudioStore(store =>store.selectedVoice);
-	const setSelectedVoice = useAudioStore(store =>store.setSelectedVoice);
-	const voiceNames = useAudioStore(store =>store.voiceNames);
-	const setVoiceNames = useAudioStore(store =>store.setVoiceNames);
+	const volume = useAudioStore(store => store.volume);
+	const setVolume = useAudioStore(store => store.setVolume);
+	const selectedVoice = useAudioStore(store => store.selectedVoice);
+	const setSelectedVoice = useAudioStore(store => store.setSelectedVoice);
+	const voiceNames = useAudioStore(store => store.voiceNames);
+	const setVoiceNames = useAudioStore(store => store.setVoiceNames);
 
 	useEffect(() => {
 		if (voiceNames[0] === "") {
-			speechSynthesis.onvoiceschanged = () => {
-				const foundVoices = speechSynthesis.getVoices();
-				const newVoiceNames = foundVoices.map(voice => voice.name.split(" - ")[0].split("(")[0]);
-				setVoiceNames(newVoiceNames);
-			};
+			// Fully kiosk will error out when trying to access speechSyntehsis 
+			try {
+				speechSynthesis.onvoiceschanged = () => {
+					const foundVoices = speechSynthesis.getVoices();
+					const newVoiceNames = foundVoices.map(voice => voice.name.split(" - ")[0].split("(")[0]);
+					setVoiceNames(newVoiceNames);
+				};
+			} catch (e) {}
 		}
 	}, [setVoiceNames, voiceNames]);
 
@@ -56,7 +60,7 @@ function AudioDrawer() {
 				value={volume * 100}
 				aria-label="Volume slider"
 				onChange={(e, val) => setVolume(+val / 100)}
-				onPointerUp={() => playSound("sounds/beep-xylo.mp3")}
+				onPointerUp={() => playSound(SoundFX.BEEP_XYLO)}
 				/>
 			<br />
 			<Title>
