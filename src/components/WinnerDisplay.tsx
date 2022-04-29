@@ -1,6 +1,6 @@
 import styled from '@emotion/styled/macro';
 import { Button } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { emit } from '../SocketInterface';
 import { useGameStore } from '../store/GameStore';
 import { SocketEvent } from '../types/SocketTypes';
@@ -104,7 +104,7 @@ const getPrettyPlace = (place: number) => {
 }
 
 function WinnerDisplay() {
-	const [ hidden, setHidden ] = useState(false);
+	const [ hidden, setHidden ] = useState(true);
 	const selectGame = useGameStore(store => store.selectGame);
 	const currentGame = useGameStore(store => store.gameList?.find(game => game.gameType === store.currentGameType));
 	const players = useGameStore(store => store.players);
@@ -114,6 +114,10 @@ function WinnerDisplay() {
 	const undoLastDart = () => {
 		emit(SocketEvent.UNDO_LAST_DART, true);
 	}
+
+	useEffect(() => {
+		setHidden(finalScores.length === 0);
+	}, [finalScores]);
 	
 	if (hidden)
 		return null;

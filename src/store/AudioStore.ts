@@ -3,6 +3,7 @@ import create from 'zustand'
 
 export type AudioStore = {
 	volume: number;
+	isHeckler: boolean;
 	selectedVoice: number;
 	voiceNames: string[];
 	ttsQueue: string[];
@@ -11,6 +12,7 @@ export type AudioStore = {
 	setSelectedVoice: (voice: number) => void;
 	setTTSQueue: (ttsQueue: string[]) => void;
 	addTTSMessage: (message: string) => void;
+	setIsHeckler: (heckler: boolean) => void;
 };
 
 const getLocalStorage = (key: string) => JSON.parse(localStorage.getItem(key) ?? "null");
@@ -21,6 +23,7 @@ export const useAudioStore = create<AudioStore>((set, get) => ({
 	voiceNames: [""],
 	selectedVoice: getLocalStorage("selectedVoice") ?? 0,
 	ttsQueue: [],
+	isHeckler: false,
 	setVolume: (volume: number): void =>  {
 		set({ volume });
 		setLocalStorage("volume", volume);
@@ -42,6 +45,9 @@ export const useAudioStore = create<AudioStore>((set, get) => ({
 		const { ttsQueue } = get();
 		set({ ttsQueue: [ ...ttsQueue, message ] });
 		checkQueue();
+	},
+	setIsHeckler: (isHeckler: boolean): void =>  {
+	  	set({ isHeckler });
 	},
 }));
 

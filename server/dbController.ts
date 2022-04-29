@@ -1,6 +1,5 @@
 import { LocalStorage } from "node-localstorage";
 import { CalibrationMap, LedCalibrationMap } from "../src/types/LedTypes";
-import { CalibrationObj } from "../src/types/SocketTypes";
 
 global.localStorage = new LocalStorage('./scratch');
 

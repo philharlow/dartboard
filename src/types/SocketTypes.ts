@@ -17,14 +17,8 @@ export enum SocketEvent {
 	SHOW_POPUP = "SHOW_POPUP",
 	HECKLE = "HECKLE",
 	PLAY_SOUND = "PLAY_SOUND",
+	DISTRACTION = "DISTRACTION",
 }
-
-export type CalibrationObj = {
-	ring: Ring;
-	score: number;
-	x: number;
-	y: number;
-};
 
 export const calibrationOrder: string[] = [];
 calibrationOrder.push(getLedKey(25, Ring.DoubleBullseye));
@@ -42,3 +36,11 @@ export enum SoundFX {
 	BASEBALL_HIT = "sounds/baseball.mp3",
 	BEEP_XYLO = "sounds/beep-xylo.mp3",
 };
+
+export enum LightDistraction {
+	ADD_RANDOM_HINT = "Add Random Hint",
+	REMOVE_HINTS = "Remove Hints",
+	WIPE_ANIMATION = "Wipe Animation",
+	GROW_ANIMATION = "Grow Animation",
+};
+

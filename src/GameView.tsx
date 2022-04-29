@@ -9,10 +9,11 @@ import Popup from './components/Popup';
 import SettingsDrawer from './components/SettingsDrawer';
 import SettingsSelectionScreen from './components/SettingsSelectionScreen';
 import ThrowsDrawer from './components/ThrowsDrawer';
-import HeckleDrawer from './components/HeckleDrawer';
 import { useConnectionStore } from './store/ConnectionStore';
 import { useGameStore } from './store/GameStore';
 import { usePlayerStore } from './store/PlayerStore';
+import AudioDrawer from './components/AudioDrawer';
+import { preloadSounds } from './tools/AudioTools';
 
 const GameViewDiv = styled.div`
   width: 100%;
@@ -36,7 +37,7 @@ function GameView() {
 	const fetchGameList = useGameStore(store => store.fetchGameList);
 	const socketConnected = useConnectionStore(store => store.socketConnected);
 	const allPlayers = usePlayerStore(store => store.allPlayers);
-	const calibrationMode = useGameStore(store => store.calibrationMode);
+	const calibrationState = useGameStore(store => store.calibrationState);
 	const fetchAllPlayers = usePlayerStore(store => store.fetchAllPlayers);
 	
 	console.log("GameView redraw");
@@ -44,6 +45,7 @@ function GameView() {
 	useEffect(() => {
 		if (socketConnected && gameList === undefined) {
 			fetchGameList();
+			preloadSounds();
 		}
 	}, [fetchGameList, gameList, socketConnected]);
 
@@ -56,18 +58,27 @@ function GameView() {
 
 	let content: JSX.Element | undefined;
 
-	if (!gameList || !gameList.length) content = <LoadingScreenDiv><div>Loading...</div>	</LoadingScreenDiv>
-	else if (calibrationMode) content = <CalibrationScreen />
-	else if (!currentGame) content = <GameSelectionScreen />
-	else if (!selectedSettings || !selectedSettings.length) content = <SettingsSelectionScreen />
-	else if (!players.length) content = <PlayerSelectionScreen />
-	else content = <GameBoard />
+	// Loading data
+	if (!gameList || !gameList.length)
+		content = <LoadingScreenDiv><div>Loading...</div>	</LoadingScreenDiv>
+	// Calibration
+	else if (calibrationState !== null)
+		content = <CalibrationScreen />
+	else if (!currentGame)
+		content = <GameSelectionScreen />
+	else if (!selectedSettings || !selectedSettings.length)
+		content = <SettingsSelectionScreen />
+	else if (!players.length)
+		content = <PlayerSelectionScreen />
+	else
+		content = <GameBoard />
 
 	return <GameViewDiv>
 		{content}
 
 		<SettingsDrawer />
 		<ThrowsDrawer />
+		<AudioDrawer />
 		<DartboardDrawer />
 		<Popup />
 	</GameViewDiv>;

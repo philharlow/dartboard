@@ -141,7 +141,7 @@ function GameBoard() {
 			</NextPlayerButton>
 		</ButtonRow>
 		<BackButton onClick={() => window.confirm("Are you sure you want to exit?") && selectGame(undefined)} />
-      	{winningPlayerIndex > -1 && <WinnerDisplay />}
+      	<WinnerDisplay />
     </RootDiv>
   );
 }

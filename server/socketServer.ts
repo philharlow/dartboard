@@ -1,6 +1,6 @@
 import { Server } from 'socket.io';
 import { GameStatus, GameType, parseDartCode, SelectedSetting } from '../src/types/GameTypes';
-import { SocketEvent } from '../src/types/SocketTypes';
+import { LightDistraction, SocketEvent } from '../src/types/SocketTypes';
 import gameController from './gameController';
 import ledController from './LedController';
 
@@ -52,10 +52,16 @@ export class SocketServer {
 				gameController.clearCalibration(darts);
 			});
 			socket.on(SocketEvent.SET_CALIBRATION_STEP, () => {
-				gameController.nextCalibrationStep();
+				gameController.startCalibration();
 			});
-			socket.on(SocketEvent.HECKLE, (text) => {
+			socket.on(SocketEvent.HECKLE, (text) => { // Forward from heckle ui to main tablet
 				speak(text);
+			});
+			socket.on(SocketEvent.PLAY_SOUND, (sound) => { // Forward from heckle ui to main tablet
+				socketServer?.emit(SocketEvent.PLAY_SOUND, sound);
+			});
+			socket.on(SocketEvent.DISTRACTION, (distraction) => { // Forward from heckle ui to main tablet
+				ledController.handleDistraction(distraction);
 			});
 			socket.on(SocketEvent.SET_WAITING_FOR_THROW, (waitingForThrow: boolean) => {
 				gameController.updateGameStatus({ waitingForThrow });

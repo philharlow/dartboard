@@ -67,7 +67,7 @@ class Game301 extends GameBase {
 		if (!players.length) {
 			return;
 		}
-		if (!waitingForThrow) {
+		if (!waitingForThrow && ring !== Ring.Miss) {
 			speak("remove darts and hit next player", true);
 			return;
 		}

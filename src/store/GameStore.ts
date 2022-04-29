@@ -1,7 +1,7 @@
 import create from 'zustand'
 import { emit, socket } from '../SocketInterface';
 import { serverFetch } from '../tools/ClientUtils';
-import { CalibrationMode, DartThrow, GameDefinition, GameStatus, GameType, SelectedSetting } from '../types/GameTypes';
+import { DartThrow, GameDefinition, GameStatus, GameType, SelectedSetting, startingGameStatus } from '../types/GameTypes';
 import { SocketEvent } from '../types/SocketTypes';
 
 export type GameStore = GameStatus & {
@@ -23,16 +23,7 @@ const setViaSocket = (change: Partial<GameStore>) => {
 };
 
 export const useGameStore = create<GameStore>((set, get) => ({
-	currentGameType: GameType.None,
-	players: [],
-	scores: [],
-	finalScores: [],
-	dartThrows: [],
-	currentRound: 0,
-	waitingForThrow: false,
-	currentPlayerIndex: 0,
-	winningPlayerIndex: -1,
-	calibrationMode: CalibrationMode.None,
+	...startingGameStatus,
 	selectGame: (game?: GameType) => {
 		emit(SocketEvent.START_GAME, game);
 	},

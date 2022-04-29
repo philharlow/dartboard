@@ -9,10 +9,9 @@ export enum GameType {
 	GameHelicopter = "helicopter",
 }
 
-
 export interface GameStatus {
 	currentGameType: GameType;
-	currentGameName?: string;
+	currentGameName: string | null;
 	players: string[];
 	scores: number[];
 	dartThrows: DartThrow[];
@@ -20,10 +19,31 @@ export interface GameStatus {
 	waitingForThrow: boolean;
 	currentPlayerIndex: number;
 	winningPlayerIndex: number;
-	selectedSettings?: SelectedSetting[];
-	calibrationMode: CalibrationMode;
+	selectedSettings: SelectedSetting[] | null;
 	finalScores: FinalScore[];
+	calibrationState: CalibrationState | null;
+	connections: {dartboard: boolean, leds: boolean},
 }
+
+export const resetGameStatus: Partial<GameStatus> = {
+    currentGameType: GameType.None,
+    currentGameName: null,
+    players: [],
+    scores: [],
+    dartThrows: [],
+    currentRound: 0,
+    waitingForThrow: false,
+    currentPlayerIndex: 0,
+    winningPlayerIndex: -1,
+    selectedSettings: [],
+    finalScores: [],
+};
+
+export const startingGameStatus: GameStatus = {
+    ...resetGameStatus,
+    calibrationState: null,
+    connections: {dartboard: false, leds: false},
+} as GameStatus;
 
 export interface GameDefinition {
 	name: string;
@@ -63,9 +83,12 @@ export interface SelectedSetting {
 }
 
 export enum CalibrationMode {
-	None,
     Dartboard,
     Leds,
+}
+export interface CalibrationState {
+	mode: CalibrationMode;
+	step: number | null;
 }
 
 export const parseDartCode = (code: string) => {
@@ -76,6 +99,15 @@ export const parseDartCode = (code: string) => {
 	if (score === 25)
 		return { ring: ring === Ring.InnerSingle ? Ring.OuterBullseye : Ring.DoubleBullseye, score: 25 };
 	return { ring, score };
+}
+
+export const getSpokenScore = (dartCode: string) => {
+	const { ring, score } = parseDartCode(dartCode);
+	if (ring === Ring.Miss) return "Miss";
+	if (ring === Ring.Triple) return "Triple " + score;
+	const scoreStr = score === 25 ? "Bullseye" : "" + score;
+	if (ring === Ring.Double || ring === Ring.DoubleBullseye) return "Double " + scoreStr;
+	return scoreStr;
 }
 
 export enum Base {

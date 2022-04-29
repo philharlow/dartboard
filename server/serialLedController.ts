@@ -1,24 +1,27 @@
 import { SerialPort } from 'serialport';
-import { ledCalibration } from './gameController';
+import gameController, { ledCalibration } from './gameController';
 import { LedsObj } from '../src/types/LedTypes';
 
 const retryTime = 10 * 1000;
 let retriesLeft = 10;
 let port: SerialPort | undefined;
 
+export let ledsConnected = false;
+
 export const openLedSerialConnection = () => {
     if (port) {
         console.log('openLedSerialConnection() already has port!');
         return;
     }
-    const path = process.platform === "win32" ? "COM4" : "/dev/ttyUSB0";
+    const path = process.platform === "win32" ? "COM4" : "/dev/ttyACM0";
     console.log('opening led serial on', path);
     port = new SerialPort({ path, baudRate: 115200 });
     // Read the port data
     port.on("open", () => {
         console.log('led serial port open');
         retriesLeft = 10;
-
+        ledsConnected = true;
+        gameController.updateConnections();
     });
     const retryConnection = () => {
         port?.destroy();
@@ -30,10 +33,14 @@ export const openLedSerialConnection = () => {
     port.on("close", () => {
         if (!port) return;
         console.log('led serial port closed. retrying...');
+        ledsConnected = false;
+        gameController.updateConnections();
         retryConnection();
     });
     port.on("error", (message) => {
         console.log('led serial port error!!', message, "retriesLeft:", retriesLeft);
+        ledsConnected = false;
+        gameController.updateConnections();
         retryConnection();
     });
 }

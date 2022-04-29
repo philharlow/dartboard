@@ -1,7 +1,7 @@
 import { cloneDeep } from "lodash";
 import { Hint, Led, Ring, getLedsAsInts, scoreOrder, growOrder, initialLedsObj, getLedKey, LedsObj } from "../src/types/LedTypes";
-import { SocketEvent, SoundFX } from "../src/types/SocketTypes";
-import { updateFromLedObj, writeToLedController } from "./serialLedController";
+import { LightDistraction, SocketEvent, SoundFX } from "../src/types/SocketTypes";
+import { updateFromLedObj } from "./serialLedController";
 import { emit } from "./socketServer";
 
 interface PendingFlash {
@@ -10,6 +10,16 @@ interface PendingFlash {
 	ring: Ring;
 }
 
+export const getRandomSegment = (): Hint => {
+	const score = 1 + Math.floor(Math.random() * 20); // 1-21 (21 for bullseye)
+	// Bullseye
+	if (score > 20) {
+		const ring = Math.random() > 0.5 ? Ring.DoubleBullseye : Ring.OuterBullseye;
+		return { ring, score: 25 };
+	}
+	const ring: Ring = Math.floor(Math.random() * 4); // First 4 are Double, OuterSingle, Triple, InnerSingle currently
+	return { ring, score };
+}
 
 export const countOns = (arr: Led[]) => arr.reduce((a, v) => (v.on ? a + 1 : a), 0);
 
@@ -19,6 +29,23 @@ class LedController {
 	pendingFlashes: PendingFlash[] = [];
 	hints: Hint[] = [];
 	needsDispatch = false;
+	
+
+	handleDistraction = (distraction: LightDistraction) => {
+		if (distraction === LightDistraction.ADD_RANDOM_HINT) {
+			const newHints: Hint[] = [ ...this.hints, getRandomSegment() ];
+			this.setHints(newHints);
+		}
+		if (distraction === LightDistraction.REMOVE_HINTS) {
+			this.setHints([]);
+		}
+		if (distraction === LightDistraction.WIPE_ANIMATION) {
+			this.animWipe();
+		}
+		if (distraction === LightDistraction.GROW_ANIMATION) {
+			this.animGrow();
+		}
+	}
 
 	loop = () => {
 		if (this.needsDispatch) {

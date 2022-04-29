@@ -126,7 +126,7 @@ class GameBase {
 		
 
 		// Next round
-		if (nextPlayerIndex < currentPlayerIndex )
+		if (nextPlayerIndex <= currentPlayerIndex )
 			gameController.updateGameStatus({ currentRound: currentRound + 1 });
 		
 		gameController.updateGameStatus({

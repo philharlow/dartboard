@@ -97,7 +97,7 @@ class GameGolf extends GameBase {
 		if (!players.length || winningPlayerIndex > -1) {
 			return;
 		}
-		if (!waitingForThrow) {
+		if (!waitingForThrow && ring !== Ring.Miss) {
 			speak("remove darts and hit next player", true);
 			return;
 		}
