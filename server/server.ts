@@ -7,21 +7,24 @@ import { parseDartCode } from '../src/types/GameTypes';
 import ledController from './LedController';
 import { gameList } from './gameTypes/GamesList';
 import { startSocketServer } from './socketServer';
-import { openSerialConnection } from './serialController';
-import { openLedSerialConnection } from './serialLedController';
-import { initGPIO } from './gpioController';
+import calibrationController from './calibrationController';
 
 const app = express();
 const server = http.createServer(app);
 
 startSocketServer(server);
 
-openSerialConnection();
-openLedSerialConnection();
-
 gameController.init();
+calibrationController.init();
 
-initGPIO();
+// Prevent running gpio bit on windows
+setTimeout(async () => {
+    const isWindows = process.platform === "win32";
+    if (!isWindows) {
+        const { initGPIO } = await import('./gpioController');
+        initGPIO();
+    }
+}, 1);
 
 
 const lineReader = readline.createInterface({

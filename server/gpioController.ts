@@ -23,15 +23,6 @@ const tiltSensorEvent = () => {
 	}, tiltSensorCooldownTime);
 };
 
-export const forceCooldown = () => {
-	clearTimeout(tiltSensorCooldown);
-	clearTimeout(missDelay);
-	tiltSensorCooldown = setTimeout(() => {
-		tiltSensorCooldown = undefined;
-	}, tiltSensorCooldownTime);
-};
-
-
 
 gpio.on('change', function(channel, value) {
 	if (channel === tiltSensor) {

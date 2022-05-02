@@ -1,6 +1,7 @@
 import { Server } from 'socket.io';
-import { GameStatus, GameType, parseDartCode, SelectedSetting } from '../src/types/GameTypes';
-import { LightDistraction, SocketEvent } from '../src/types/SocketTypes';
+import { CalibrationMode, GameStatus, GameType, parseDartCode, SelectedSetting } from '../src/types/GameTypes';
+import { LightDistraction, SocketEvent, SoundFX } from '../src/types/SocketTypes';
+import calibrationController from './calibrationController';
 import gameController from './gameController';
 import ledController from './LedController';
 
@@ -48,11 +49,11 @@ export class SocketServer {
 			socket.on(SocketEvent.UNDO_LAST_DART, () => {
 				gameController.undoLastDart();
 			});
-			socket.on(SocketEvent.CLEAR_CALIBRATION, (darts: boolean) => {
-				gameController.clearCalibration(darts);
+			socket.on(SocketEvent.CLEAR_CALIBRATION, (mode: CalibrationMode) => {
+				calibrationController.clearCalibration(mode);
 			});
 			socket.on(SocketEvent.SET_CALIBRATION_STEP, () => {
-				gameController.startCalibration();
+				calibrationController.startCalibration();
 			});
 			socket.on(SocketEvent.HECKLE, (text) => { // Forward from heckle ui to main tablet
 				speak(text);
@@ -93,6 +94,10 @@ export const emit = (topic: string, data: any) => {
 
 export const speak = (message: string, immediate?: boolean) => {
 	socketServer?.emit(SocketEvent.SPEAK, { message, immediate });
+};
+
+export const playSound = (sound: SoundFX) => {
+	socketServer?.emit(SocketEvent.PLAY_SOUND, sound);
 };
 
 export const showPopup = (message: string, sound?: string) => {

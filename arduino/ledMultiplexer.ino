@@ -20,18 +20,20 @@ void setup ()
 const int ROWS = 11;
 const int COLS = 8;
 
-int8_t leds[ROWS] = { 0 };
+uint8_t leds[ROWS] = { 0 };
 
 // all on bytes(doesnt work): bÿÿÿÿÿÿÿÿÿÿÿ 
 // all on: a255,255,255,255,255,255,255,255,255,255,255
 // 1s: a1,1,1,1,1,1,1,1,1,1,1
 // all off: a0,0,0,0,0,0,0,0,0,0,0
+// single on: +1,1
+// single off: -1,1
 
 
 boolean newData = false;
-const int MODE_ON = 1, MODE_OFF = 2, MODE_ALL = 3, MODE_ALL_BYTES = 4; 
-int mode = 0;
-int8_t inputBuffer[ROWS];
+const int INPUT_MODE_ON = 1, INPUT_MODE_OFF = 2, INPUT_MODE_ALL = 3, INPUT_MODE_ALL_BYTES = 4; 
+int inputMode = 0;
+uint8_t inputBuffer[ROWS];
 int inputPos = 0;
 
 
@@ -41,37 +43,48 @@ unsigned int tempInputPos = 0;
 void processIncomingByte (const byte inByte) {
   
   if (inByte == '\n' && tempInputPos == 0) {
-      if (mode == MODE_ON && inputPos == 2) {
+      if (inputMode == INPUT_MODE_ON && inputPos == 2) {
         int x = inputBuffer[0];
         int y = inputBuffer[1];
         leds[y] = leds[y] | (1 << x);
       }
-      if (mode == MODE_OFF && inputPos == 2) {
+      if (inputMode == INPUT_MODE_OFF && inputPos == 2) {
         int x = inputBuffer[0];
         int y = inputBuffer[1];
         leds[y] = leds[y] & ~(1 << x);
       }
-      if (mode == MODE_ALL || (mode == MODE_ALL_BYTES)) {
+      if (inputMode == INPUT_MODE_ALL || (inputMode == INPUT_MODE_ALL_BYTES)) {
         for (int i=0; i<inputPos; i++) {
           leds[i] = inputBuffer[i];
         }
       }
       inputPos = 0;
-      mode = 0;
+      inputMode = 0;
+      
+      //Serial.println("rows:");
+      //for (int row = 0; row < ROWS; row++) {
+      //  Serial.println(leds[row]);
+      //}
   } else {
-    if (mode == 0) {
-      if (inByte == '+') mode = MODE_ON;
-      if (inByte == '-') mode = MODE_OFF;
-      if (inByte == 'a') mode = MODE_ALL;
-      if (inByte == 'b') mode = MODE_ALL_BYTES;
-    } else if (mode == MODE_ALL_BYTES) {
+    // First character defines mode
+    if (inputMode == 0) {
+      if (inByte == '+') inputMode = INPUT_MODE_ON;
+      if (inByte == '-') inputMode = INPUT_MODE_OFF;
+      if (inByte == 'a') inputMode = INPUT_MODE_ALL;
+      if (inByte == 'b') inputMode = INPUT_MODE_ALL_BYTES;
+    } else if (inputMode == INPUT_MODE_ALL_BYTES) {
       if (inputPos < ROWS)
         inputBuffer [inputPos++] = inByte;
     } else {
       if (inByte == ',' || inByte == '\n') {
         tempInput[tempInputPos++] = '\0';
         tempInputPos = 0;
-        inputBuffer [inputPos++] = atoi(tempInput);
+        //Serial.println("tempInput");
+        //Serial.println(tempInput);
+        //Serial.println(inputPos);
+        int val = atoi(tempInput);
+        //Serial.println(val);
+        inputBuffer[inputPos++] = val;
         if (inByte == '\n')
           processIncomingByte(inByte);
       } else {
@@ -81,11 +94,6 @@ void processIncomingByte (const byte inByte) {
   }
 }
 
-
-
-int pos = -1;
-int loopCount = 0;
-String str;
 void loop() {
   
   while (Serial.available () > 0) {
@@ -98,19 +106,22 @@ void loop() {
 
 void draw() {
   for (int row = 0; row < ROWS; row++) {
-    int16_t grounds = 0xFFFF;
+    uint16_t grounds = 0xFFFF;
     grounds -= 1 << row;
 
-    int positives = leds[row];// 0;
-    //for (int col = 0; col < COLS; col++)
-    //  if (arr[row][col]) positives += 1 << col;
+    uint16_t positives = leds[row];
+    //Serial.println("positives");
+    //Serial.println(positives);
+    //Serial.println("grounds");
+    //Serial.println(grounds >> 8);
+    //Serial.println(grounds & 255);
 
     digitalWrite(latchPin, LOW);
+    shiftOut(dataPin, clockPin, MSBFIRST, positives);
     shiftOut(dataPin, clockPin, MSBFIRST, grounds >> 8);
     shiftOut(dataPin, clockPin, MSBFIRST, grounds & 255);
-    shiftOut(dataPin, clockPin, MSBFIRST, positives);
     digitalWrite(latchPin, HIGH);
 
-    //delay(500);
+    //delay(1500);
   }
 }

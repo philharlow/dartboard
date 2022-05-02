@@ -104,9 +104,7 @@ class Game301 extends GameBase {
 			this.roundEnded();
 		// Winner!
 		} else if (playerScore === 0) {
-			speak("Well done!. " + currentPlayer + " wins!");
 			this.finishGame(currentPlayerIndex);
-			ledController.animSolidWipe();
 		// Thrown 3 darts
 		} else if (playerDarts.filter((d => d.round === currentRound)).length === this.throwsPerRound)
 			this.roundEnded();

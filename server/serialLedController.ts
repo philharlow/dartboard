@@ -1,48 +1,11 @@
 import { SerialPort } from 'serialport';
-import gameController, { ledCalibration } from './gameController';
+import { ledCalibration } from './calibrationController';
 import { LedsObj } from '../src/types/LedTypes';
 
-const retryTime = 10 * 1000;
-let retriesLeft = 10;
-let port: SerialPort | undefined;
+let serialPort: SerialPort | undefined;
 
-export let ledsConnected = false;
-
-export const openLedSerialConnection = () => {
-    if (port) {
-        console.log('openLedSerialConnection() already has port!');
-        return;
-    }
-    const path = process.platform === "win32" ? "COM4" : "/dev/ttyACM0";
-    console.log('opening led serial on', path);
-    port = new SerialPort({ path, baudRate: 115200 });
-    // Read the port data
-    port.on("open", () => {
-        console.log('led serial port open');
-        retriesLeft = 10;
-        ledsConnected = true;
-        gameController.updateConnections();
-    });
-    const retryConnection = () => {
-        port?.destroy();
-        port = undefined;
-        if (retriesLeft && retriesLeft--) {
-            setTimeout(openLedSerialConnection, retryTime);
-        }
-    };
-    port.on("close", () => {
-        if (!port) return;
-        console.log('led serial port closed. retrying...');
-        ledsConnected = false;
-        gameController.updateConnections();
-        retryConnection();
-    });
-    port.on("error", (message) => {
-        console.log('led serial port error!!', message, "retriesLeft:", retriesLeft);
-        ledsConnected = false;
-        gameController.updateConnections();
-        retryConnection();
-    });
+export const handleLedSerialConnection = (port: SerialPort) => {
+    serialPort = port;
 }
 
 const leds = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -54,7 +17,7 @@ export const writeToLedController = (arr: number[]) => {
     const output = "a" + arr.map(val => val).join(",") + "\n";
     // console.log("writing leds. length:", arr.length, output);
     // port?.flush();
-    port?.write(output);
+    serialPort?.write(output);
 }
 
 export const ledOn = (dartCode: string, on = true, write = false) => {
@@ -76,20 +39,8 @@ export const updateFromLedObj = (ledsObj: LedsObj) => {
     writeToLedController(leds);
 }
 
-let pos = 0;
 const ROWS = 11;
 const COLS = 8;
-/*
-setInterval(() => {
-    leds[Math.floor(pos / COLS) % ROWS] = leds[Math.floor(pos / COLS) % ROWS] & ~(1 << (pos % COLS));
-    if (pos + 1 >= ROWS * COLS) pos = 0;
-    else pos++;
-    leds[Math.floor(pos / COLS) % ROWS] = leds[Math.floor(pos / COLS) % ROWS] | (1 << (pos % COLS));
-    //console.log("leds", leds);
-    //console.log("led at", leds.length, Math.floor(pos / COLS) % ROWS, pos % COLS);
-    writeToLedController(leds);
-}, 100);
-*/
 
 let lastStep = 0;
 export const ledCalibrationStep = (step: number) => {

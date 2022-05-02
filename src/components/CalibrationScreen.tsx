@@ -36,6 +36,11 @@ function CalibrationScreen() {
 		emit(SocketEvent.SET_CALIBRATION_STEP, 0);
 	}
 
+	const step = calibrationState?.step ?? 0;
+	// 2 extra for leds since the bullseys has 3 leds. Should find a better way to do this.
+	const extraLeds = 2;
+	const steps = calibrationState?.mode === CalibrationMode.Dartboard ? calibrationOrder.length : calibrationOrder.length + extraLeds;
+
 	return (
 		<CalibrationScreenDiv>
 			<Title>
@@ -49,12 +54,12 @@ function CalibrationScreen() {
 				}
 				{calibrationState?.step !== null && 
 				<>
-					<CalibrationStep>Step {(calibrationState?.step ?? 0) + 1} / {calibrationOrder.length}</CalibrationStep>
+					<CalibrationStep>Step {step + 1} / {steps}</CalibrationStep>
+					{calibrationState?.mode === CalibrationMode.Dartboard && <CalibrationHint>Press {getSpokenScore(calibrationOrder[step])} on the dartboard</CalibrationHint>}
 					{calibrationState?.mode === CalibrationMode.Leds && <CalibrationHint>Press the lit up segment on the dartboard</CalibrationHint>}
-					{calibrationState?.mode === CalibrationMode.Dartboard && <CalibrationHint>Press {getSpokenScore(calibrationOrder[calibrationState?.step ?? 0])} on the dartboard</CalibrationHint>}
 				</>}
 			</CalibrationHint>
-			<DartBoard />
+			{calibrationState?.mode === CalibrationMode.Dartboard && <DartBoard />}
 		</CalibrationScreenDiv>
 	);
 }

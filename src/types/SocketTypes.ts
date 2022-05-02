@@ -33,13 +33,15 @@ for (let i=0; i<20; i++) {
 
 export enum SoundFX {
 	BULLS_EYE = "sounds/bullseye.mp3",
-	BASEBALL_HIT = "sounds/baseball.mp3",
+	BASEBALL_HIT = "sounds/baseball-hit.mp3",
+	CHEERING = "sounds/cheering.mp3",
 	BEEP_XYLO = "sounds/beep-xylo.mp3",
+	SUCCESS = "sounds/success.mp3",
 };
 
 export enum LightDistraction {
 	ADD_RANDOM_HINT = "Add Random Hint",
-	REMOVE_HINTS = "Remove Hints",
+	REMOVE_HINTS = "Clear Hints",
 	WIPE_ANIMATION = "Wipe Animation",
 	GROW_ANIMATION = "Grow Animation",
 };

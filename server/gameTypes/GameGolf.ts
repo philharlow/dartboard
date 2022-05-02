@@ -1,10 +1,10 @@
 import { cloneDeep } from "lodash";
 import { DartThrow, GameType } from "../../src/types/GameTypes";
 import { Hint, Ring } from "../../src/types/LedTypes";
-import { SocketEvent } from "../../src/types/SocketTypes";
+import { SocketEvent, SoundFX } from "../../src/types/SocketTypes";
 import gameController from "../gameController";
 import ledController from "../LedController";
-import { showPopup, socketServer, speak } from "../socketServer";
+import { playSound, showPopup, socketServer, speak } from "../socketServer";
 import GameBase from "./GameBase";
 
 
@@ -134,9 +134,7 @@ class GameGolf extends GameBase {
 			this.roundEnded();
 			if (currentRound === this.holes) {
 				// TODO
-				speak("Well done!. " + currentPlayer + " wins!");
 				this.finishGame(currentPlayerIndex);
-				ledController.animSolidWipe();
 			// Thrown 3 darts
 			}
 		}

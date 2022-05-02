@@ -3,9 +3,10 @@ import ledController from "../LedController";
 import { DartThrow, FinalScore, GameDefinition } from "../../src/types/GameTypes";
 import { Ring } from "../../src/types/LedTypes";
 import { delay } from "../../src/tools/Utils";
-import { showPopup, speak } from "../socketServer";
+import { playSound, showPopup, speak } from "../socketServer";
 import gameController from "../gameController";
 import { getPronounciation } from "../../src/types/PlayerTypes";
+import { SoundFX } from "../../src/types/SocketTypes";
 
 
 
@@ -68,8 +69,12 @@ class GameBase {
 	}
 
 	finishGame(winningPlayerIndex: number) {
+		const { players, } = gameController.gameStatus;
 		
 		gameController.updateGameStatus({ winningPlayerIndex, finalScores: this.getFinalScores(), waitingForThrow: false });
+		playSound(SoundFX.CHEERING);
+		speak("Well done!. " + players[winningPlayerIndex] + " wins!");
+		ledController.animSolidWipe();
 	}
 
 	getScore(player: string, dartThrows: DartThrow[]) {

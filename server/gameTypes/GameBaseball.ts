@@ -14,10 +14,22 @@ const baseballField = [ 9, 12, 5, 20, 1, 18, 4 ];
 
 export const baseList = [Base.Home, Base.First, Base.Second, Base.Third, Base.Home];
 export const runnerOrder = [Base.Dugout, Base.Home, Base.First, Base.Second, Base.Third, Base.Home, Base.Dugout];
+		
+const fieldHints: Hint[] = [];
+baseballField.forEach(score => {
+	fieldHints.push({ score, ring: Ring.InnerSingle });
+	fieldHints.push({ score, ring: Ring.OuterSingle });
+	fieldHints.push({ score, ring: Ring.Double });
+	fieldHints.push({ score, ring: Ring.Triple });
+});
+const fieldHintsWithHomerun = cloneDeep(fieldHints);
+fieldHintsWithHomerun.push({ score: 25, ring: Ring.DoubleBullseye });
+fieldHintsWithHomerun.push({ score: 25, ring: Ring.OuterBullseye });
 
 class GameBaseball extends GameBase {
 	throwsPerRound = 3;
 	innings = 9;
+	homerunsAnyBatter = false;
 
 	constructor() {
 		super({
@@ -30,6 +42,11 @@ class GameBaseball extends GameBase {
 					name: "Innings",
 					propName: "innings",
 					options: [9, 8, 7, 6, 10, 11, 12, 2]
+				},
+				{
+					name: "Homeruns Any Batter",
+					propName: "homerunsAnyBatter",
+					options: [true, false]
 				}
 			]
 		});
@@ -96,8 +113,8 @@ class GameBaseball extends GameBase {
 		let totalScore = multiplier;
 		const inning = currentRound + 1;
 		const roundDarts = clonedDarts.filter((dart) => dart.player === currentPlayer && dart.round === currentRound);
-		const lastThrow = roundDarts.length === 2;
-		if (score === 25 && lastThrow) {
+		const canHitHomerun = this.homerunsAnyBatter || roundDarts.length === 2;
+		if (score === 25 && canHitHomerun) {
 			hit = true;
 			totalScore = 4;
 		}
@@ -139,9 +156,7 @@ class GameBaseball extends GameBase {
 			const inningRuns = this.getRoundScore(roundDarts);
 			if (currentPlayerIndex + 1 === players.length && inning === this.innings) {
 				const winningPlayerIndex = this.getWinnerIndex();
-				speak("Well done!. " + players[winningPlayerIndex] + " wins!");
 				this.finishGame(winningPlayerIndex);
-				ledController.animSolidWipe();
 			} else {
 				speak(currentPlayer + " scored " + inningRuns + " run" + (inningRuns === 1 ? "" : "s"))
 				this.roundEnded();
@@ -181,17 +196,8 @@ class GameBaseball extends GameBase {
 		const currentPlayer = players[currentPlayerIndex];
 		const roundDarts = dartThrows.filter((dart) => dart.player === currentPlayer && dart.round === currentRound);
 
-		const hints: Hint[] = [];
-		baseballField.forEach(score => {
-			hints.push({ score, ring: Ring.InnerSingle });
-			hints.push({ score, ring: Ring.OuterSingle });
-			hints.push({ score, ring: Ring.Double });
-			hints.push({ score, ring: Ring.Triple });
-		});
-		if (roundDarts.length === 2) {
-			hints.push({ score: 25, ring: Ring.DoubleBullseye });
-			hints.push({ score: 25, ring: Ring.OuterBullseye });
-		}
+		const canHitHomerun = this.homerunsAnyBatter || roundDarts.length === 2;
+		const hints = canHitHomerun ? fieldHintsWithHomerun : fieldHints;
 		ledController.setHints(hints);
 	}
 
