@@ -45,12 +45,12 @@ for(let i = 0; i < paths.length && !ledSerialConnection && !dartboardSerialConne
             //console.log(`serial port ${path} open`);
         });
         serialPort.on("close", () => {
-            serialPort?.destroy();
+            cleanupPort(serialPort);
             retryConnection(serialPort);
             //console.log('serial port closed. retrying...');
         });
         serialPort.on("error", (message) => {
-            serialPort?.destroy();
+            cleanupPort(serialPort);
             //console.log('serial port error!!', message);
         });
         parser.on('data', (data: string) => {
@@ -59,13 +59,31 @@ for(let i = 0; i < paths.length && !ledSerialConnection && !dartboardSerialConne
                 handleInputSerialConnection(serialPort, parser);
                 gameController.updateConnections();
                 console.log("found dartboard!", path);
+                cleanup();
             } else if (data.includes("LedMatrix")) {
                 ledSerialConnection = serialPort;
                 handleLedSerialConnection(serialPort);
                 gameController.updateConnections();
                 console.log("found leds!", path);
+                cleanup();
             }
-            else console.log("serial port", path, "got data", data);
-        }); 
+            // else console.log("serial port", path, "got data", data);
+
+        });
+
+        const cleanupPort = (port: SerialPort) => {
+            if (port && port !== ledSerialConnection && port !== dartboardSerialConnection) {
+                port?.removeAllListeners();
+                if (port?.isOpen)
+                    port?.close();
+                port?.destroy();
+            }
+        };
+
+        const cleanup = () => {
+            if (ledSerialConnection && dartboardSerialConnection) {
+                serialPorts.forEach(cleanupPort);
+            }
+        };
     } catch (e) {}
 }

@@ -86,7 +86,7 @@ class GameController {
 
     addDartMatrixHit(coord: string) {
         const dartCode = dartCalibration[coord];
-        //console.log("got matrix hit:", dartCode, coord)
+        console.log("got matrix hit:", dartCode, coord)
         const { score, ring } = parseDartCode(dartCode);
         this.addDartThrow(score, ring);
     }

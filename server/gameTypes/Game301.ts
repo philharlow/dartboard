@@ -20,13 +20,23 @@ class Game301 extends GameBase {
 			maxPlayers: 8,
 			pronounciation: ("3o1"),
 			gameType: GameType.Game301,
-			settingsIntro: "Select your starting score",
+			//settingsIntro: "Select your starting score",
 			settingsOptions: [
 				{
 					name: "Starting Score",
 					propName: "startingScore",
 					options: [ 301, 501, 601, 701, 101 ]
 				},
+				{
+					name: "In Mode",
+					propName: "inMode",
+					options: [ "Any In", "Double In", "Triple In" ],
+				},
+				{
+					name: "Out Mode",
+					propName: "outMode",
+					options: [ "Any Out", "Double Out", "Triple Out" ],
+				}
 			],
 		});
 	}
