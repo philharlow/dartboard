@@ -12,13 +12,28 @@ const outputs = [ledPin];
 const tiltSensorCooldownTime = 1000; // ms
 let tiltSensorCooldown;
 let missDelay;
+let blinking = false;
+let blinked = false;
+let blinkInterval;
+const blink = () => {
+	blinked = !blinked;
+	turnGpioOn(ledPin, blinked);
+}
+
 const tiltSensorEvent = () => {
 	if (tiltSensorCooldown) return;
-	console.log("miss!");
-	missDelay = setTimeout(() => gameController.addDartThrow(0, Ring.Miss), 500);
-	turnGpioOn(ledPin, true);
+	console.log("button!");
+	blinking = !blinking;
+	if (blinking) {
+		blinkInterval = setInterval(blink, 400);
+		blinked = false;
+		blink();
+	} else {
+		clearInterval(blinkInterval);
+		gpio.write(ledPin, false);
+	}
 	tiltSensorCooldown = setTimeout(() => {
-		turnGpioOn(ledPin, false);
+		//turnGpioOn(ledPin, false);
 		tiltSensorCooldown = undefined;
 	}, tiltSensorCooldownTime);
 };

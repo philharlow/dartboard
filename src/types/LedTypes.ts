@@ -21,6 +21,32 @@ export type LedsObj = {
 	[key: string]: Led;
 };
 
+export type LedXYCoord = {
+	[key: string]: { x: number, y: number };
+};
+
+export interface AnimationFrame {
+	time: number;
+	leds: LedsObj;
+};
+
+export enum AnimationType {
+	WIPE,
+	SOLID_WIPE,
+	CHECKERBOARD,
+	ALTERNATING_SCORES,
+	GROW,
+	SHRINK,
+	BULLSEYE,
+}
+
+export interface Animation {
+	frames: AnimationFrame[];
+	duration: number;
+	name: string;
+	type: AnimationType;
+};
+
 export type CalibrationMap = {
 	[key: string]: string;
 };
