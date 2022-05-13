@@ -3,9 +3,9 @@ import { DartThrow, GameType } from "../../src/types/GameTypes";
 import { Hint, Ring } from "../../src/types/LedTypes";
 import { SocketEvent, SoundFX } from "../../src/types/SocketTypes";
 import gameController from "../gameController";
-import ledController from "../LedController";
+import ledController from "../ledController";
 import { playSound, showPopup, socketServer, speak } from "../socketServer";
-import GameBase from "./GameBase";
+import GameBase from "./gameBase";
 
 
 class GameGolf extends GameBase {

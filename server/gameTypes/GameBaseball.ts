@@ -1,9 +1,9 @@
 import { cloneDeep } from "lodash";
-import ledController from "../LedController";
+import ledController from "../ledController";
 //import { speak } from "../../src/store/AudioStore";
 import { Base, DartThrow, GameType } from "../../src/types/GameTypes";
 import { Hint, Ring } from "../../src/types/LedTypes";
-import GameBase from "./GameBase";
+import GameBase from "./gameBase";
 import { socketServer, speak } from "../socketServer";
 import gameController from "../gameController";
 import { SocketEvent } from "../../src/types/SocketTypes";

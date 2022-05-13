@@ -1,5 +1,5 @@
 import { DartThrow, GameType } from "../../src/types/GameTypes";
-import GameBase from "./GameBase";
+import GameBase from "./gameBase";
 
 
 class GameCricket extends GameBase {

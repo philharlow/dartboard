@@ -1,16 +1,27 @@
 import _, { cloneDeep } from "lodash";
-import ledController from "../LedController";
-//import { speak } from "../../src/store/AudioStore";
+import ledController from "../ledController";
 import { DartThrow, GameType } from "../../src/types/GameTypes";
 import { Hint, Ring } from "../../src/types/LedTypes";
-import { Player } from "../../src/types/PlayerTypes";
-import GameBase from "./GameBase";
+import GameBase from "./gameBase";
 import { showPopup, socketServer, speak } from "../socketServer";
 import gameController from "../gameController";
 import { SocketEvent } from "../../src/types/SocketTypes";
 
+enum Game301InMode {
+	ANY_IN = "Any In",
+	DOUBLE_IN = "Double In",
+	TRIPLE_IN = "Triple In"
+};
+enum Game301OutMode {
+	ANY_OUT = "Any Out",
+	DOUBLE_OUT = "Double Out",
+	TRIPLE_OUT = "Triple Out"
+};
+
 class Game301 extends GameBase {
 	startingScore = 0;
+	inMode = Game301InMode.ANY_IN;
+	outMode = Game301OutMode.ANY_OUT;
 	
 
 	constructor() {
@@ -30,12 +41,12 @@ class Game301 extends GameBase {
 				{
 					name: "In Mode",
 					propName: "inMode",
-					options: [ "Any In", "Double In", "Triple In" ],
+					options: Object.values(Game301InMode),
 				},
 				{
 					name: "Out Mode",
 					propName: "outMode",
-					options: [ "Any Out", "Double Out", "Triple Out" ],
+					options: Object.values(Game301OutMode),
 				}
 			],
 		});

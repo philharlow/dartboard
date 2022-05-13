@@ -1,10 +1,9 @@
-import GameType from "./GameBase";
-import Game301 from "./Game301";
-import GameHelicopter from "./GameHelicopter";
-import GameBaseball from "./GameBaseball";
-import GameCricket from "./GameCricket";
-import GameGolf from "./GameGolf";
-import GameBase from "./GameBase";
+import GameType from "./gameBase";
+import Game301 from "./game301";
+import GameHelicopter from "./gameHelicopter";
+import GameBaseball from "./gameBaseball";
+import GameCricket from "./gameCricket";
+import GameGolf from "./gameGolf";
 
 
 export const gameList: GameType[] = [

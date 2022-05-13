@@ -17,9 +17,9 @@ export let ledSerialConnection: SerialPort| undefined;
 
 const retryConnection = (port: SerialPort) => {
     if (port === dartboardSerialConnection) {
-        console.log("dartboard rety", port.path);
+        console.log("dartboard disconnected", port.path);
     } else if (port === ledSerialConnection) {
-        console.log("led rety", port.path);
+        console.log("led disconnected", port.path);
     }
     //serialPort?.destroy();
     //serialPort = undefined;

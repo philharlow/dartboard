@@ -1,5 +1,8 @@
 import { getRingFromChar, Ring } from "./LedTypes";
 
+export const isServer = typeof window === 'undefined';
+export const isClient = !isServer;
+
 export enum GameType {
 	None = "",
 	Game301 = "301",
@@ -7,6 +10,17 @@ export enum GameType {
 	GameCricket = "cricket",
 	GameGolf = "golf",
 	GameHelicopter = "helicopter",
+}
+
+export interface GameBoardButtons {
+	undo: boolean;
+	miss: boolean;
+	nextPlayer: boolean;
+}
+
+export interface Connections {
+	dartboard: boolean;
+	leds: boolean;
 }
 
 export interface GameStatus {
@@ -22,7 +36,8 @@ export interface GameStatus {
 	selectedSettings: SelectedSetting[] | null;
 	finalScores: FinalScore[];
 	calibrationState: CalibrationState | null;
-	connections: {dartboard: boolean, leds: boolean},
+	connections: Connections,
+	buttons: GameBoardButtons,
 }
 
 export const resetGameStatus: Partial<GameStatus> = {
@@ -43,6 +58,7 @@ export const startingGameStatus: GameStatus = {
     ...resetGameStatus,
     calibrationState: null,
     connections: {dartboard: false, leds: false},
+	buttons: {undo: false, miss: false, nextPlayer: false},
 } as GameStatus;
 
 export interface GameDefinition {
@@ -64,6 +80,23 @@ export interface DartThrow {
 	round: number;
 	bust: boolean;
 	extra?: number;
+}
+
+export interface RoundScores {
+	round: number;
+	roundScores: number[];
+}
+
+export interface WinningScore {
+	playerName: string;
+	score: number;
+	place: number;
+}
+
+export interface Scores {
+	currentScores: number[];
+	roundScores: RoundScores[];
+	winningScores: WinningScore[];
 }
 
 export interface FinalScore {

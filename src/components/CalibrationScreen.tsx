@@ -38,8 +38,8 @@ function CalibrationScreen() {
 
 	const step = calibrationState?.step ?? 0;
 	// 2 extra for leds since the bullseys has 3 leds. Should find a better way to do this.
-	const extraLeds = 2;
-	const steps = calibrationState?.mode === CalibrationMode.Dartboard ? calibrationOrder.length : calibrationOrder.length + extraLeds;
+	const extraBullseyeLeds = 2;
+	const steps = calibrationOrder.length + (calibrationState?.mode === CalibrationMode.Dartboard ? 0 : extraBullseyeLeds);
 
 	return (
 		<CalibrationScreenDiv>

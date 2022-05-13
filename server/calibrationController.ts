@@ -3,7 +3,7 @@ import { CalibrationMap, LedCalibrationMap } from '../src/types/LedTypes';
 import { calibrationOrder, SocketEvent, SoundFX } from '../src/types/SocketTypes';
 import { getDartCalibration, getLedCalibration, setDartCalibration, setLedCalibration } from './dbController';
 import gameController from './gameController';
-import ledController from './LedController';
+import ledController from './ledController';
 import { ledCalibrationStep } from './serialLedController';
 import { playSound, socketServer, speak } from './socketServer';
 
@@ -17,12 +17,12 @@ export const dartCalibration: CalibrationMap = getDartCalibration();
 export const ledCalibration: LedCalibrationMap = getLedCalibration();
 
 if (Object.keys(dartCalibration).length !== calibrationOrder.length) clearObject(dartCalibration);
-if (Object.keys(ledCalibration).length !== calibrationOrder.length) clearObject(ledCalibration); // stored by dartcode, so no extra leds
+if (Object.keys(ledCalibration).length !== calibrationOrder.length) clearObject(ledCalibration);
 console.log("Loaded calibrations", Object.keys(dartCalibration).length, Object.keys(ledCalibration).length);
 
 
 const ROWS = 8;
-const extraLeds = 2;
+const extraBullseyeLeds = 2;
 
 class CalibrationController {
     calibrationMode: CalibrationMode | null = null;
@@ -125,7 +125,7 @@ class CalibrationController {
             ledCalibration[dartCode] = [ ...(ledCalibration[dartCode] || []), ledCoord];
             setLedCalibration(ledCalibration);
             console.log("ledCalibration:", Object.keys(ledCalibration).length);
-            if (this.calibrationStep >= calibrationOrder.length + extraLeds - 1) { // 2 extra for extra bullseye leds
+            if (this.calibrationStep >= calibrationOrder.length + extraBullseyeLeds - 1) { // 2 extra for extra bullseye leds
                 this.finishCalibration();
             } else {
                 this.nextCalibrationStep();

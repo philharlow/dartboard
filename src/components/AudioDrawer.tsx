@@ -1,6 +1,6 @@
 import styled from '@emotion/styled/macro';
 import Drawer, { DrawerPosition } from './Drawer';
-import { speak, useAudioStore } from '../store/AudioStore';
+import { safeSpeechSynthesis, speak, useAudioStore } from '../store/AudioStore';
 import { MenuItem, Select, Slider } from '@mui/material';
 import { useEffect } from 'react';
 import { playSound } from '../tools/AudioTools';
@@ -33,15 +33,13 @@ function AudioDrawer() {
 	const setVoiceNames = useAudioStore(store => store.setVoiceNames);
 
 	useEffect(() => {
-		if (voiceNames[0] === "") {
+		if (voiceNames[0] === "" && safeSpeechSynthesis) {
 			// Fully kiosk will error out when trying to access speechSyntehsis 
-			try {
-				speechSynthesis.onvoiceschanged = () => {
-					const foundVoices = speechSynthesis.getVoices();
-					const newVoiceNames = foundVoices.map(voice => voice.name.split(" - ")[0].split("(")[0]);
-					setVoiceNames(newVoiceNames);
-				};
-			} catch (e) {}
+			safeSpeechSynthesis.onvoiceschanged = () => {
+				const foundVoices = safeSpeechSynthesis.getVoices();
+				const newVoiceNames = foundVoices.map(({ name }: any) => name.split(" - ")[0].split("(")[0]);
+				setVoiceNames(newVoiceNames);
+			};
 		}
 	}, [setVoiceNames, voiceNames]);
 

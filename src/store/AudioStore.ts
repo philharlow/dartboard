@@ -38,7 +38,7 @@ export const useAudioStore = create<AudioStore>((set, get) => ({
 	
 	setTTSQueue: (ttsQueue: string[]) => {
 		set({ ttsQueue });
-		speechSynthesis.cancel();
+		safeSpeechSynthesis?.cancel();
 		checkQueue();
 	},
 	addTTSMessage: (message: string) => {
@@ -53,7 +53,7 @@ export const useAudioStore = create<AudioStore>((set, get) => ({
 
 const checkQueue = async () => {
 	const { ttsQueue } = useAudioStore.getState();
-	if (ttsQueue.length && !speechSynthesis.speaking) {
+	if (ttsQueue.length && (!safeSpeechSynthesis || !safeSpeechSynthesis.speaking)) {
 		const newQueue = cloneDeep(ttsQueue);
 		const message = newQueue.shift();
 		useAudioStore.setState({ ttsQueue: newQueue })
@@ -62,23 +62,29 @@ const checkQueue = async () => {
 	}
 };
 
+export let safeSpeechSynthesis: any = undefined;
+try {
+	safeSpeechSynthesis = window.speechSynthesis;
+} catch (e) { console.log("No speech synthesis found"); }
+
+
 const _speak = (message: string) => {
 	return new Promise(resolve => {
 		const { selectedVoice, volume } = useAudioStore.getState();
 		if (volume <= 0) return;
-		console.log("speaking", message);
-		//alert("fully " + (window.document as any).fully + " window.fully " + (window as any).fully);
+		// console.log("speaking", message);
+		// alert("fully " + fully + " window.fully " + (window as any).fully);
 		
-		if (speechSynthesis) {
-			speechSynthesis.cancel();
+		if (safeSpeechSynthesis) {
+			safeSpeechSynthesis.cancel();
 			const msg = new SpeechSynthesisUtterance(message);
-			msg.voice = speechSynthesis.getVoices()[selectedVoice];
+			msg.voice = safeSpeechSynthesis.getVoices()[selectedVoice];
 			msg.volume = volume;
 			msg.onend = resolve;
-			window.speechSynthesis.speak(msg);
+			safeSpeechSynthesis.speak(msg);
 		} else if ((window as any).fully) {
 			// Fully kiosk browser support
-			(window as any).fully.stopTextToSpeech();
+			//(window as any).fully.stopTextToSpeech();
 			(window as any).fully.textToSpeech(message);
 		}
 	});

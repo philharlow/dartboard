@@ -21,6 +21,7 @@ const PopupRoot = styled.div`
 	font-size: 100px;
 	pointer-events: none;
 	opacity: 0%;
+	white-space: nowrap;
 	&.open {
 		display: flex;
 		animation: fadeInOutAnim 2s ease 0s 1 normal forwards;
@@ -46,7 +47,7 @@ function Popup() {
 			setOpen(false);
 			setTimeout(() => {
 				setOpen(true);
-			}, 1);
+			}, 10);
 		}
 	}, [popupMessage]);
 

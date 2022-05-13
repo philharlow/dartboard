@@ -6,6 +6,8 @@ import { initialLedsObj, LedsObj } from '../types/LedTypes';
 export type LedStore = {
 	ledsObj: LedsObj;
 	setLeds: (ledsObj: LedsObj) => void;
+	buttonLeds: boolean[];
+	setButtonLeds: (buttonLeds: boolean[]) => void;
 };
 
 export const useLedStore = create<LedStore>((set, get) => ({
@@ -13,4 +15,8 @@ export const useLedStore = create<LedStore>((set, get) => ({
 	setLeds: (ledsObj: LedsObj) => {
 		set({ ledsObj });
 	},
+	buttonLeds: [false, false, false],
+	setButtonLeds: (buttonLeds: boolean[]) => {
+		set({ buttonLeds });
+	}
   }));

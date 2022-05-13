@@ -83,17 +83,9 @@ const getTurnBoard = (game?: GameType) => {
 function GameBoard() {
 	const currentGame = useGameStore(store => store.gameList?.find(game => game.gameType === store.currentGameType));
   const selectGame = useGameStore(store => store.selectGame);
-  const dartThrows = useGameStore(store => store.dartThrows);
   const currentGameName = useGameStore(store => store.currentGameName);
-  const waitingForThrow = useGameStore(store => store.waitingForThrow);
-  const winningPlayerIndex = useGameStore(store => store.winningPlayerIndex);
-  const currentRound = useGameStore(store => store.currentRound);
-  const players = useGameStore(store => store.players);
-  const currentPlayerIndex = useGameStore(store => store.currentPlayerIndex);
-  const currentPlayer = players[currentPlayerIndex];
+  const buttons = useGameStore(store => store.buttons);
 
-  const playerDarts = dartThrows.filter(t => t.player === currentPlayer);
-  const roundDarts = playerDarts.filter(t => t.round === currentRound);
 
   const addMiss = () => {
     sendDartThrow(0, Ring.Miss);
@@ -118,24 +110,24 @@ function GameBoard() {
 		</ContentRow>
 		<ButtonRow>
 			<UndoButton
-				disabled={roundDarts.length === 0 && waitingForThrow}
+				disabled={!buttons.undo}
 				variant="contained"
 				onClick={() => undoLastDart()}
 			>
 				Undo
 			</UndoButton>
 			<MissButton
-				disabled={!waitingForThrow}
+				disabled={!buttons.miss}
 				variant="contained"
 				onClick={() => addMiss()}
 			>
 				Miss
 			</MissButton>
 			<NextPlayerButton
-				disabled={waitingForThrow}
+				disabled={!buttons.nextPlayer}
 				variant="contained"
 				onClick={() => nextPlayer()}
-				className={!waitingForThrow ? "waiting" : ""}
+				className={buttons.nextPlayer ? "waiting" : ""}
 			>
 				Next Player
 			</NextPlayerButton>

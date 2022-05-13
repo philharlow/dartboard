@@ -8,6 +8,7 @@ import { SocketEvent, SoundFX } from "./types/SocketTypes";
 import { speak } from "./store/AudioStore";
 import { serverFetch } from "./tools/ClientUtils";
 import { playSound } from "./tools/AudioTools";
+import { range } from "lodash";
 
 export let socket: Socket | undefined;
 
@@ -29,8 +30,13 @@ export const connectSocket = async () => {
   })
   
   socket.on(SocketEvent.UPDATE_LEDS, (msg) => {
-    const cloned = getLedsFromInts(msg);
-    useLedStore.setState({ ledsObj: cloned });
+    const ledsObj = getLedsFromInts(msg);
+    useLedStore.setState({ ledsObj });
+  })
+  
+  socket.on(SocketEvent.UPDATE_BUTTON_LEDS, (msg) => {
+    const buttonLeds = range(0, 3).map((i: number) => ((msg >> i) & 1) === 1);
+    useLedStore.setState({ buttonLeds });
   })
   
   socket.on(SocketEvent.UPDATE_GAME_STATUS, (changes: Partial<GameStatus>) => {
@@ -76,8 +82,6 @@ export const fetchFreshState = async () => {
 		if (gameStatus)
 			useGameStore.setState( gameStatus );
 }
-
-
 
 const autoConnect = true;
 if (autoConnect)

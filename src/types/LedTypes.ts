@@ -1,6 +1,5 @@
 import { cloneDeep } from "lodash";
 
-
 export enum Ring {
 	Double,
 	OuterSingle,
@@ -21,9 +20,17 @@ export type LedsObj = {
 	[key: string]: Led;
 };
 
-export type LedXYCoord = {
-	[key: string]: { x: number, y: number };
+export enum LedButton {
+    UNDO,
+    MISS,
+    NEXT,
+}
+
+export type Coordinate = { x: number, y: number };
+export type LedXYCoords = {
+	[key: string]: Coordinate;
 };
+export const ledXYCoords: LedXYCoords = {};
 
 export interface AnimationFrame {
 	time: number;
@@ -40,10 +47,10 @@ export enum AnimationType {
 	BULLSEYE,
 }
 
-export interface Animation {
+export interface LedAnimation {
 	frames: AnimationFrame[];
-	duration: number;
 	name: string;
+	clearAfter?: boolean;
 	type: AnimationType;
 };
 
@@ -129,7 +136,6 @@ export const setRingFromInt = (ledsObj: LedsObj, ring: Ring, int: number) =>{
 }
 
 export const scoreOrder = [20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5];
-export const wedgeOrder = [20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5];
 export const growOrder = [Ring.DoubleBullseye, Ring.OuterBullseye, Ring.InnerSingle, Ring.Triple, Ring.OuterSingle, Ring.Double];
 export const ledKeysFromRingThenScore: {[ index: number]: string[]} = [];
 for (const ring of growOrder) ledKeysFromRingThenScore[ring] = [];
@@ -160,11 +166,36 @@ export const getLedKeySlow = (score: number, ring: Ring) => {
 	return "s" + score;
 }
 
+// Measured distances for each ring from the bullseye. Units do't matter if you change them
+const distances: Map<Ring, number> = new Map();
+distances.set(Ring.Double, 18.5);
+distances.set(Ring.OuterSingle, 15);
+distances.set(Ring.Triple, 11.25);
+distances.set(Ring.InnerSingle, 6.5);
+export const diameter = 2 * distances.get(Ring.Double)!;
+
+const addXYCoord = (ledKey: string, score: number, ring: Ring) => {
+	if (ring === Ring.DoubleBullseye || ring === Ring.OuterBullseye) {
+		ledXYCoords[ledKey] = { x: 0, y: 0 };
+		return;
+	}
+	const scoreIndex = scoreOrder.indexOf(score);
+	const angleDeg = scoreIndex * (360 / 20);
+	const angleRad = angleDeg * Math.PI / 180;
+	const distance = distances.get(ring)!;
+	//console.log("score", score, scoreIndex, angleDeg, angleRad);
+	const x = Math.sin(angleRad) * distance;
+	const y = Math.cos(angleRad) * distance;
+	ledXYCoords[ledKey] = { x, y };
+};
+
 export const initialLedsObj: LedsObj = {};
 const initialOn = false;
 const addLed = (score: number, ring: Ring, on: boolean) => {
-	ledKeysFromRingThenScore[ring][score] = getLedKeySlow(score, ring);
-	initialLedsObj[getLedKey(score, ring)] = { score, ring, on }
+	const ledKey = getLedKeySlow(score, ring);
+	ledKeysFromRingThenScore[ring][score] = ledKey;
+	initialLedsObj[ledKey] = { score, ring, on };
+	addXYCoord(ledKey, score, ring);
 };
 
 for (let i=1; i<=20; i++) {
@@ -175,3 +206,32 @@ for (let i=1; i<=20; i++) {
 }
 addLed(25, Ring.DoubleBullseye, initialOn);
 addLed(25, Ring.OuterBullseye, initialOn);
+
+export const turnOnCircle = (center: Coordinate, innerRadius: number, outerRadius: number) => {
+	const leds = cloneDeep(initialLedsObj);
+	const innerRadiusSq = innerRadius * innerRadius;
+	const outerRadiusSq = outerRadius * outerRadius;
+	for (const led in leds) {
+		const ledObj = leds[led];
+		const { x, y } = ledXYCoords[led];
+		const xOffset = center.x - x;
+		const yOffset = center.y - y;
+		const distanceSq = xOffset * xOffset + yOffset * yOffset;
+		if (distanceSq >= innerRadiusSq && distanceSq <= outerRadiusSq) {
+			ledObj.on = true;
+		}
+	}
+	return leds;
+};
+
+export const turnOnLine = (lineX?: number, lineY?: number, thickness = 5) => {
+	const leds = cloneDeep(initialLedsObj);
+	const halfThickness = 0.5 * thickness;
+	for (const led in leds) {
+		const ledObj = leds[led];
+		const { x, y } = ledXYCoords[led];
+		if (lineX !== undefined && Math.abs(x - lineX) < halfThickness) ledObj.on = true;
+		if (lineY !== undefined && Math.abs(y - lineY) < halfThickness) ledObj.on = true;
+	}
+	return leds;
+};

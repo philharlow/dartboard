@@ -1,4 +1,4 @@
-import ledController from "../LedController";
+import ledController from "../ledController";
 //import { speak } from "../../src/store/AudioStore";
 import { DartThrow, FinalScore, GameDefinition } from "../../src/types/GameTypes";
 import { Ring } from "../../src/types/LedTypes";
@@ -104,16 +104,21 @@ class GameBase {
 	}
 	
 	undoLastDart() {
-		const { dartThrows } = gameController.gameStatus;
-		gameController.updateGameStatus({
-			dartThrows: dartThrows.slice(0, -1),
-			waitingForThrow: true,
-			winningPlayerIndex: -1,
-		})
-		this.waitingForThrowSet();
-		speak("Undone", true);
-		this.updateHints();
-		this.updateScores();
+		const { dartThrows, currentPlayerIndex, players, currentRound } = gameController.gameStatus;
+		const currentPlayer = players[currentPlayerIndex];
+		// TODO protect undoing more than current round's darts
+		const lastDart = dartThrows[dartThrows.length - 1];
+		if (lastDart && lastDart.player === currentPlayer && lastDart.round === currentRound) {
+			gameController.updateGameStatus({
+				dartThrows: dartThrows.slice(0, -1),
+				waitingForThrow: true,
+				winningPlayerIndex: -1,
+			})
+			this.waitingForThrowSet();
+			speak("Undone", true);
+			this.updateHints();
+			this.updateScores();
+		}
 	}
 	
 	hasPlayerWon(playerIndex: number): boolean {
@@ -139,7 +144,8 @@ class GameBase {
 			waitingForThrow: true,
 		});
 		this.waitingForThrowSet();
-		speak("alright, " + nextPlayer + "'s turn!");
+		if (Math.random() > 0.5) speak("alright, " + nextPlayer + "'s turn!");
+		else speak("ok, " + nextPlayer + " is up!");
 		
 		showPopup(nextPlayer + " is up");
 		this.updateHints();

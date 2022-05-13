@@ -1,7 +1,8 @@
 import { cloneDeep } from "lodash";
-import { Hint, Led, Ring, getLedsAsInts, scoreOrder, growOrder, initialLedsObj, getLedKey, LedsObj } from "../src/types/LedTypes";
+import { GameBoardButtons } from "../src/types/GameTypes";
+import { Hint, Led, Ring, getLedsAsInts, scoreOrder, growOrder, initialLedsObj, getLedKey, LedsObj, Coordinate, turnOnCircle, diameter, ledXYCoords, turnOnLine, LedAnimation, AnimationType, AnimationFrame, LedButton } from "../src/types/LedTypes";
 import { LightDistraction, SocketEvent, SoundFX } from "../src/types/SocketTypes";
-import { updateFromLedObj } from "./serialLedController";
+import { getButtonLedsValue, setButtonLedOn, updateFromLedObj, writeButtonLedsToSerial } from "./serialLedController";
 import { emit } from "./socketServer";
 
 interface PendingFlash {
@@ -23,13 +24,25 @@ export const getRandomSegment = (): Hint => {
 
 export const countOns = (arr: Led[]) => arr.reduce((a, v) => (v.on ? a + 1 : a), 0);
 
+enum AnimationMode {
+	Stopped,
+	PlayOnce,
+	PlayOnceReverse,
+	Loop,
+	LoopReverse,
+	//Boomerang,
+}
+
 class LedController {
 	// leds: Led[] = cloneDeep(initialLeds);
 	ledsObj: LedsObj = cloneDeep(initialLedsObj);
 	pendingFlashes: PendingFlash[] = [];
 	hints: Hint[] = [];
 	needsDispatch = false;
-	
+	currentAnimation?: LedAnimation;
+	animationFrame = 0;
+	animationStartedAt = 0;
+	animationMode = AnimationMode.Stopped;
 
 	handleDistraction = (distraction: LightDistraction) => {
 		if (distraction === LightDistraction.ADD_RANDOM_HINT) {
@@ -47,13 +60,62 @@ class LedController {
 		}
 	}
 
+	stopAnimation = () => {
+		if (this.currentAnimation) {
+			if (this.currentAnimation.clearAfter)
+				updateFromLedObj(initialLedsObj);
+			
+			this.animationMode = AnimationMode.Stopped;
+			this.currentAnimation = undefined;
+		}
+	};
+
+	playAnimation = (animation?: LedAnimation, animationMode?: AnimationMode) => {
+		this.currentAnimation = animation;
+		if (animation) {
+			this.animationStartedAt = Date.now();
+			this.animationMode = animationMode ?? AnimationMode.PlayOnce;
+			this.animationFrame = this.animationMode === AnimationMode.PlayOnceReverse || this.animationMode === AnimationMode.LoopReverse ? animation.frames.length - 1 : 0;
+			const frame = this.currentAnimation.frames[this.animationFrame];
+			updateFromLedObj(frame.leds);
+		}
+	};
+
 	loop = () => {
+		if (this.currentAnimation) {
+			const now = Date.now();
+			const elapsed = now - this.animationStartedAt;
+			const direction = this.animationMode === AnimationMode.PlayOnceReverse || this.animationMode === AnimationMode.LoopReverse ? -1 : 1;
+			const nextFrameIndex = this.animationFrame + direction;
+			const nextFrame = this.currentAnimation.frames[nextFrameIndex];
+			if (!nextFrame) {
+				// anim done
+				if (this.animationMode === AnimationMode.PlayOnce || this.animationMode === AnimationMode.PlayOnceReverse) {
+					if (this.currentAnimation.clearAfter)
+						this.stopAnimation();
+				} else { // Loop
+					this.playAnimation(this.currentAnimation, this.animationMode);
+				}
+			} else {
+				const lastFrame = this.currentAnimation.frames[this.currentAnimation.frames.length - 1];
+				const duration = lastFrame.time;
+				const nextFrameTime = direction === 1 ? nextFrame.time : duration - nextFrame.time;
+
+				if (nextFrameTime <= elapsed) {
+					this.animationFrame = nextFrameIndex;
+					const frame = this.currentAnimation.frames[this.animationFrame];
+					updateFromLedObj(frame.leds);
+					console.log("anim updating leds");
+				}
+			}
+		}
 		if (this.needsDispatch) {
-			this.sendToSocket();
+			this.sendLedsToSocket();
+			// this.sendToSerial(); // send immediately instead
 			this.needsDispatch = false;
 		}
 	}
-	loopInterval = setInterval(this.loop, 1000 / 50);
+	loopInterval = setInterval(this.loop, 20); // 50 hertz
 
 	setAllOn(on: boolean, dispatch: boolean = true): boolean {
 		let changed = false;
@@ -171,23 +233,47 @@ class LedController {
 
 	dispatchUpdate = () => {
 		this.needsDispatch = true;
-		this.sendToSerial();
+		this.sendLedsToSerial();
 	}
 
-	sendToSerial() {
+	sendLedsToSerial() {
 		const ledsObj = cloneDeep(this.ledsObj);
 		//const ints = getLedsAsSerialInts(ledsObj);
 
 		updateFromLedObj(ledsObj);
 	}
 
-	sendToSocket() {
+	sendLedsToSocket() {
 		const ledsObj = cloneDeep(this.ledsObj);
 		const ints = getLedsAsInts(ledsObj);
 
 		//console.log("leds", ledsObj)
 
 		emit(SocketEvent.UPDATE_LEDS, ints);
+	}
+
+	updateButtons(buttons: GameBoardButtons) {
+		const startValue = getButtonLedsValue();
+		setButtonLedOn(LedButton.UNDO, buttons.undo);
+		setButtonLedOn(LedButton.MISS, buttons.miss);
+		setButtonLedOn(LedButton.NEXT, buttons.nextPlayer);
+		const updatedValue = getButtonLedsValue();
+
+		// console.log("ledcontroller: update buttons", buttons);
+
+		if (startValue !== updatedValue) {
+			this.sendButtonsToSerial();
+			this.sendButtonsToSocket();
+		}
+	}
+
+	sendButtonsToSerial() {
+		writeButtonLedsToSerial();
+	}
+
+	sendButtonsToSocket() {
+		const value = getButtonLedsValue();
+		emit(SocketEvent.UPDATE_BUTTON_LEDS, value);
 	}
 
 	// Animations
@@ -238,6 +324,7 @@ class LedController {
 	};
 	
 	animGrow = (ringTime = 150) => {
+		console.log("anim grow");
 		this.cancelPendingFlashes();
 		growOrder.forEach((ring, i) =>  {
 			setTimeout(() => this.setRingOn(ring, true), ringTime * i);
@@ -262,6 +349,43 @@ class LedController {
 		
 		emit(SocketEvent.PLAY_SOUND, SoundFX.BULLS_EYE);
 	};
+	
+
+	animRipple = (score: number, ring: Ring, thickness = 3, speed = 2) => {
+		const center: Coordinate = ledXYCoords[getLedKey(score, ring)];
+		const max = 20;
+		const timeStep = 50 / speed;
+		const frames: AnimationFrame[] = [];
+		for (let i=0; i<max; i++) {
+			const inner = (i / max) * diameter;
+			const leds = turnOnCircle(center, inner, inner + thickness);
+			const time = i * timeStep;
+			const frame: AnimationFrame = { leds, time };
+			frames.push(frame);
+		}
+		const animation: LedAnimation = {
+			frames,
+			name: "ripple",
+			clearAfter: true,
+			type: AnimationType.ALTERNATING_SCORES,
+		}
+		this.playAnimation(animation, AnimationMode.Loop);
+	}
+	
+
+	animVerticalSwipe = (thickness = 10, speed = 2) => {
+		const max = 10;
+		const timeStep = 100 / speed;
+		const radius = diameter / 2;
+		for (let i=0; i<max; i++) {
+			setTimeout(() => {
+				const x = ((i / max) * diameter) - radius;
+				const leds = turnOnLine(x, undefined, thickness);
+				updateFromLedObj(leds);
+			}, i * timeStep);
+		}
+		setTimeout(() => updateFromLedObj(initialLedsObj), (max + 1) * timeStep);
+	}
 	
 	
 }

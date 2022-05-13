@@ -17,7 +17,7 @@ const ScoreRow = styled.tr`
 	}
 `;
 const ScoreCell = styled.th`
-	min-width: 50px;
+	min-width: 100px;
 	padding: 5px;
 	text-align: center;
 	border: 1px solid white;
@@ -78,7 +78,7 @@ function ScoreBoard() {
             block: 'center',
             inline: 'center',
         });
-		console.log("scrolling to", currentDiv)
+		// console.log("scrolling to", currentDiv)
 	}, [currentDiv]);
 
 	
@@ -129,7 +129,7 @@ function ScoreBoard() {
 			<tbody>
 				<ScoreRow>
 					<FixedCell>Player</FixedCell>
-					<BoldCell>Score</BoldCell>
+					<FixedCell style={{left: 120}}>Score</FixedCell>
 					{rounds}
 				</ScoreRow>
 				{players.map((player, i) => {
@@ -138,7 +138,7 @@ function ScoreBoard() {
 
 					return <ScoreRow key={player} className={i === currentPlayerIndex ? "current" : ""}>
 							<FixedScoreCell className={i === currentPlayerIndex && waitingForThrow ? "waiting" : ""}>{player}</FixedScoreCell>
-							<ScoreCell>{score}</ScoreCell>
+							<FixedScoreCell style={{left: 120}}>{score}</FixedScoreCell>
 							{dartsByRound.map((darts, d) => getTurnCell(darts, d, i === currentPlayerIndex && d === currentRound && waitingForThrow))}
 						</ScoreRow>
 				})}

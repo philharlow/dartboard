@@ -1,9 +1,9 @@
 import { Server } from 'socket.io';
 import { CalibrationMode, GameStatus, GameType, parseDartCode, SelectedSetting } from '../src/types/GameTypes';
-import { LightDistraction, SocketEvent, SoundFX } from '../src/types/SocketTypes';
+import { SocketEvent, SoundFX } from '../src/types/SocketTypes';
 import calibrationController from './calibrationController';
 import gameController from './gameController';
-import ledController from './LedController';
+import ledController from './ledController';
 
 
 export class SocketServer {
@@ -22,7 +22,8 @@ export class SocketServer {
 		this.io.on('connection', (socket) => {
 			this.connections.push(socket);
 			console.log('a user connected', this.connections.length);
-			ledController.sendToSocket();
+			ledController.sendLedsToSocket();
+			ledController.sendButtonsToSocket();
 
 			socket.on("disconnect", (reason) => {
 				this.connections.splice(this.connections.indexOf(socket), 1);
