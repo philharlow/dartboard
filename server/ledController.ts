@@ -2,7 +2,7 @@ import { cloneDeep } from "lodash";
 import { GameBoardButtons } from "../src/types/GameTypes";
 import { Hint, Led, Ring, getLedsAsInts, scoreOrder, growOrder, initialLedsObj, getLedKey, LedsObj, Coordinate, turnOnCircle, diameter, ledXYCoords, turnOnLine, LedAnimation, AnimationType, AnimationFrame, LedButton } from "../src/types/LedTypes";
 import { LightDistraction, SocketEvent, SoundFX } from "../src/types/SocketTypes";
-import { getButtonLedsValue, setButtonLedOn, updateFromLedObj, writeButtonLedsToSerial } from "./serialLedController";
+import { getButtonLedsValue, setButtonLedOn, updateFromLedObj } from "./serialLedController";
 import { emit } from "./socketServer";
 
 interface PendingFlash {
@@ -111,7 +111,7 @@ class LedController {
 		}
 		if (this.needsDispatch) {
 			this.sendLedsToSocket();
-			// this.sendToSerial(); // send immediately instead
+			this.sendLedsToSerial();
 			this.needsDispatch = false;
 		}
 	}
@@ -147,10 +147,6 @@ class LedController {
 			this.setSingleLedOn(score, ring, this.getHintOn(score, ring));
 		}, (flashes * 2) * duration);
 		this.pendingFlashes.push({ timeout, score, ring });
-
-		// TODO: do this in a better place
-		if (score === 25)
-			this.animBullseye();
 	};
 
 	getHintOn(score: number, ring: Ring): boolean {
@@ -233,7 +229,7 @@ class LedController {
 
 	dispatchUpdate = () => {
 		this.needsDispatch = true;
-		this.sendLedsToSerial();
+		// this.sendLedsToSerial();
 	}
 
 	sendLedsToSerial() {
@@ -250,6 +246,7 @@ class LedController {
 		//console.log("leds", ledsObj)
 
 		emit(SocketEvent.UPDATE_LEDS, ints);
+		emit(SocketEvent.UPDATE_BUTTON_LEDS, getButtonLedsValue());
 	}
 
 	updateButtons(buttons: GameBoardButtons) {
@@ -262,22 +259,11 @@ class LedController {
 		// console.log("ledcontroller: update buttons", buttons);
 
 		if (startValue !== updatedValue) {
-			this.sendButtonsToSerial();
-			this.sendButtonsToSocket();
+			this.dispatchUpdate();
 		}
 	}
 
-	sendButtonsToSerial() {
-		writeButtonLedsToSerial();
-	}
-
-	sendButtonsToSocket() {
-		const value = getButtonLedsValue();
-		emit(SocketEvent.UPDATE_BUTTON_LEDS, value);
-	}
-
 	// Animations
-	
 	animQuadSpin = () => {
 		this.cancelPendingFlashes();
 		const flashTime = 50;

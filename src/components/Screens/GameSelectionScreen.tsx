@@ -1,7 +1,7 @@
 import styled from '@emotion/styled/macro';
 import { Button } from '@mui/material';
-import { useGameStore } from '../store/GameStore';
-import { GameType } from '../types/GameTypes';
+import { useGameStore } from '../../store/GameStore';
+import { GameType } from '../../types/GameTypes';
 
 const StartScreenDiv = styled.div`
     height: 100%;

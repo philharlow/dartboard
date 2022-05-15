@@ -1,18 +1,18 @@
 import styled from '@emotion/styled/macro';
 import React, { useEffect } from 'react';
-import CalibrationScreen from './components/CalibrationScreen';
-import DartboardDrawer from './components/DartboardDrawer';
+import CalibrationScreen from './components/Screens/CalibrationScreen';
+import DartboardDrawer from './components/Drawers/DartboardDrawer';
 import GameBoard from './components/gameBoards/GameBoard';
-import GameSelectionScreen from './components/GameSelectionScreen';
-import PlayerSelectionScreen from './components/PlayerSelectionScreen';
-import Popup from './components/Popup';
-import SettingsDrawer from './components/SettingsDrawer';
-import SettingsSelectionScreen from './components/SettingsSelectionScreen';
-import ThrowsDrawer from './components/ThrowsDrawer';
+import GameSelectionScreen from './components/Screens/GameSelectionScreen';
+import PlayerSelectionScreen from './components/Screens/PlayerSelectionScreen';
+import Popup from './components/Overlays/Popup';
+import SettingsDrawer from './components/Drawers/SettingsDrawer';
+import SettingsSelectionScreen from './components/Screens/SettingsSelectionScreen';
+import ThrowsDrawer from './components/Drawers/ThrowsDrawer';
 import { useConnectionStore } from './store/ConnectionStore';
 import { useGameStore } from './store/GameStore';
 import { usePlayerStore } from './store/PlayerStore';
-import AudioDrawer from './components/AudioDrawer';
+import AudioDrawer from './components/Drawers/AudioDrawer';
 import { preloadSounds } from './tools/AudioTools';
 
 const GameViewDiv = styled.div`
@@ -40,7 +40,7 @@ function GameView() {
 	const calibrationState = useGameStore(store => store.calibrationState);
 	const fetchAllPlayers = usePlayerStore(store => store.fetchAllPlayers);
 	
-	console.log("GameView redraw");
+	// console.log("GameView redraw");
 
 	useEffect(() => {
 		if (socketConnected && gameList === undefined) {
@@ -59,7 +59,7 @@ function GameView() {
 	let content: JSX.Element | undefined;
 
 	// Loading data
-	if (!gameList || !gameList.length)
+	if (!gameList || !gameList.length || !socketConnected)
 		content = <LoadingScreenDiv><div>Loading...</div>	</LoadingScreenDiv>
 	// Calibration
 	else if (calibrationState !== null)

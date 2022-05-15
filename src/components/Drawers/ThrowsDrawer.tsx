@@ -1,6 +1,6 @@
 import styled from '@emotion/styled/macro';
 import Drawer, { DrawerPosition } from './Drawer';
-import { useGameStore } from '../store/GameStore';
+import { useGameStore } from '../../store/GameStore';
 
 const Title = styled.div`
 	font-weight: bold;

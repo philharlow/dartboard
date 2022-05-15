@@ -1,9 +1,9 @@
 import styled from '@emotion/styled/macro';
 import { Button } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { emit } from '../SocketInterface';
-import { useGameStore } from '../store/GameStore';
-import { SocketEvent } from '../types/SocketTypes';
+import { emit } from '../../SocketInterface';
+import { useGameStore } from '../../store/GameStore';
+import { SocketEvent } from '../../types/SocketTypes';
 
 const BlurBackground = styled.div`
 	position: fixed;

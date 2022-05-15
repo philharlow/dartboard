@@ -33,7 +33,8 @@ class GameHelicopter extends GameBase {
 				{
 					name: "Difficulty",
 					propName: "difficulty",
-					options: [ Difficulty.Easy, Difficulty.Medium, Difficulty.Hard ]
+					options: [ Difficulty.Easy, Difficulty.Medium, Difficulty.Hard ],
+					displaySuffix: "",
 				},
 			],
 		});
@@ -60,11 +61,6 @@ class GameHelicopter extends GameBase {
 		super.exiting();
 
 		this.clearTick();
-	}
-
-	setOptions() {
-		super.setOptions();
-		gameController.updateGameStatus({ currentGameName: this.gameDef.name + " - " + this.difficulty });
 	}
 
 	getSpeed() {

@@ -5,7 +5,7 @@ import { Ring } from '../../types/LedTypes';
 import BackButton from '../BackButton';
 import ScoreBoard from './ScoreBoard';
 import TurnBoard from './TurnBoard';
-import WinnerDisplay from '../WinnerDisplay';
+import WinnerDisplay from '../Overlays/WinnerDisplay';
 import BaseballBoard from './BaseballBoard';
 import { GameType } from '../../types/GameTypes';
 import { emit, sendDartThrow } from '../../SocketInterface';

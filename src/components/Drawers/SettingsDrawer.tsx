@@ -1,10 +1,10 @@
 import Drawer, { DrawerPosition } from './Drawer';
 import { Button, Switch } from '@mui/material';
-import { emit } from '../SocketInterface';
-import { SocketEvent } from '../types/SocketTypes';
+import { emit } from '../../SocketInterface';
+import { SocketEvent } from '../../types/SocketTypes';
 import styled from '@emotion/styled/macro';
-import { useGameStore } from '../store/GameStore';
-import { useConnectionStore } from '../store/ConnectionStore';
+import { useGameStore } from '../../store/GameStore';
+import { useConnectionStore } from '../../store/ConnectionStore';
 
 
 const Title = styled.div`

@@ -1,8 +1,8 @@
 import styled from '@emotion/styled/macro';
 import Drawer, { DrawerPosition } from './Drawer';
 import { Button, Switch } from '@mui/material';
-import { useConnectionStore } from '../store/ConnectionStore';
-import { connectSocket } from '../SocketInterface';
+import { useConnectionStore } from '../../store/ConnectionStore';
+import { connectSocket } from '../../SocketInterface';
 
 
 const Title = styled.div`

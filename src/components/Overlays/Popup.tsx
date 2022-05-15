@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import styled from '@emotion/styled/macro';
-import { PopupMessage, useConnectionStore } from '../store/ConnectionStore';
+import { PopupMessage, useConnectionStore } from '../../store/ConnectionStore';
 
 const PopupRoot = styled.div`
 	display: none;

@@ -39,6 +39,7 @@ export const useAudioStore = create<AudioStore>((set, get) => ({
 	setTTSQueue: (ttsQueue: string[]) => {
 		set({ ttsQueue });
 		safeSpeechSynthesis?.cancel();
+		(window as any).fully?.stopTextToSpeech(); // Fully kiosk browser support
 		checkQueue();
 	},
 	addTTSMessage: (message: string) => {
@@ -84,7 +85,7 @@ const _speak = (message: string) => {
 			safeSpeechSynthesis.speak(msg);
 		} else if ((window as any).fully) {
 			// Fully kiosk browser support
-			//(window as any).fully.stopTextToSpeech();
+			// We can return immediately here as fullykiosk queues tts for us (and doesnt give us a callback, either)
 			(window as any).fully.textToSpeech(message);
 		}
 	});

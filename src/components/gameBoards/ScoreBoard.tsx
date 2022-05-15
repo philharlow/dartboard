@@ -50,14 +50,13 @@ const ThrowCell = styled.div`
 const FixedCell = styled(ScoreCell)`
 	position: sticky;
 	left: 10px;
-	width: 100px;
 	background: #0d0d0dc1;
 `;
 const FixedScoreCell = styled(ScoreCell)`
 	position: sticky;
+	font-size: 40px;
 	left: 10px;
 	height: 65px;
-	width: 100px;
 	line-height: 70px;
 	background: #0d0d0dc1;
 `;

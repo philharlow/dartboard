@@ -3,10 +3,11 @@
 // Project page:
 
 // Example serial commands:
-// all on bytes(doesnt work): bÿÿÿÿÿÿÿÿÿÿÿ 
-// all on: a255,255,255,255,255,255,255,255,255,255,255
-// 1s: a1,1,1,1,1,1,1,1,1,1,1
-// all off: a0,0,0,0,0,0,0,0,0,0,0
+// command type, followed by 12 comma-separated 8-bit numbers, representing the 11 rows, and the extra buttons
+// all on bytes(doesnt work): bÿÿÿÿÿÿÿÿÿÿÿÿ
+// all on: a255,255,255,255,255,255,255,255,255,255,255,255
+// 1s: a1,1,1,1,1,1,1,1,1,1,1,1
+// all off: a0,0,0,0,0,0,0,0,0,0,0,0
 // single on: +1,1
 // single off: -1,1
 
@@ -22,19 +23,19 @@ const int clockPin = 11;
 // DS pin 14
 const int dataPin = 12;
 
-// Button leds. These are in a funky order (+,-) because of which nano pins can pwm
+// Button led pins. These are in a funky order (+,-) because of which nano pins can pwm
 const int undoButtonLedPin = 3;
 const int undoButtonGroundPin = 2;
 const int missButtonLedPin = 5;
 const int missButtonGroundPin = 4;
 const int nextButtonLedPin = 6;
 const int nextButtonGroundPin = 7;
-int undoPwmOn = 50; // use pwm to skip resistors
-int missPwmOn = 70; // use pwm to skip resistors
-int nextPwmOn = 70; // use pwm to skip resistors
+int undoPwmOn = 50; // use pwm to skip resistors/allow fading
+int missPwmOn = 70;
+int nextPwmOn = 70;
 
 
-// LED matrix
+// LED matrix size
 const int ROWS = 11;
 const int COLS = 8;
 
@@ -45,7 +46,7 @@ uint8_t extraLeds = 0;
 boolean newData = false;
 const int INPUT_MODE_ON = 1, INPUT_MODE_OFF = 2, INPUT_MODE_ALL = 3, INPUT_MODE_ALL_BYTES = 4, INPUT_MODE_EXTRA_BUTTONS = 5; 
 int inputMode = 0;
-uint8_t inputBuffer[ROWS];
+uint8_t inputBuffer[ROWS + 1];
 int inputPos = 0;
 char tempInput[32];
 unsigned int tempInputPos = 0;
@@ -86,8 +87,12 @@ void processIncomingByte (const byte inByte) {
         leds[y] = leds[y] & ~(1 << x);
       }
       if (inputMode == INPUT_MODE_ALL || (inputMode == INPUT_MODE_ALL_BYTES)) {
-        for (int i=0; i<inputPos; i++) {
+        int length = min(ROWS, inputPos);
+        for (int i=0; i<length; i++) {
           leds[i] = inputBuffer[i];
+        }
+        if (inputPos == ROWS + 1) {
+          extraLeds = inputBuffer[ROWS];
         }
       }
       if (inputMode == INPUT_MODE_EXTRA_BUTTONS && inputPos == 1) {
@@ -140,6 +145,7 @@ void loop() {
   
 }
 
+long period = 1000;
 void draw() {
   for (int row = 0; row < ROWS; row++) {
     uint16_t cathodes = 0xFFFF;
@@ -153,9 +159,14 @@ void draw() {
     shiftOut(dataPin, clockPin, MSBFIRST, cathodes & 255);
     digitalWrite(latchPin, HIGH);
 
+    // Make the buttons breathe in and out
+    unsigned long now = millis();
+    long pos = now % period;
+    float val = (cos(pos / (float)period * PI * 2) + 1) * 0.5;
+    float pwm = 0.2 + val * 0.8;
     // Extra buttons
-    analogWrite(undoButtonLedPin, (extraLeds >> 2) & 1 == 1 ? undoPwmOn : 0);
-    analogWrite(missButtonLedPin, (extraLeds >> 1) & 1 == 1 ? missPwmOn : 0);
-    analogWrite(nextButtonLedPin, (extraLeds >> 0) & 1 == 1 ? undoPwmOn : 0);
+    analogWrite(undoButtonLedPin, (extraLeds >> 2) & 1 == 1 ? pwm * undoPwmOn : 0);
+    analogWrite(missButtonLedPin, (extraLeds >> 1) & 1 == 1 ? pwm * missPwmOn : 0);
+    analogWrite(nextButtonLedPin, (extraLeds >> 0) & 1 == 1 ? pwm * nextPwmOn : 0);
   }
 }

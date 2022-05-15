@@ -15,15 +15,9 @@ const buttonLeds = [false, false, false]; // undo, miss, next
 export const writeLedsToSerial = () => {
     // TODO fix this on arduino side
     //const output = "b" + arr.map(val => String.fromCharCode(val)).join("") + "\n";
-    const output = "a" + leds.map(val => val).join(",") + "\n";
+    const fullLeds = [ ...leds, getButtonLedsValue() ];
+    const output = "a" + fullLeds.map(val => val).join(",") + "\n";
     // console.log("writing leds. length:", arr.length, output);
-    serialPort?.write(output);
-}
-
-export const writeButtonLedsToSerial = () => {
-    const value = getButtonLedsValue();
-    const output = "e" + value + "\n";
-    //console.log("writing button leds:", output);
     serialPort?.write(output);
 }
 

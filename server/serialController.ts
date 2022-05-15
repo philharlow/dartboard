@@ -6,34 +6,39 @@ import { handleInputSerialConnection } from './serialInputController';
 import { handleLedSerialConnection } from './serialLedController';
 import { range } from 'lodash';
 
-const retryTime = 10 * 1000;
-let retriesLeft = 10;
 
 const portOptionsWindows = range(1, 20).map(n => "COM" + n); // COM1-COM20
 const portOptionsLinux = [...range(0, 5).map(n => "/dev/ttyUSB" + n), ...range(0, 5).map(n => "/dev/ttyACM" + n)]; // /dev/ttyUSB0-/dev/ttyUSB5, /dev/ttyACM0-/dev/ttyACM5
+const paths = process.platform === "win32" ? portOptionsWindows : portOptionsLinux;
+const serialPorts = [];
 
 export let dartboardSerialConnection: SerialPort| undefined;
 export let ledSerialConnection: SerialPort| undefined;
 
-const retryConnection = (port: SerialPort) => {
+const retryTime = 10 * 1000;
+
+const retry = (path: string) => {
+    if (ledSerialConnection && dartboardSerialConnection) return;
+    console.log("retyting port", path);
+    tryPort(path);
+    if (ledSerialConnection && dartboardSerialConnection) return;
+    setTimeout(() => retry(path), retryTime);
+};
+
+const handleDisconnect = (port: SerialPort) => {
     if (port === dartboardSerialConnection) {
         console.log("dartboard disconnected", port.path);
+        dartboardSerialConnection = undefined;
+        retry(port.path);
     } else if (port === ledSerialConnection) {
         console.log("led disconnected", port.path);
+        ledSerialConnection = undefined;
+        retry(port.path);
     }
-    //serialPort?.destroy();
-    //serialPort = undefined;
-    //parser = undefined;
-    if (retriesLeft && retriesLeft--) {
-        //setTimeout(openSerialConnection, retryTime);
-    }
+    port?.destroy();
 };
- 
-const paths = process.platform === "win32" ? portOptionsWindows : portOptionsLinux;
-const serialPorts = [];
-console.log('trying serial ports');
-for(let i = 0; i < paths.length && !ledSerialConnection && !dartboardSerialConnection; i++) {
-    const path = paths[i];
+
+const tryPort = (path: string) => {
     //console.log('trying serial port', path);
     try {
         const serialPort = new SerialPort({ path, baudRate: 115200 });
@@ -46,7 +51,7 @@ for(let i = 0; i < paths.length && !ledSerialConnection && !dartboardSerialConne
         });
         serialPort.on("close", () => {
             cleanupPort(serialPort);
-            retryConnection(serialPort);
+            handleDisconnect(serialPort);
             //console.log('serial port closed. retrying...');
         });
         serialPort.on("error", (message) => {
@@ -85,5 +90,11 @@ for(let i = 0; i < paths.length && !ledSerialConnection && !dartboardSerialConne
                 serialPorts.forEach(cleanupPort);
             }
         };
-    } catch (e) {}
+    } catch (e) {}  
+};
+
+console.log('trying serial ports');
+for(let i = 0; i < paths.length && !ledSerialConnection && !dartboardSerialConnection; i++) {
+    const path = paths[i];
+    tryPort(path);
 }

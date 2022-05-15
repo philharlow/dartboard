@@ -1,10 +1,10 @@
 import styled from '@emotion/styled/macro';
 import { Button } from '@mui/material';
-import { emit } from '../SocketInterface';
-import { useGameStore } from '../store/GameStore';
-import { CalibrationMode, getSpokenScore } from '../types/GameTypes';
-import { calibrationOrder, SocketEvent } from '../types/SocketTypes';
-import DartBoard from './DartBoard';
+import { emit } from '../../SocketInterface';
+import { useGameStore } from '../../store/GameStore';
+import { CalibrationMode, getSpokenScore } from '../../types/GameTypes';
+import { calibrationOrder, SocketEvent } from '../../types/SocketTypes';
+import DartBoard from '../DartBoard';
 
 const CalibrationScreenDiv = styled.div`
 	margin: 30px;

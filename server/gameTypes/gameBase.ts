@@ -1,23 +1,13 @@
 import ledController from "../ledController";
 //import { speak } from "../../src/store/AudioStore";
-import { DartThrow, FinalScore, GameDefinition } from "../../src/types/GameTypes";
+import { DartThrow, FinalScore, GameDefinition, SelectedSetting } from "../../src/types/GameTypes";
 import { Ring } from "../../src/types/LedTypes";
-import { delay } from "../../src/tools/Utils";
+import { delay, getRandom } from "../../src/tools/Utils";
 import { playSound, showPopup, speak } from "../socketServer";
 import gameController from "../gameController";
 import { getPronounciation } from "../../src/types/PlayerTypes";
 import { SoundFX } from "../../src/types/SocketTypes";
 
-
-
-export const addDartThrow = (score: number, ring: Ring) => {
-	const { currentGame } = gameController;
-	if (currentGame) {
-		//currentGame?.addDartThrow(score, ring);
-	} else {
-		ledController.flashLed(score, ring);
-	}
-}
 
 class GameBase {
 	gameDef: GameDefinition;
@@ -31,8 +21,18 @@ class GameBase {
 
 	starting() {
 		console.log(this.gameDef.name + " : starting");
-		speak((this.gameDef.pronounciation || this.gameDef.name) + ". " + (this.gameDef.settingsIntro ?? "Select your settings"));
+		const spokenName = this.gameDef.pronounciation || this.gameDef.name;
+		const intro = this.gameDef.settingsIntro ?? "Select your settings";
+		speak(spokenName + "., " + intro); // extra comma causes better pause 🤷‍♂️
 		this.startingAnim();
+	}
+
+	getDisplayName(settings?: SelectedSetting[]) {
+		const suffix = settings?.map(setting => {
+			const option = this.getOption(setting.settingName);
+			return setting.settingValue + " " + (option?.displaySuffix ?? option.name);
+		}).join(", ");
+		return this.gameDef.name + (suffix ? ", " + suffix : "");
 	}
 
 	startingAnim() {
@@ -44,16 +44,23 @@ class GameBase {
 		ledController.animShrink();
 	}
 
-	setOptions() {
-		const { selectedSettings, } = gameController.gameStatus;
+	getOption(optionName: string) {
+		const option = this.gameDef.settingsOptions.find(op => op.name === optionName);
+		return option;
+	}
+
+	optionsSet() {
+		const { selectedSettings } = gameController.gameStatus;
 
 		selectedSettings?.forEach(setting => {
-			const options = this.gameDef.settingsOptions.find(op => op.name === setting.name);
+			const option = this.getOption(setting.settingName);
 			// Apply settings via propName
-			if (options)
-				(this as any)[options.propName] = setting.option;
+			if (option)
+				(this as any)[option.propName] = setting.settingValue;
 		})
-		speak("Select Players");
+
+		if (selectedSettings.length)
+			speak("Select Players");
 	}
 
 	playersSet() {
@@ -93,8 +100,44 @@ class GameBase {
 
 	updateHints() {
 	}
+	waitingForDart() {
+		return gameController.gameStatus.waitingForThrow;
+	}
+
+	getDartThrow(score: number, ring: Ring): DartThrow | undefined {
+		// Check if we are waiting for a dart
+
+		// Build the dart throw
+		const dartThrow: DartThrow | undefined = undefined;
+		return dartThrow;
+	}
 
 	addDartThrow(score: number, ring: Ring) {
+		// Create DartThrow
+		const dartThrow = this.getDartThrow(score, ring);
+		// Handle DartThrow
+		if (dartThrow) {
+			// Add DartThrow to game status
+
+			// Update dartsByRound
+
+			// Update scores/winners
+
+			// Update current player and round if needed
+
+			// Update hints
+
+			// Update visual/sound fx (ie. bullseye anim/sound)
+
+			// If new winners, show popup
+
+			// Else
+			
+			// Speak message for dart throw
+
+			// Dispatch popup
+
+		}
 		console.log("addDartThrow() not implemented yet!")
 	}
 
@@ -108,16 +151,22 @@ class GameBase {
 		const currentPlayer = players[currentPlayerIndex];
 		// TODO protect undoing more than current round's darts
 		const lastDart = dartThrows[dartThrows.length - 1];
-		if (lastDart && lastDart.player === currentPlayer && lastDart.round === currentRound) {
+		if (lastDart) { // && lastDart.player === currentPlayer && lastDart.round === currentRound) {
 			gameController.updateGameStatus({
 				dartThrows: dartThrows.slice(0, -1),
 				waitingForThrow: true,
 				winningPlayerIndex: -1,
+				currentRound: lastDart.round,
+				currentPlayerIndex: players.indexOf(lastDart.player),
 			})
 			this.waitingForThrowSet();
-			speak("Undone", true);
 			this.updateHints();
 			this.updateScores();
+
+			// Announce a player change
+			//if (currentPlayer !== lastDart.player)
+			//	speak("It's " + lastDart.player + "'s throw");
+			speak("Undone. It's " + lastDart.player + "'s throw", true);
 		}
 	}
 	
@@ -144,10 +193,14 @@ class GameBase {
 			waitingForThrow: true,
 		});
 		this.waitingForThrowSet();
-		if (Math.random() > 0.5) speak("alright, " + nextPlayer + "'s turn!");
-		else speak("ok, " + nextPlayer + " is up!");
+
+		// Random prompt
+		const prefix = getRandom(["alright", "ok"]);
+		const suffix = getRandom(["'s turn!", " is up!"]);
+		const text = prefix + " " + nextPlayer + " " + suffix;
+		speak(text);
 		
-		showPopup(nextPlayer + " is up");
+		showPopup(nextPlayer + " " + suffix);
 		this.updateHints();
 	}
 

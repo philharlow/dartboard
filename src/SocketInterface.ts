@@ -72,7 +72,7 @@ export const sendDartThrow = (score: number, ring: Ring) => {
   socket?.emit(SocketEvent.ADD_DART_THROW, getCharFromRing(ring) + score);
 }
 
-export const emit = (topic: SocketEvent, data: any) => {
+export const emit = (topic: SocketEvent, data: any = undefined) => {
   socket?.emit(topic, data);
 }
 

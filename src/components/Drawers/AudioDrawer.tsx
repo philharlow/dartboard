@@ -1,10 +1,10 @@
 import styled from '@emotion/styled/macro';
 import Drawer, { DrawerPosition } from './Drawer';
-import { safeSpeechSynthesis, speak, useAudioStore } from '../store/AudioStore';
+import { safeSpeechSynthesis, speak, useAudioStore } from '../../store/AudioStore';
 import { MenuItem, Select, Slider } from '@mui/material';
 import { useEffect } from 'react';
-import { playSound } from '../tools/AudioTools';
-import { SoundFX } from '../types/SocketTypes';
+import { playSound } from '../../tools/AudioTools';
+import { SoundFX } from '../../types/SocketTypes';
 
 const Title = styled.div`
 	font-weight: bold;

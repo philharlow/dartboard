@@ -109,10 +109,11 @@ export interface SettingOptions {
 	name: string;
 	propName: string;
 	options: any[];
+	displaySuffix?: string;
 }
 export interface SelectedSetting {
-	name: string;
-	option: any;
+	settingName: string;
+	settingValue: any;
 }
 
 export enum CalibrationMode {

@@ -40,7 +40,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
 	},
 	setSelectedSettings: (selectedSettings: SelectedSetting[]) => {
 		emit(SocketEvent.SET_SETTINGS, selectedSettings);
-		//currentGame?.setOptions();
 	},
 	setPlayers: (players: string[]) => {
 		emit(SocketEvent.SET_PLAYERS, players);

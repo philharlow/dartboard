@@ -1,6 +1,6 @@
 import _, { cloneDeep } from "lodash";
 import ledController from "../ledController";
-import { DartThrow, GameType } from "../../src/types/GameTypes";
+import { DartThrow, GameType, SelectedSetting } from "../../src/types/GameTypes";
 import { Hint, Ring } from "../../src/types/LedTypes";
 import GameBase from "./gameBase";
 import { showPopup, socketServer, speak } from "../socketServer";
@@ -36,17 +36,20 @@ class Game301 extends GameBase {
 				{
 					name: "Starting Score",
 					propName: "startingScore",
-					options: [ 301, 501, 601, 701, 101 ]
+					options: [ 301, 501, 601, 701, 101 ],
+					displaySuffix: "",
 				},
 				{
 					name: "In Mode",
 					propName: "inMode",
 					options: Object.values(Game301InMode),
+					displaySuffix: "",
 				},
 				{
 					name: "Out Mode",
 					propName: "outMode",
 					options: Object.values(Game301OutMode),
+					displaySuffix: "",
 				}
 			],
 		});
@@ -74,9 +77,8 @@ class Game301 extends GameBase {
 		return score;
 	}
 
-	setOptions() {
-		super.setOptions();
-		gameController.updateGameStatus({ currentGameName: "" + this.startingScore });
+	getDisplayName(settings?: SelectedSetting[]) {
+		return settings?.map(setting => setting.settingValue).join(", ") ?? this.gameDef.name;
 	}
 
 	addDartThrow(score: number, ring: Ring) {
@@ -111,9 +113,13 @@ class Game301 extends GameBase {
 		const playerScore = this.getScore(currentPlayer, dartThrows) - totalScore;
 		// console.log("playerscore will be", playerScore);
 
-		const scoreMessage = ring === Ring.Miss ? " miss" : this.getSpokenScore(score, ring);
-		speak(scoreMessage, true);
 		gameController.gameStatus.dartThrows.push(newThrow);
+		const roundThrows = playerDarts.filter((d => d.round === currentRound));
+
+		const roundScore = roundThrows.reduce((acc, t) => acc + t.totalScore, 0);
+		const extra = roundScore > 100 ? (roundScore > 150 ? "., High Ton" : "., Low Ton") : "";
+		const scoreMessage = ring === Ring.Miss ? " miss" : this.getSpokenScore(score, ring) + extra;
+		speak(scoreMessage, true);
 
 		// Bust!
 		if (playerScore < 0) {
@@ -121,13 +127,12 @@ class Game301 extends GameBase {
 			newThrow.totalScore = 0;
 			speak(scoreMessage + "! Bust!!", true);
          
-
 			this.roundEnded();
 		// Winner!
 		} else if (playerScore === 0) {
 			this.finishGame(currentPlayerIndex);
 		// Thrown 3 darts
-		} else if (playerDarts.filter((d => d.round === currentRound)).length === this.throwsPerRound)
+		} else if (roundThrows.length === this.throwsPerRound)
 			this.roundEnded();
 
 		const popupMessage = newThrow.ring === Ring.Miss ? "Miss" :

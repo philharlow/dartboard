@@ -34,9 +34,9 @@ class GameController {
     
     setSettings(settings: SelectedSetting[]) {
         console.log('setSettings:', settings);
-        this.updateGameStatus({ selectedSettings: settings });
-        if (settings.length > 0)
-            this.currentGame?.setOptions();
+        const gameDisplayName = this.currentGame?.getDisplayName(settings) ?? this.gameStatus.currentGameType;
+        this.updateGameStatus({ selectedSettings: settings, currentGameName: gameDisplayName });
+        this.currentGame?.optionsSet();
     }
 
     setPlayers(players: string[]) {
@@ -48,20 +48,27 @@ class GameController {
 
     addDartThrow(score: number, ring: Ring) {
         const { waitingForThrow } = this.gameStatus;
-        //console.log("handling dart", score, ring);
-        if (this.currentGame && waitingForThrow)
+        // console.log("handling dart", score, ring, this.currentGame);
+        if (this.currentGame && waitingForThrow) {
             this.currentGame.addDartThrow(score, ring);
-        else if (ring !== Ring.Miss)
+
+            // TODO: do this in a better place
+            if (score === 25) ledController.animBullseye();
+        } else if (ring !== Ring.Miss)
             ledController.flashLed(score, ring);
     }
 
+    isPlaying() {
+        return this.gameStatus.players.length > 0;
+    }
+
     nextPlayer() {
-        if (this.gameStatus.players.length)
+        if (this.isPlaying())
             this.currentGame?.nextPlayer();
     }
 
     undoLastDart() {
-        if (this.gameStatus.players.length)
+        if (this.isPlaying())
             this.currentGame?.undoLastDart();
     }
 
@@ -83,11 +90,11 @@ class GameController {
     updateButtons() {
         // This needs cleanup, optimization, and generalization
 		const { dartThrows, waitingForThrow, currentPlayerIndex, players, currentRound, currentGameType, buttons } = this.gameStatus;
-		const isPlaying = currentGameType !== GameType.None && players.length;
+		const isPlaying = currentGameType !== GameType.None && this.isPlaying();
 		const currentPlayer = players[currentPlayerIndex];
 		const playerDarts = dartThrows.filter(t => t.player === currentPlayer);
 		const roundDarts = playerDarts.filter(t => t.round === currentRound);
-		const undo = isPlaying && !(roundDarts.length === 0 && waitingForThrow);
+		const undo = isPlaying && dartThrows.length > 0; // !(roundDarts.length === 0 && waitingForThrow);
 		const miss = isPlaying && waitingForThrow;
 		const nextPlayer = isPlaying && !waitingForThrow;
 

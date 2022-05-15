@@ -4,6 +4,7 @@ int matrixMasterPins[] = {30, 28, 26, 24, 22, 20, 18, 16, 14, 12, 10}; //Put the
 int matrixSlavePins[] = {31, 29, 27, 25, 23, 21, 19, 17}; //Put the pins you connected the lines of your Slave Layer
 
 int missSensorPin = 2; // Output pin from the tilt sensor
+// countdown will be negative when ignoring sensor input, positive after it received sensor input but is waiting to announce to make sure no other button/pad input comes in first
 int missCountdown = 0;
 
 int nextButtonPin = 4;
@@ -12,12 +13,6 @@ int missButtonPin = 6;
 int missButtonGroundPin = 7;
 int undoButtonPin = 8;
 int undoButtonGroundPin = 9;
-
-void sendMessage(String message) {
-    Serial.println(message);
-    delay(500);
-    missCountdown = 0;
-}
 
 void setup() {
     Serial.begin(115200);
@@ -50,10 +45,20 @@ void setup() {
     digitalWrite(nextButtonGroundPin, LOW);
 }
 
+void sendMessage(String message) {
+    Serial.println(message);
+    delay(500);
+    missCountdown = -1000; // Extra delay to prevent additional misses
+}
+
+void onMissSensor() {
+    if (missCountdown == 0) missCountdown = 100;
+}
+
 void loop() {
+    if (missCountdown < 0) missCountdown++; // Count down delay
     if (missCountdown > 0) {
         if (--missCountdown == 0) {
-            missCountdown = -1; // Ignore any miss events during our delay
             sendMessage("miss");
         }
     }
@@ -62,7 +67,6 @@ void loop() {
         digitalWrite(matrixMasterPins[i], LOW);
         for(int j = 0; j < slaveLines; j++){
             if(digitalRead(matrixSlavePins[j]) == LOW){
-                missCountdown = -1; // Ignore any miss events during our delay
                 String hit = String(j) + "," + String(i);
                 sendMessage(hit);
                 break;
@@ -72,31 +76,14 @@ void loop() {
     }
 
     if (digitalRead(undoButtonPin) == LOW) {
-        onUndoButton();
+        sendMessage("undo");
     }
 
     if (digitalRead(missButtonPin) == LOW) {
-        onMissButton();
+        sendMessage("missb");
     }
 
     if (digitalRead(nextButtonPin) == LOW) {
-        onNextButton();
+        sendMessage("next");
     }
-}
-
-void onMissSensor() {
-    if (missCountdown != 0) return;
-    missCountdown = 100;
-}
-
-void onUndoButton() {
-    sendMessage("undo");
-}
-
-void onMissButton() {
-    sendMessage("missb");
-}
-
-void onNextButton() {
-    sendMessage("next");
 }

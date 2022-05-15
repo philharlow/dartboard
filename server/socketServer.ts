@@ -23,7 +23,6 @@ export class SocketServer {
 			this.connections.push(socket);
 			console.log('a user connected', this.connections.length);
 			ledController.sendLedsToSocket();
-			ledController.sendButtonsToSocket();
 
 			socket.on("disconnect", (reason) => {
 				this.connections.splice(this.connections.indexOf(socket), 1);

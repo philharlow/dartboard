@@ -1,10 +1,11 @@
 import Drawer, { DrawerPosition } from './Drawer';
-import DartBoard from './DartBoard';
+import DartBoard from '../DartBoard';
 import styled from '@emotion/styled/macro';
 import { Button } from '@mui/material';
-import { useEffect, useState } from 'react';
-import { useLedStore } from '../store/LedStore';
-import { LedButton } from '../types/LedTypes';
+import { useLedStore } from '../../store/LedStore';
+import { LedButton, Ring } from '../../types/LedTypes';
+import { emit, sendDartThrow } from '../../SocketInterface';
+import { SocketEvent } from '../../types/SocketTypes';
 
 const ButtonRow = styled.div`
   display: flex;
@@ -30,7 +31,7 @@ const UndoButton = styled(BoardButton)`
 		background-color: #101f50;
     }
 	&.lit {
-		background-color:#2a4cbb;
+		background-color: #2a4cbb;
     	box-shadow: #2a4cbb 0px 0px 20px;
 	}
 `;
@@ -41,7 +42,7 @@ const MissButton = styled(BoardButton)`
 		background-color: #47130c;
     }
 	&.lit {
-		background-color:#cf3622
+		background-color: #cf3622;
     	box-shadow: #cf3622 0px 0px 20px;
 	}
 `;
@@ -52,7 +53,7 @@ const NextButton = styled(BoardButton)`
 		background-color: #0c3a0c;
     }
 	&.lit {
-		background-color:#28c328;
+		background-color: #28c328;
     	box-shadow: #28c328 0px 0px 20px;
 	}
 `;
@@ -61,43 +62,34 @@ const NextButton = styled(BoardButton)`
 function DartboardDrawer() {
 	const buttonLeds = useLedStore(store => store.buttonLeds);
 
-	const [undoLit, setUndoLit] = useState(false);
-	const [missLit, setMissLit] = useState(false);
-	const [nextLit, setNextLit] = useState(false);
+	const undoLit = buttonLeds[LedButton.UNDO];
+	const missLit = buttonLeds[LedButton.MISS];
+	const nextLit = buttonLeds[LedButton.NEXT];
+	
+	const addMiss = () => {
+		sendDartThrow(0, Ring.Miss);
+	}
+	const undoLastDart = () => {
+		emit(SocketEvent.UNDO_LAST_DART);
+	}
+	const nextPlayer = () => {
+		emit(SocketEvent.NEXT_PLAYER, true);
+	}
 
-	const undo = () => {
-		console.log('undo');
-	};
-	const miss = () => {
-		console.log('miss');
-	};
-	const next = () => {
-		console.log('next');
-	};
-
-	useEffect(() => {
-		setUndoLit(buttonLeds[LedButton.UNDO]);
-		setMissLit(buttonLeds[LedButton.MISS]);
-		setNextLit(buttonLeds[LedButton.NEXT]);
-	}, [buttonLeds]);
-
-
-	const undoClassName = undoLit ? 'lit' : "";
-	const missClassName = missLit ? 'lit' : "";
-	const nextClassName = nextLit ? 'lit' : "";
+	const getClassName = (lit: boolean) => lit ? 'lit' : "";
 
 	
 	return (
-		<Drawer position={DrawerPosition.Top} tabStyle={{right: "50%"}} drawerStyle={{left: "25%"}} tabLabel="Board">
+		<Drawer position={DrawerPosition.Top} tabStyle={{right: "185px"}} drawerStyle={{left: "25%"}} tabLabel="Board">
 			<DartBoard />
 			<ButtonRow>
-				<UndoButton className={undoClassName} variant="contained" onClick={undo}>
+				<UndoButton className={getClassName(undoLit)} variant="contained" onClick={undoLastDart}>
 					Undo
 				</UndoButton>
-				<MissButton className={missClassName} variant="contained" onClick={miss}>
+				<MissButton className={getClassName(missLit)} variant="contained" onClick={addMiss}>
 					Miss
 				</MissButton>
-				<NextButton className={nextClassName} variant="contained" onClick={next}>
+				<NextButton className={getClassName(nextLit)} variant="contained" onClick={nextPlayer}>
 					Next
 				</NextButton>
 			</ButtonRow>

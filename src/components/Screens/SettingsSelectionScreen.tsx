@@ -2,10 +2,10 @@ import styled from '@emotion/styled/macro';
 import { Button, MenuItem, Select } from '@mui/material';
 import { cloneDeep } from 'lodash';
 import { useState } from 'react';
-import { speak } from '../store/AudioStore';
-import { useGameStore } from '../store/GameStore';
-import { SelectedSetting } from '../types/GameTypes';
-import BackButton from './BackButton';
+import { speak } from '../../store/AudioStore';
+import { useGameStore } from '../../store/GameStore';
+import { SelectedSetting } from '../../types/GameTypes';
+import BackButton from '../BackButton';
 
 const RootDiv = styled.div`
     height: 100%;
@@ -67,12 +67,12 @@ function SettingsSelectionScreen() {
 	const selectGame = useGameStore(store => store.selectGame);
 	const setSelectedSettings = useGameStore(store => store.setSelectedSettings);
 
-	const [ selections, setSelections ] = useState<SelectedSetting[]>(currentGame?.settingsOptions?.map(o => ({ name: o.name, option: o.options[0] })) || []);
+	const [ selections, setSelections ] = useState<SelectedSetting[]>(currentGame?.settingsOptions?.map(o => ({ settingName: o.name, settingValue: "" + o.options[0] })) || []);
 
 	const setSelection = (name: string, option: string) => {
 		const newSelections = cloneDeep(selections);
-		const selection = newSelections.find(s => s.name === name);
-		if (selection) selection.option = option;
+		const selection = newSelections.find(s => s.settingName === name);
+		if (selection) selection.settingValue = option;
 		setSelections(newSelections);
 		speak("" + option);
 	}
@@ -82,16 +82,16 @@ function SettingsSelectionScreen() {
 			<GameTitle>
 				{currentGame?.name} Settings
 			</GameTitle>
-			{selections.map(selection => <SettingRow key={selection.name}>
+			{selections.map(selection => <SettingRow key={selection.settingName}>
 					<Grow>
-						{selection.name}
+						{selection.settingName}
 					</Grow>
 					<ColoredSelect
-						value={selection.option}
-						onChange={(ev) => setSelection(selection.name, (ev.target as any).value)}
+						value={"" + selection.settingValue}
+						onChange={(ev) => setSelection(selection.settingName, (ev.target as any).value)}
 					>
-						{currentGame?.settingsOptions?.find(o => o.name === selection.name)?.options.map(option => 
-							<MenuItem key={option} value={option}>{option}</MenuItem>
+						{currentGame?.settingsOptions?.find(o => o.name === selection.settingName)?.options.map(option => 
+							<MenuItem key={"" + option} value={"" + option}>{"" + option}</MenuItem>
 						)}
 					</ColoredSelect>
 				</SettingRow>
