@@ -18,7 +18,6 @@ const server = http.createServer(app);
 
 // Game server
 startSocketServer(server);
-gameController.init();
 calibrationController.init();
 
 // Routes

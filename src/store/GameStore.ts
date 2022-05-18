@@ -6,7 +6,7 @@ import { SocketEvent } from '../types/SocketTypes';
 
 export type GameStore = GameStatus & {
 	gameList?: GameDefinition[];
-	selectGame: (gameType?: GameType) => void;
+	setGameType: (gameType?: GameType) => void;
 	setDartThrows: (dartThrows: DartThrow[]) => void;
 	setCurrentRound: (round: number) => void;
 	setWaitingForThrow: (waitingForThrow: boolean) => void;
@@ -24,7 +24,7 @@ const setViaSocket = (change: Partial<GameStore>) => {
 
 export const useGameStore = create<GameStore>((set, get) => ({
 	...startingGameStatus,
-	selectGame: (game?: GameType) => {
+	setGameType: (game?: GameType) => {
 		emit(SocketEvent.START_GAME, game);
 	},
 	setWaitingForThrow: (waitingForThrow: boolean) => {

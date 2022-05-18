@@ -14,6 +14,7 @@ import { useGameStore } from './store/GameStore';
 import { usePlayerStore } from './store/PlayerStore';
 import AudioDrawer from './components/Drawers/AudioDrawer';
 import { preloadSounds } from './tools/AudioTools';
+import EditPlayersScreen from './components/Screens/EditPlayersScreen';
 
 const GameViewDiv = styled.div`
   width: 100%;
@@ -39,6 +40,7 @@ function GameView() {
 	const allPlayers = usePlayerStore(store => store.allPlayers);
 	const calibrationState = useGameStore(store => store.calibrationState);
 	const fetchAllPlayers = usePlayerStore(store => store.fetchAllPlayers);
+	const edittingPlayers = usePlayerStore(store => store.edittingPlayers);
 	
 	// console.log("GameView redraw");
 
@@ -64,6 +66,8 @@ function GameView() {
 	// Calibration
 	else if (calibrationState !== null)
 		content = <CalibrationScreen />
+	else if (edittingPlayers)
+		content = <EditPlayersScreen />
 	else if (!currentGame)
 		content = <GameSelectionScreen />
 	else if (!selectedSettings || !selectedSettings.length)

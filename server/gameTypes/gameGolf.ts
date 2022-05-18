@@ -85,7 +85,7 @@ class GameGolf extends GameBase {
 		if (score !== hole) return "Miss";
 		if (ring === Ring.Double) return "Eagle";
 		if (ring === Ring.Triple) return "Birdie";
-		return "Ppar"; // typo here to force proper pronounciation, otherwise reads p-a-r
+		return "Par";
 	}
 
 	addDartThrow(score: number, ring: Ring) {
@@ -107,6 +107,7 @@ class GameGolf extends GameBase {
 		const clonedDarts = cloneDeep(dartThrows);
 		const multiplier = 1;//this.getMultiplier(ring);
 		const totalScore = score === hole ? 1 : 0;// score * multiplier;
+		const scoreMessage = this.getSpokenScore(score, ring);
 		const newThrow: DartThrow = {
 			player: currentPlayer,
 			score,
@@ -115,6 +116,7 @@ class GameGolf extends GameBase {
 			totalScore,
 			round: currentRound,
 			bust: false,
+			display: scoreMessage,
 		}
 		clonedDarts.push(newThrow);
 		const playerDarts = clonedDarts.filter(t => t.player === currentPlayer);
@@ -124,9 +126,8 @@ class GameGolf extends GameBase {
 		//speak(totalScore ? "Hit!" : "Miss");
 		// console.log("playerscore will be", playerScore);
 
-		const scoreMessage = this.getSpokenScore(score, ring);
-		speak(scoreMessage, true);
-		showPopup(scoreMessage.replace("Pp", "P"));
+		speak(scoreMessage.replace("P", "Pp"), true); // typo here to force proper pronounciation, otherwise reads p-a-r
+		showPopup(scoreMessage);
 		gameController.gameStatus.dartThrows.push(newThrow);
 
 		// Bust!

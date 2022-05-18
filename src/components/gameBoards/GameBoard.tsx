@@ -82,7 +82,7 @@ const getTurnBoard = (game?: GameType) => {
 
 function GameBoard() {
 	const currentGame = useGameStore(store => store.gameList?.find(game => game.gameType === store.currentGameType));
-  const selectGame = useGameStore(store => store.selectGame);
+  const setGameType = useGameStore(store => store.setGameType);
   const currentGameName = useGameStore(store => store.currentGameName);
   const buttons = useGameStore(store => store.buttons);
 
@@ -132,7 +132,7 @@ function GameBoard() {
 				Next Player
 			</NextPlayerButton>
 		</ButtonRow>
-		<BackButton onClick={() => window.confirm("Are you sure you want to exit?") && selectGame(undefined)} />
+		<BackButton onClick={() => window.confirm("Are you sure you want to exit?") && setGameType(undefined)} />
       	<WinnerDisplay />
     </RootDiv>
   );

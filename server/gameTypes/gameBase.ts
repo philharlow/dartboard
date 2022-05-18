@@ -88,6 +88,9 @@ class GameBase {
 		return 0;
 	}
 
+	currentScores: number[] = [];
+	roundScores: number[][] = [];
+	
 	updateScores() {
 		const { players, dartThrows } = gameController.gameStatus
 		const newScores = players.map(player => this.getScore(player, dartThrows));
@@ -197,7 +200,7 @@ class GameBase {
 		// Random prompt
 		const prefix = getRandom(["alright", "ok"]);
 		const suffix = getRandom(["'s turn!", " is up!"]);
-		const text = prefix + " " + nextPlayer + " " + suffix;
+		const text = prefix + " " + nextPlayer + suffix;
 		speak(text);
 		
 		showPopup(nextPlayer + " " + suffix);

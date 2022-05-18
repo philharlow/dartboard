@@ -79,6 +79,7 @@ export interface DartThrow {
 	ring: Ring;
 	round: number;
 	bust: boolean;
+	display: string;
 	extra?: number;
 }
 

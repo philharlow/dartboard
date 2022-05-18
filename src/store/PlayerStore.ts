@@ -4,6 +4,12 @@ import { Player } from '../types/PlayerTypes';
 
 export type PlayerStore = {
 	allPlayers?: Player[];
+	lastPlayers?: Player[];
+	edittingPlayers?: boolean;
+	edittingPlayer?: Player;
+	setEdittingPlayer: (edittingPlayer?: Player) => void;
+	setEdittingPlayers: (edittingPlayers: boolean) => void;
+	setLastPlayers: (lastPlayers: Player[]) => void;
 	addPlayer: (player: Player) => void;
 	updatePlayer: (player: Player) => void;
 	removePlayer: (player: Player) => void;
@@ -11,6 +17,15 @@ export type PlayerStore = {
 };
 
 export const usePlayerStore = create<PlayerStore>((set, get) => ({
+	setEdittingPlayer: (edittingPlayer?: Player) => {
+		set({ edittingPlayer });
+	},
+	setEdittingPlayers: (edittingPlayers: boolean) => {
+		set({ edittingPlayers });
+	},
+	setLastPlayers: (lastPlayers: Player[]) => {
+		set({ lastPlayers });
+	},
 	addPlayer: (player: Player): void =>  {
 	  const { allPlayers } = get();
 	  if (allPlayers)

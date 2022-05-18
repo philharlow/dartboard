@@ -105,7 +105,7 @@ const getPrettyPlace = (place: number) => {
 
 function WinnerDisplay() {
 	const [ hidden, setHidden ] = useState(true);
-	const selectGame = useGameStore(store => store.selectGame);
+	const setGameType = useGameStore(store => store.setGameType);
 	const currentGame = useGameStore(store => store.gameList?.find(game => game.gameType === store.currentGameType));
 	const players = useGameStore(store => store.players);
 	const winningPlayerIndex = useGameStore(store => store.winningPlayerIndex);
@@ -149,10 +149,10 @@ function WinnerDisplay() {
 					<UndoButton variant='contained' onClick={() => undoLastDart()}>
 						Undo
 					</UndoButton>
-					<ChangeGameButton variant='contained' onClick={() => selectGame(undefined)}>
+					<ChangeGameButton variant='contained' onClick={() => setGameType(undefined)}>
 						Change Game
 					</ChangeGameButton>
-					<ReplayButton variant='contained' onClick={() => selectGame(currentGame?.gameType)}>
+					<ReplayButton variant='contained' onClick={() => setGameType(currentGame?.gameType)}>
 						Replay Game
 					</ReplayButton>
 					<ContinueButton variant='contained' onClick={() => setHidden(true)}>

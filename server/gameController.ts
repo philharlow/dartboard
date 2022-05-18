@@ -17,12 +17,8 @@ class GameController {
     allPlayers = defaultPlayers;
     gameStatus: GameStatus = cloneDeep(startingGameStatus);
 
-    init() {
-        
-    }
-
-    startGame(gameType: GameType) {
-        console.log('startGame:', gameType);
+    setGameType(gameType: GameType) {
+        console.log('setGameType:', gameType);
         if (this.currentGame) {
             this.currentGame.exiting();
             this.reset();

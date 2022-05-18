@@ -1,6 +1,5 @@
 import styled from '@emotion/styled/macro';
 import { useGameStore } from '../../store/GameStore';
-import { Ring } from '../../types/LedTypes';
 
 const TurnBoardDiv = styled.div`
     padding-right: 10px;
@@ -70,10 +69,7 @@ function TurnBoard() {
 	for (let i=0; i<dartsPerTurn; i++)
 		if (roundDarts[i]) {
 			const scoreCellClass = className + (i+1 === roundDarts.length ? " flash" : "");
-			if (roundDarts[i].ring === Ring.Miss)
-				scores.push(<ScoreCell key={i} className={scoreCellClass}>Miss</ScoreCell> );
-			else
-				scores.push(<ScoreCell key={i} className={scoreCellClass}>{roundDarts[i].multiplier} x {roundDarts[i].score}</ScoreCell> );
+			scores.push(<ScoreCell key={i} className={scoreCellClass}>{roundDarts[i].display}</ScoreCell> );
 		} else
 			scores.push(<ScoreCell key={i}></ScoreCell> );
 

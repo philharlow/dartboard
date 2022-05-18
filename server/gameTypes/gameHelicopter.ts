@@ -139,6 +139,7 @@ class GameHelicopter extends GameBase {
 			round: currentRound,
 			bust: false,
 			extra: hit ? hitIndex : undefined,
+			display: hit ? "hit" : "miss",
 		}
 		clonedDarts.push(newThrow);
 		

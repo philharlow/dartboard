@@ -1,6 +1,7 @@
 import styled from '@emotion/styled/macro';
 import { Button } from '@mui/material';
 import { useGameStore } from '../../store/GameStore';
+import { usePlayerStore } from '../../store/PlayerStore';
 import { GameType } from '../../types/GameTypes';
 
 const StartScreenDiv = styled.div`
@@ -28,7 +29,7 @@ const GameButton = styled.div`
 	height: 300px;
 	background: #0d0d0d61;
 	flex-shrink: 0;
-	border-radius: 15px;
+	border-radius: 25px;
     display: flex;
 	flex-direction: column;
 	gap: 30%;
@@ -39,7 +40,6 @@ const GameButton = styled.div`
 		background: #ccccccaa;
 	}
 `;
-
 
 const Title = styled.div`
 	font-size: 48px;
@@ -54,16 +54,18 @@ const PlayersButton = styled(Button)`
 	right: 20px;
 	bottom: 20px;
 	padding: 20px 30px;
+	border-radius: 10px;
 `;
 
 
 function GameSelectionScreen() {
-	const selectGame = useGameStore(store => store.selectGame);
+	const setGameType = useGameStore(store => store.setGameType);
 	const gameList = useGameStore(store => store.gameList);
+	const setEdittingPlayers = usePlayerStore(store => store.setEdittingPlayers);
 
 	const startGame = (gameType: GameType) => {
 		setTimeout(() => {
-			selectGame(gameType);
+			setGameType(gameType);
 		}, 100);
 		//playSound("sounds/beeps/beep-tapped.aif")
 	}
@@ -85,7 +87,7 @@ function GameSelectionScreen() {
 					</GameButton>)
 				}
 			</Slider>
-			<PlayersButton variant='contained'>
+			<PlayersButton variant='contained' onClick={() => setEdittingPlayers(true)}>
 				Edit Players
 			</PlayersButton>
 		</StartScreenDiv>

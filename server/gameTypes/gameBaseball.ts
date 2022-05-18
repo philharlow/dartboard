@@ -118,6 +118,7 @@ class GameBaseball extends GameBase {
 			hit = true;
 			totalScore = 4;
 		}
+		const scoreMessage = hit ? this.getSpokenScore(score, ring) : "miss";
 		const newThrow: DartThrow = {
 			player: currentPlayer,
 			score,
@@ -126,6 +127,7 @@ class GameBaseball extends GameBase {
 			totalScore: hit ? totalScore : 0,
 			round: currentRound,
 			bust: false,
+			display: scoreMessage,
 		}
 		clonedDarts.push(newThrow);
 		roundDarts.push(newThrow);
@@ -136,7 +138,6 @@ class GameBaseball extends GameBase {
 		const playerScore = this.getScore(currentPlayer, dartThrows) + multiplier;
 		// console.log("playerscore will be", playerScore);
 
-		const scoreMessage = hit ? this.getSpokenScore(score, ring) : "miss";
 		speak(scoreMessage, true);
 		gameController.gameStatus.dartThrows.push(newThrow);
 		

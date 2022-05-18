@@ -35,7 +35,7 @@ export class SocketServer {
 				gameController.addDartThrow(score, ring);
 			});
 			socket.on(SocketEvent.START_GAME, (currentGame?: GameType) => {
-				gameController.startGame(currentGame);
+				gameController.setGameType(currentGame);
 			});
 			socket.on(SocketEvent.SET_SETTINGS, (settings?: SelectedSetting[]) => {
 				gameController.setSettings(settings);

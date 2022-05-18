@@ -4,7 +4,9 @@ import { cloneDeep } from 'lodash';
 import { useState } from 'react';
 import { speak } from '../../store/AudioStore';
 import { useGameStore } from '../../store/GameStore';
+import { usePlayerStore } from '../../store/PlayerStore';
 import { SelectedSetting } from '../../types/GameTypes';
+import { Player } from '../../types/PlayerTypes';
 import BackButton from '../BackButton';
 
 const RootDiv = styled.div`
@@ -62,10 +64,14 @@ const Grow = styled.div`
     padding: 10px;
 `;
 
-function SettingsSelectionScreen() {
+interface Props {
+	player: Player;
+};
+
+function PlayerDetailsScreen(props: Props) {
 	const currentGame = useGameStore(store => store.gameList?.find(game => game.gameType === store.currentGameType));
-	const setGameType = useGameStore(store => store.setGameType);
 	const setSelectedSettings = useGameStore(store => store.setSelectedSettings);
+	const setEdittingPlayer = usePlayerStore(store => store.setEdittingPlayer);
 
 	const [ selections, setSelections ] = useState<SelectedSetting[]>(currentGame?.settingsOptions?.map(o => ({ settingName: o.name, settingValue: "" + o.options[0] })) || []);
 
@@ -80,7 +86,7 @@ function SettingsSelectionScreen() {
 	return (
 		<RootDiv>
 			<GameTitle>
-				{currentGame?.name} Settings
+				Player Details
 			</GameTitle>
 			{selections.map(selection => <SettingRow key={selection.settingName}>
 					<Grow>
@@ -96,7 +102,7 @@ function SettingsSelectionScreen() {
 					</ColoredSelect>
 				</SettingRow>
 				)}
-			<BackButton onClick={() => setGameType(undefined)} />
+			<BackButton onClick={() => setEdittingPlayer(undefined)} />
 			<NextButton
 				variant="contained"
 				onClick={() => setSelectedSettings(selections)}
@@ -107,7 +113,7 @@ function SettingsSelectionScreen() {
 	);
 }
 
-export default SettingsSelectionScreen;
+export default PlayerDetailsScreen;
 
 
 
