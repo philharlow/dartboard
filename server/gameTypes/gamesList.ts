@@ -8,7 +8,7 @@ import GameGolf from "./gameGolf";
 
 export const gameList: GameType[] = [
 	new Game301(),
-	new GameCricket(),
+	//new GameCricket(),
 	new GameGolf(),
 	new GameHelicopter(),
 	new GameBaseball(),

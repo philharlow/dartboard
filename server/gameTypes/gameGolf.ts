@@ -49,7 +49,7 @@ class GameGolf extends GameBase {
 	}
 
 	getRingScore(ring: Ring) {
-		if (ring === Ring.InnerSingle || Ring.OuterSingle) return 0;
+		if (ring === Ring.InnerSingle || ring === Ring.OuterSingle) return 0;
 		if (ring === Ring.Triple) return -1;
 		if (ring === Ring.Double) return -2;
 		return 1;
@@ -105,8 +105,8 @@ class GameGolf extends GameBase {
 		const hole = currentRound + 1;
 
 		const clonedDarts = cloneDeep(dartThrows);
-		const multiplier = 1;//this.getMultiplier(ring);
-		const totalScore = score === hole ? 1 : 0;// score * multiplier;
+		const multiplier = this.getMultiplier(ring);
+		const totalScore = score === hole ? this.getRingScore(ring) : 1;// score * multiplier;
 		const scoreMessage = this.getSpokenScore(score, ring);
 		const newThrow: DartThrow = {
 			player: currentPlayer,
@@ -122,6 +122,8 @@ class GameGolf extends GameBase {
 		const playerDarts = clonedDarts.filter(t => t.player === currentPlayer);
 		
 		const playerScore = this.getScore(currentPlayer, dartThrows) - totalScore;
+
+		// console.log("dart", ring, this.getRingScore(ring), newThrow);
 		
 		//speak(totalScore ? "Hit!" : "Miss");
 		// console.log("playerscore will be", playerScore);

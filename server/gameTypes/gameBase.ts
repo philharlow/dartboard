@@ -23,7 +23,7 @@ class GameBase {
 		console.log(this.gameDef.name + " : starting");
 		const spokenName = this.gameDef.pronounciation || this.gameDef.name;
 		const intro = this.gameDef.settingsIntro ?? "Select your settings";
-		speak(spokenName + "., " + intro); // extra comma causes better pause 🤷‍♂️
+		speak(spokenName); // + "., " + intro); // extra comma causes better pause 🤷‍♂️
 		this.startingAnim();
 	}
 
@@ -87,9 +87,17 @@ class GameBase {
 	getScore(player: string, dartThrows: DartThrow[]) {
 		return 0;
 	}
+	
+	getMultiplier(ring: Ring) {
+		if (ring === Ring.Triple) return 3;
+		if (ring === Ring.Double || ring === Ring.DoubleBullseye) return 2;
+		return 1;
+	}
 
 	currentScores: number[] = [];
 	roundScores: number[][] = [];
+	currentPlayerRoundScores: number[] = [];
+	currentPlayerRoundDarts: DartThrow[] = [];
 	
 	updateScores() {
 		const { players, dartThrows } = gameController.gameStatus

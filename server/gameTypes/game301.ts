@@ -106,7 +106,7 @@ class Game301 extends GameBase {
 			totalScore,
 			round: currentRound,
 			bust: false,
-			display: score === 0 ? "miss" : multiplier + " x " + score,
+			display: score === 0 ? "Miss" : multiplier + " x " + score,
 		}
 		clonedDarts.push(newThrow);
 		const playerDarts = clonedDarts.filter(t => t.player === currentPlayer);

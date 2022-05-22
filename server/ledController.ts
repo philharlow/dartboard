@@ -62,22 +62,33 @@ class LedController {
 
 	stopAnimation = () => {
 		if (this.currentAnimation) {
-			if (this.currentAnimation.clearAfter)
-				updateFromLedObj(initialLedsObj);
+			if (this.currentAnimation.clearAfter) {
+				//updateFromLedObj(initialLedsObj);
+				this.ledsObj = cloneDeep(initialLedsObj);
+				this.needsDispatch = true;
+				this.drawHints();
+				// console.log("drawign hints", this.hints.length);
+			}
 			
 			this.animationMode = AnimationMode.Stopped;
 			this.currentAnimation = undefined;
 		}
 	};
 
-	playAnimation = (animation?: LedAnimation, animationMode?: AnimationMode) => {
+	isReverse(animationMode: AnimationMode): boolean {
+		return animationMode === AnimationMode.PlayOnceReverse || animationMode === AnimationMode.LoopReverse;
+	};
+
+	playAnimation = (animation?: LedAnimation, animationMode = AnimationMode.PlayOnce) => {
 		this.currentAnimation = animation;
 		if (animation) {
 			this.animationStartedAt = Date.now();
-			this.animationMode = animationMode ?? AnimationMode.PlayOnce;
-			this.animationFrame = this.animationMode === AnimationMode.PlayOnceReverse || this.animationMode === AnimationMode.LoopReverse ? animation.frames.length - 1 : 0;
+			this.animationMode = animationMode;
+			this.animationFrame = this.isReverse(this.animationMode) ? animation.frames.length - 1 : 0;
 			const frame = this.currentAnimation.frames[this.animationFrame];
-			updateFromLedObj(frame.leds);
+			this.ledsObj = cloneDeep(frame.leds);
+			this.needsDispatch = true;
+			//updateFromLedObj(frame.leds);
 		}
 	};
 
@@ -104,8 +115,10 @@ class LedController {
 				if (nextFrameTime <= elapsed) {
 					this.animationFrame = nextFrameIndex;
 					const frame = this.currentAnimation.frames[this.animationFrame];
-					updateFromLedObj(frame.leds);
-					console.log("anim updating leds");
+					//updateFromLedObj(frame.leds);
+					this.ledsObj = cloneDeep(frame.leds);
+					this.needsDispatch = true;
+					//console.log("anim updating leds");
 				}
 			}
 		}
@@ -135,18 +148,25 @@ class LedController {
 		this.pendingFlashes = [];
 		this.hints = [];
 	};
+
+	flashType: "flash" | "ripple" = "ripple";
 	
 	flashLed = (score: number, ring: Ring, duration = 100, flashes = 3, dispatch: boolean = true) => {
-		this.setSingleLedOn(score, ring, true, dispatch);
-		this.setSingleLedOnLater(score, ring, false, duration);
-		for (let i=1; i<flashes; i++) {
-			this.setSingleLedOnLater(score, ring, true, i * 2 * duration);
-			this.setSingleLedOnLater(score, ring, false, (i * 2 + 1) * duration);
+		if (this.flashType === "flash") {
+			// TODO update to new anim system
+			this.setSingleLedOn(score, ring, true, dispatch);
+			this.setSingleLedOnLater(score, ring, false, duration);
+			for (let i=1; i<flashes; i++) {
+				this.setSingleLedOnLater(score, ring, true, i * 2 * duration);
+				this.setSingleLedOnLater(score, ring, false, (i * 2 + 1) * duration);
+			}
+			const timeout = setTimeout(() => {
+				this.setSingleLedOn(score, ring, this.getHintOn(score, ring));
+			}, (flashes * 2) * duration);
+			this.pendingFlashes.push({ timeout, score, ring });
+		} else {
+			this.animRipple(score, ring);
 		}
-		const timeout = setTimeout(() => {
-			this.setSingleLedOn(score, ring, this.getHintOn(score, ring));
-		}, (flashes * 2) * duration);
-		this.pendingFlashes.push({ timeout, score, ring });
 	};
 
 	getHintOn(score: number, ring: Ring): boolean {
@@ -338,12 +358,13 @@ class LedController {
 	
 
 	animRipple = (score: number, ring: Ring, thickness = 3, speed = 2) => {
+		if (ring === Ring.Miss || score === 0) return;
 		const center: Coordinate = ledXYCoords[getLedKey(score, ring)];
-		const max = 20;
+		const numFrames = 20;
 		const timeStep = 50 / speed;
 		const frames: AnimationFrame[] = [];
-		for (let i=0; i<max; i++) {
-			const inner = (i / max) * diameter;
+		for (let i=0; i<numFrames; i++) {
+			const inner = (i / numFrames) * diameter;
 			const leds = turnOnCircle(center, inner, inner + thickness);
 			const time = i * timeStep;
 			const frame: AnimationFrame = { leds, time };
@@ -355,7 +376,7 @@ class LedController {
 			clearAfter: true,
 			type: AnimationType.ALTERNATING_SCORES,
 		}
-		this.playAnimation(animation, AnimationMode.Loop);
+		this.playAnimation(animation);
 	}
 	
 
