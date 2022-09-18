@@ -3,7 +3,8 @@
 This is two seperate Typescript projects in one, with additional Arduino code that is necessary to run.
 At the core, this is a React application project that runs the fronted UI for the application.
 There is also backend NodeJS server applications that runs on port 4000 that interfaces with the serial ports to communicate with the arduinos, and handles all game logic. Via websockets it sends out updates to the game state.
-There is 
+
+Tested using node 14.20.0
 
 
 /Arduino
