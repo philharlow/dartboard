@@ -1,7 +1,7 @@
 import styled from '@emotion/styled/macro';
 import { Button, MenuItem, Select } from '@mui/material';
 import { cloneDeep } from 'lodash';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { speak } from '../../store/AudioStore';
 import { useGameStore } from '../../store/GameStore';
 import { SelectedSetting } from '../../types/GameTypes';
@@ -68,6 +68,10 @@ function SettingsSelectionScreen() {
 	const setSelectedSettings = useGameStore(store => store.setSelectedSettings);
 
 	const [ selections, setSelections ] = useState<SelectedSetting[]>(currentGame?.settingsOptions?.map(o => ({ settingName: o.name, settingValue: "" + o.options[0] })) || []);
+
+	useEffect(() => {
+		setSelections(currentGame?.settingsOptions?.map(o => ({ settingName: o.name, settingValue: "" + o.options[0] })) || []);
+	}, [currentGame]);
 
 	const setSelection = (name: string, option: string) => {
 		const newSelections = cloneDeep(selections);

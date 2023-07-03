@@ -30,7 +30,7 @@ class GameBase {
 	getDisplayName(settings?: SelectedSetting[]) {
 		const suffix = settings?.map(setting => {
 			const option = this.getOption(setting.settingName);
-			return setting.settingValue + " " + (option?.displaySuffix ?? option.name);
+			return setting.settingValue + " " + (option?.displaySuffix ?? option?.name);
 		}).join(", ");
 		return this.gameDef.name + (suffix ? ", " + suffix : "");
 	}
