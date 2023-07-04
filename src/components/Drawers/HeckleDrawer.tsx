@@ -1,7 +1,7 @@
 import Drawer, { DrawerPosition } from './Drawer';
 import { Button } from '@mui/material';
 import { emit } from '../../SocketInterface';
-import { SocketEvent } from '../../types/SocketTypes';
+import { HeckleEvent, SocketEvent } from '../../types/SocketTypes';
 import styled from '@emotion/styled/macro';
 import { useAudioStore } from '../../store/AudioStore';
 import { useState } from 'react';
@@ -19,7 +19,7 @@ function HeckleDrawer() {
 
 	const sendHeckle = () => {
 		setVolume(0);
-		emit(SocketEvent.HECKLE, text);
+		emit(HeckleEvent.HECKLE, text);
 	};
 
 	return (

@@ -84,7 +84,7 @@ export const getRingFromChar = (char: string) => {
 	if (char === "t") return Ring.Triple;
 	if (char === "d") return Ring.Double;
 	if (char === "o") return Ring.OuterSingle;
-	return Ring.InnerSingle;
+	/*if (char === "i")*/ return Ring.InnerSingle;
 }
 
 export const getLedsAsInts = (ledsObj: LedsObj) => {
@@ -166,7 +166,7 @@ export const getLedKeySlow = (score: number, ring: Ring) => {
 	return "s" + score;
 }
 
-// Measured distances for each ring from the bullseye. Units do't matter if you change them
+// Measured distances for each ring from the bullseye. Units don't matter
 const distances: Map<Ring, number> = new Map();
 distances.set(Ring.Double, 18.5);
 distances.set(Ring.OuterSingle, 15);

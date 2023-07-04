@@ -1,10 +1,10 @@
 import { cloneDeep } from "lodash";
 import { DartThrow, GameType } from "../../src/types/GameTypes";
 import { Hint, Ring } from "../../src/types/LedTypes";
-import { SocketEvent, SoundFX } from "../../src/types/SocketTypes";
+import { GameEvent } from "../../src/types/SocketTypes";
 import gameController from "../gameController";
 import ledController from "../ledController";
-import { playSound, showPopup, socketServer, speak } from "../socketServer";
+import { showPopup, socketServer, speak } from "../socketServer";
 import GameBase from "./gameBase";
 
 
@@ -143,7 +143,7 @@ class GameGolf extends GameBase {
 		}
 
 
-		socketServer.emit(SocketEvent.ADD_DART_THROW, newThrow);
+		socketServer.emit(GameEvent.ADD_DART_THROW, newThrow);
 		//setDartThrows(clonedDarts);
 		this.updateHints();
 		this.updateScores();

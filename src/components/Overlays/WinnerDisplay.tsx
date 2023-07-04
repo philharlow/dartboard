@@ -3,7 +3,7 @@ import { Button } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { emit } from '../../SocketInterface';
 import { useGameStore } from '../../store/GameStore';
-import { SocketEvent } from '../../types/SocketTypes';
+import { GameEvent } from '../../types/SocketTypes';
 
 const BlurBackground = styled.div`
 	position: fixed;
@@ -112,7 +112,7 @@ function WinnerDisplay() {
 	const finalScores = useGameStore(store => store.finalScores);
 
 	const undoLastDart = () => {
-		emit(SocketEvent.UNDO_LAST_DART, true);
+		emit(GameEvent.UNDO_LAST_DART, true);
 	}
 
 	useEffect(() => {

@@ -9,7 +9,7 @@ import WinnerDisplay from '../Overlays/WinnerDisplay';
 import BaseballBoard from './BaseballBoard';
 import { GameType } from '../../types/GameTypes';
 import { emit, sendDartThrow } from '../../SocketInterface';
-import { SocketEvent } from '../../types/SocketTypes';
+import { GameEvent } from '../../types/SocketTypes';
 
 const RootDiv = styled.div`
 	display: flex;
@@ -91,10 +91,10 @@ function GameBoard() {
     sendDartThrow(0, Ring.Miss);
   }
   const undoLastDart = () => {
-	emit(SocketEvent.UNDO_LAST_DART, true);
+	emit(GameEvent.UNDO_LAST_DART, true);
   }
   const nextPlayer = () => {
-	emit(SocketEvent.NEXT_PLAYER, true);
+	emit(GameEvent.NEXT_PLAYER, true);
   }
 
   const ScoreBoard = getScoreBoard(currentGame?.gameType);

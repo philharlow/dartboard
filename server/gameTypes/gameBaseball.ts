@@ -6,7 +6,7 @@ import { Hint, Ring } from "../../src/types/LedTypes";
 import GameBase from "./gameBase";
 import { socketServer, speak } from "../socketServer";
 import gameController from "../gameController";
-import { SocketEvent } from "../../src/types/SocketTypes";
+import { GameEvent } from "../../src/types/SocketTypes";
 import { delay } from "../../src/tools/Utils";
 
 const baseballField = [ 9, 12, 5, 20, 1, 18, 4 ];
@@ -148,7 +148,7 @@ class GameBaseball extends GameBase {
 		// Thrown 3 darts
 		} else */
 
-		socketServer.emit(SocketEvent.ADD_DART_THROW, newThrow);
+		socketServer.emit(GameEvent.ADD_DART_THROW, newThrow);
 		//setDartThrows(clonedDarts);
 		this.updateHints();
 		this.updateScores();

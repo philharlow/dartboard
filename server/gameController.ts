@@ -1,6 +1,6 @@
 import { cloneDeep } from 'lodash';
 import { DartThrow, GameStatus, GameType, parseDartCode, startingGameStatus, SelectedSetting, resetGameStatus } from '../src/types/GameTypes';
-import { SocketEvent } from '../src/types/SocketTypes';
+import { GameEvent, SocketEvent } from '../src/types/SocketTypes';
 import GameBase from './gameTypes/gameBase';
 import { gameList } from './gameTypes/gamesList';
 import ledController from './ledController';
@@ -79,7 +79,7 @@ class GameController {
 
     updateGameStatus(changes: Partial<GameStatus>) {
         Object.assign(this.gameStatus, changes);
-        socketServer.emit(SocketEvent.UPDATE_GAME_STATUS, changes);
+        socketServer.emit(GameEvent.UPDATE_GAME_STATUS, changes);
         this.updateButtons(); // This should be done elsewhere
     }
 

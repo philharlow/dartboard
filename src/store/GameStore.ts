@@ -2,7 +2,7 @@ import create from 'zustand'
 import { emit, socket } from '../SocketInterface';
 import { serverFetch } from '../tools/ClientUtils';
 import { DartThrow, GameDefinition, GameStatus, GameType, SelectedSetting, startingGameStatus } from '../types/GameTypes';
-import { SocketEvent } from '../types/SocketTypes';
+import { GameEvent } from '../types/SocketTypes';
 
 export type GameStore = GameStatus & {
 	gameList?: GameDefinition[];
@@ -19,16 +19,16 @@ export type GameStore = GameStatus & {
 };
 
 const setViaSocket = (change: Partial<GameStore>) => {
-	socket?.emit(SocketEvent.UPDATE_GAME_STATUS, change);
+	socket?.emit(GameEvent.UPDATE_GAME_STATUS, change);
 };
 
 export const useGameStore = create<GameStore>((set, get) => ({
 	...startingGameStatus,
 	setGameType: (game?: GameType) => {
-		emit(SocketEvent.START_GAME, game);
+		emit(GameEvent.START_GAME, game);
 	},
 	setWaitingForThrow: (waitingForThrow: boolean) => {
-		emit(SocketEvent.SET_WAITING_FOR_THROW, waitingForThrow);
+		emit(GameEvent.SET_WAITING_FOR_THROW, waitingForThrow);
 		//setViaSocket({ waitingForThrow });
 		//currentGame?.waitingForThrowSet();
 	},
@@ -39,10 +39,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
 		setViaSocket({ currentRound });
 	},
 	setSelectedSettings: (selectedSettings: SelectedSetting[]) => {
-		emit(SocketEvent.SET_SETTINGS, selectedSettings);
+		emit(GameEvent.SET_SETTINGS, selectedSettings);
 	},
 	setPlayers: (players: string[]) => {
-		emit(SocketEvent.SET_PLAYERS, players);
+		emit(GameEvent.SET_PLAYERS, players);
 		//currentGame?.playersSet();
 	},
 	setCurrentPlayerIndex: (currentPlayerIndex: number) => {

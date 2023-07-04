@@ -3,7 +3,7 @@ import { Button } from '@mui/material';
 import { emit } from '../../SocketInterface';
 import { useGameStore } from '../../store/GameStore';
 import { CalibrationMode, getSpokenScore } from '../../types/GameTypes';
-import { calibrationOrder, SocketEvent } from '../../types/SocketTypes';
+import { calibrationOrder, GameEvent } from '../../types/SocketTypes';
 import DartBoard from '../DartBoard';
 
 const CalibrationScreenDiv = styled.div`
@@ -33,7 +33,7 @@ function CalibrationScreen() {
 	const calibrationState = useGameStore(store => store.calibrationState);
 
 	const startCalibration = () => {
-		emit(SocketEvent.SET_CALIBRATION_STEP, 0);
+		emit(GameEvent.SET_CALIBRATION_STEP, 0);
 	}
 
 	const step = calibrationState?.step ?? 0;

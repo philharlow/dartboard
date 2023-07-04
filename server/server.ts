@@ -32,7 +32,7 @@ app.get('/allPlayers', (req, res) => res.json(gameController.allPlayers));
 const lineReader = readline.createInterface({ input: process.stdin });
 server.listen(port, () => {
     console.log('listening on *:' + port);
-    console.log("Type to send dart commands");
+    console.log("Type to send dart commands: (i10, o20, t15, d5, s25, d25, m, wipe)");
 
     lineReader.addListener("line", (line) => {
         if (line === "wipe")

@@ -1,6 +1,6 @@
 import { CalibrationMode, parseDartCode, CalibrationState } from '../src/types/GameTypes';
 import { CalibrationMap, LedCalibrationMap } from '../src/types/LedTypes';
-import { calibrationOrder, SocketEvent, SoundFX } from '../src/types/SocketTypes';
+import { calibrationOrder, GameEvent, SocketEvent, SoundFX } from '../src/types/SocketTypes';
 import { getDartCalibration, getLedCalibration, setDartCalibration, setLedCalibration } from './dbController';
 import gameController from './gameController';
 import ledController from './ledController';
@@ -78,11 +78,11 @@ class CalibrationController {
         if (this.calibrationMode === CalibrationMode.Dartboard) {
             //console.log("nextCalibration", this.calibrationStep)
             // Turn off last led
-            socketServer.emit(SocketEvent.SET_CALIBRATION_STEP, this.calibrationStep);
+            socketServer.emit(GameEvent.SET_CALIBRATION_STEP, this.calibrationStep);
             const { score, ring } = parseDartCode(calibrationOrder[this.calibrationStep]);
             ledController.setSingleLedOn(score, ring, true);
         } else if (this.calibrationMode === CalibrationMode.Leds) {
-            socketServer.emit(SocketEvent.SET_CALIBRATION_STEP, this.calibrationStep);
+            socketServer.emit(GameEvent.SET_CALIBRATION_STEP, this.calibrationStep);
             //this.updateCalibrationState();
             ledCalibrationStep(this.calibrationStep);
         }

@@ -1,7 +1,7 @@
 import styled from '@emotion/styled/macro';
 import React, { useEffect } from 'react';
 import { Button } from '@mui/material';
-import { LightDistraction, SocketEvent, SoundFX } from './types/SocketTypes';
+import { HeckleEvent, LightDistraction, SoundFX } from './types/SocketTypes';
 import { emit } from './SocketInterface';
 import { useState } from 'react';
 import { useAudioStore } from './store/AudioStore';
@@ -62,7 +62,7 @@ function HecklerView() {
 	}, [setIsHeckler]);
 
 	const sendHeckle = (heckle: string) => {
-		emit(SocketEvent.HECKLE, heckle);
+		emit(HeckleEvent.HECKLE, heckle);
 		if (!heckles.includes(heckle)) setHeckles([ heckle, ...heckles ]);
 	};
 	const handleKey = (event: React.KeyboardEvent) => {
@@ -72,10 +72,10 @@ function HecklerView() {
 		}
 	}
 	const sendPlaySound = (sound: SoundFX) => {
-		emit(SocketEvent.PLAY_SOUND, sound);
+		emit(HeckleEvent.PLAY_SOUND, sound);
 	};
 	const sendDistraction = (distraction: LightDistraction) => {
-		emit(SocketEvent.DISTRACTION, distraction);
+		emit(HeckleEvent.DISTRACTION, distraction);
 	};
 
 	return <HecklerDiv>

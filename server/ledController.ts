@@ -1,7 +1,7 @@
 import { cloneDeep } from "lodash";
 import { GameBoardButtons } from "../src/types/GameTypes";
 import { Hint, Led, Ring, getLedsAsInts, scoreOrder, growOrder, initialLedsObj, getLedKey, LedsObj, Coordinate, turnOnCircle, diameter, ledXYCoords, turnOnLine, LedAnimation, AnimationType, AnimationFrame, LedButton } from "../src/types/LedTypes";
-import { LightDistraction, SocketEvent, SoundFX } from "../src/types/SocketTypes";
+import { GameEvent, LightDistraction, SocketEvent, SoundFX, UIEvent } from "../src/types/SocketTypes";
 import { getButtonLedsValue, setButtonLedOn, updateFromLedObj } from "./serialLedController";
 import { emit } from "./socketServer";
 
@@ -265,8 +265,8 @@ class LedController {
 
 		//console.log("leds", ledsObj)
 
-		emit(SocketEvent.UPDATE_LEDS, ints);
-		emit(SocketEvent.UPDATE_BUTTON_LEDS, getButtonLedsValue());
+		emit(GameEvent.UPDATE_LEDS, ints);
+		emit(GameEvent.UPDATE_BUTTON_LEDS, getButtonLedsValue());
 	}
 
 	updateButtons(buttons: GameBoardButtons) {
@@ -353,7 +353,7 @@ class LedController {
 	animBullseye = () => {
 		this.animGrow(50);
 		
-		emit(SocketEvent.PLAY_SOUND, SoundFX.BULLS_EYE);
+		emit(UIEvent.PLAY_SOUND, SoundFX.BULLS_EYE);
 	};
 	
 

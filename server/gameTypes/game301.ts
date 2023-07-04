@@ -5,7 +5,7 @@ import { Hint, Ring } from "../../src/types/LedTypes";
 import GameBase from "./gameBase";
 import { showPopup, socketServer, speak } from "../socketServer";
 import gameController from "../gameController";
-import { SocketEvent } from "../../src/types/SocketTypes";
+import { GameEvent, SocketEvent } from "../../src/types/SocketTypes";
 
 enum Game301InMode {
 	ANY_IN = "Any In",
@@ -140,7 +140,7 @@ class Game301 extends GameBase {
 			(newThrow.bust ? "BUST " : "") + newThrow.multiplier + " x " + newThrow.score;
 		showPopup(popupMessage);
 
-		socketServer.emit(SocketEvent.ADD_DART_THROW, newThrow);
+		socketServer.emit(GameEvent.ADD_DART_THROW, newThrow);
 		//setDartThrows(clonedDarts);
 		this.updateHints();
 		this.updateScores();

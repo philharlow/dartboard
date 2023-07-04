@@ -63,7 +63,7 @@ export const startingGameStatus: GameStatus = {
 
 export interface GameDefinition {
 	name: string;
-	gameType: GameType,
+	gameType: GameType;
 	minPlayers: number;
 	maxPlayers: number;
 	pronounciation?: string;

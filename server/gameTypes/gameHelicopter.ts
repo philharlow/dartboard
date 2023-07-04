@@ -7,7 +7,7 @@ import { Player } from "../../src/types/PlayerTypes";
 import GameBase from "./gameBase";
 import { socketServer, speak } from "../socketServer";
 import gameController from "../gameController";
-import { SocketEvent } from "../../src/types/SocketTypes";
+import { GameEvent, SocketEvent } from "../../src/types/SocketTypes";
 
 
 enum Difficulty {
@@ -157,7 +157,7 @@ class GameHelicopter extends GameBase {
 		} else if (playerDarts.filter((d => d.round === currentRound)).length === this.throwsPerRound)
 			this.roundEnded();
 
-		socketServer.emit(SocketEvent.ADD_DART_THROW, newThrow);
+		socketServer.emit(GameEvent.ADD_DART_THROW, newThrow);
 		//setDartThrows(clonedDarts);
 		const winner = gameController.gameStatus.winningPlayerIndex;
 		if (winner === -1)

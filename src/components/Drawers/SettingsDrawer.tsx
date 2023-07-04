@@ -1,7 +1,7 @@
 import Drawer, { DrawerPosition } from './Drawer';
 import { Button, Switch } from '@mui/material';
 import { emit } from '../../SocketInterface';
-import { SocketEvent } from '../../types/SocketTypes';
+import { GameEvent } from '../../types/SocketTypes';
 import styled from '@emotion/styled/macro';
 import { useGameStore } from '../../store/GameStore';
 import { useConnectionStore } from '../../store/ConnectionStore';
@@ -46,11 +46,11 @@ function SettingsDrawer() {
 
 	const clearDartCalibration = () => {
 		if(window.confirm("Are you sure you want to clear dart calibrations?"))
-			emit(SocketEvent.CLEAR_CALIBRATION, true);
+			emit(GameEvent.CLEAR_CALIBRATION, true);
 	};
 	const clearLEDCalibration = () => {
 		if(window.confirm("Are you sure you want to clear led calibrations?"))
-			emit(SocketEvent.CLEAR_CALIBRATION, false);
+			emit(GameEvent.CLEAR_CALIBRATION, false);
 	};
 
 	return (

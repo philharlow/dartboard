@@ -5,7 +5,7 @@ import { Button } from '@mui/material';
 import { useLedStore } from '../../store/LedStore';
 import { LedButton, Ring } from '../../types/LedTypes';
 import { emit, sendDartThrow } from '../../SocketInterface';
-import { SocketEvent } from '../../types/SocketTypes';
+import { GameEvent } from '../../types/SocketTypes';
 
 const ButtonRow = styled.div`
   display: flex;
@@ -70,10 +70,10 @@ function DartboardDrawer() {
 		sendDartThrow(0, Ring.Miss);
 	}
 	const undoLastDart = () => {
-		emit(SocketEvent.UNDO_LAST_DART);
+		emit(GameEvent.UNDO_LAST_DART);
 	}
 	const nextPlayer = () => {
-		emit(SocketEvent.NEXT_PLAYER, true);
+		emit(GameEvent.NEXT_PLAYER, true);
 	}
 
 	const getClassName = (lit: boolean) => lit ? 'lit' : "";
