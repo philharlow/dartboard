@@ -6,6 +6,8 @@ There is also backend NodeJS server applications that runs on port 4000 that int
 
 Tested using node 14.20.0
 
+Incomplete writeup/diy guide here:
+https://philsprojects.wordpress.com/2022/05/06/dartboard-build-instructions/
 
 /Arduino
  - Sketches needed for the two Arduinos: Nano and Mega.
